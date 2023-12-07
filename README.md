@@ -22,7 +22,7 @@ AutoGan 是一个 agent frame，它为大规模 agent 群组和超长工作流�
 AutoGan requires Python version >= 3.8. It can be installed from pip:
 
 ```shell
-pip install autogan
+pip install pyautogan
 ```
 
 ### notebook
