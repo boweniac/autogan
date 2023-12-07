@@ -14,7 +14,7 @@ LONG_DESCRIPTION = "AutoGenius is an agent framework that is designed for large-
 
 setup(
     name="pyautogan",
-    version="0.1",
+    version="0.1rc2",
     author="boweniac",
     author_email="boweniac@yeah.net",
     description=DESCRIPTION,
@@ -24,6 +24,7 @@ setup(
     keywords=['python','chatgpt', 'agent'],
     install_requires=[
         'tiktoken',
+        'openai',
         'python-docx',
         'wolframalpha',
         'openpyxl',

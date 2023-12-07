@@ -2,7 +2,6 @@ import re
 import uuid
 import time
 from typing import List, Optional, Dict
-from autogan import AgentConfig
 from autogan.utils.response import default_response_func, ResponseFuncType
 
 
@@ -91,7 +90,7 @@ class AgentSwitch:
             else:
                 self._agents[item.name] = item
                 if item.agent_config is None and self._default_agent_config is not None:
-                    item.agent_config = AgentConfig(self._default_agent_config)
+                    item.set_agent_config(self._default_agent_config)
                 if item.super_rich is None and self._default_super_rich is not None:
                     item.super_rich = self._default_super_rich
                 if item.stream_mode is None:

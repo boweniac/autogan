@@ -95,6 +95,9 @@ class UniversalAgent:
         self._conversation_messages = defaultdict(list)  # key: task id，value: Conversation history
         self._conversation_focus = defaultdict(Dict)  # key: task id，value: {"task_issuer": "", "task_content": ""}
 
+    def set_agent_config(self, agent_config: Dict):
+        self.agent_config = AgentConfig(agent_config)
+
     def new_task(self, switch: AgentSwitch, task_id: str, sender_name: str, content: str,
                  completion_tokens: int):
         """Accept tasks posted by other agent.
