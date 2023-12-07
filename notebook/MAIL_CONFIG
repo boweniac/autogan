@@ -1,0 +1,6 @@
+{
+    "server": "<your Mail Send Server here>",
+    "port": 465,
+    "username": "<your Mail Server User Name here>",
+    "password": "<your Mail Server User Password here>"
+}

@@ -1,0 +1,5 @@
+.idea/
+dist/
+pyautogan.egg-info/
+autogan.egg-info/
+*.pyc
