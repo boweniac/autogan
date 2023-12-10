@@ -1,3 +1,4 @@
+import json
 from typing import Dict, Optional, List
 from autogan.oai.generate_utils import generate_chat_completion
 from autogan.oai.config_utils import LLMConfig
@@ -67,7 +68,6 @@ def compressed_messages(messages: List[Dict], focus: str, summary_model_config: 
 
     if safe_size < 0:
         safe_size = 1024
-
     # Reverse traverse the message to extract recent original conversation content.
     i = 0
     for message in reversed(messages):
@@ -80,7 +80,6 @@ def compressed_messages(messages: List[Dict], focus: str, summary_model_config: 
         request_messages.insert(0, message_copy)
         total_tokens += tokens
         i -= 1
-
     # Compress the remaining messages as distant conversation records.
     if len(messages) > (i * -1):
         compressed_size = safe_size - total_tokens
@@ -88,7 +87,7 @@ def compressed_messages(messages: List[Dict], focus: str, summary_model_config: 
             compressed_size = 1024
 
         # 压缩剩余 messages
-        content, tokens = generate_messages_summary(messages[:i], focus, summary_model_config, agent_name, response_func, stream_mode)
+        content, tokens = generate_messages_summary(messages[:i], focus, summary_model_config, compressed_size, agent_name, response_func, stream_mode)
 
         if content:
             conversation_messages.insert(
@@ -101,14 +100,13 @@ def compressed_messages(messages: List[Dict], focus: str, summary_model_config: 
                 {'role': 'assistant', 'content': f'Earlier historical conversation records: {content}'}
             )
             total_tokens += tokens
-
     if conversation_messages and request_messages:
         return conversation_messages, request_messages, total_tokens
     else:
         return None, None, None
 
 
-def generate_messages_summary(messages: List[Dict], focus: str, summary_model_config: LLMConfig, agent_name: str,
+def generate_messages_summary(messages: List[Dict], focus: str, summary_model_config: LLMConfig, summary_size: int, agent_name: str,
                               response_func: ResponseFuncType, stream_mode: Optional[bool] = None) -> tuple[str, int]:
     """Generate message summary
     生成消息摘要
@@ -139,15 +137,13 @@ def generate_messages_summary(messages: List[Dict], focus: str, summary_model_co
         --tokens: tokens of compressed content
             压缩内容的tokens
     """
-
     system_prompt = "Please make a concise summary based on the following historical information. Make sure your summary does not exceed the max_tokens limit. And when summarizing, please focus on the latest message sent by the user."
     # system_prompt = "请根据以下的历史信息，进行简洁的总结。请确保您的总结不超过 max_tokens 的限制。并且在总结时，请将你的关注点集中在用户最新发送的消息上。"
 
     summary_messages = []
     total_tokens = 0
-
     # 反向遍历 message 提取内容
-    for index, message in reversed(messages):
+    for index, message in enumerate(reversed(messages)):
         tokens = message["tokens"]
         if total_tokens + tokens > summary_model_config.max_messages_tokens and index != 0:
             break
@@ -155,10 +151,8 @@ def generate_messages_summary(messages: List[Dict], focus: str, summary_model_co
         message_copy.pop('tokens', None)
         summary_messages.insert(0, message_copy)
         total_tokens += tokens
-
     # 设置用户提示词
-    user_prompt = """max_tokens: {summary_size}\n\nHistorical information: {json.dumps(summary_messages)}\n\nUser's latest message: {focus}"""
+    user_prompt = f"""max_tokens: {summary_size}\n\nHistorical information: {json.dumps(summary_messages)}\n\nUser's latest message: {focus}"""
     chat_messages = [{'role': 'system', 'content': system_prompt}, {'role': 'user', 'content': user_prompt}]
-
     return generate_chat_completion(summary_model_config, chat_messages, agent_name, "text_summary", response_func,
                                     stream_mode)

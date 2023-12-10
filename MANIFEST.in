@@ -1,0 +1,6 @@
+prune .idea
+prune dist
+prune autogan.egg-info
+prune .idea
+recursive-exclude  *.pyc
+recursive-exclude  *.out

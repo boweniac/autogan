@@ -14,7 +14,7 @@ LONG_DESCRIPTION = "AutoGenius is an agent framework that is designed for large-
 
 setup(
     name="pyautogan",
-    version="0.1rc2",
+    version="0.1.1rc",
     author="boweniac",
     author_email="boweniac@yeah.net",
     description=DESCRIPTION,

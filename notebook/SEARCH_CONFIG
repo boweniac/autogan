@@ -1,0 +1,9 @@
+{
+    "google_search": {
+        "cx": "<your Programmable Search Engine ID here>",
+        "key": "<your Custom Search JSON API access key here>"
+    },
+    "wolfram_alpha": {
+        "app_id": "<your WolframAlpha APP ID here>"
+    }
+}

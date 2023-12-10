@@ -131,7 +131,7 @@ class UniversalAgent:
         :param completion_tokens: Message content tokens
         """
         if self._use_tool != "only":
-            safe_size = self.agent_config.main_model_config.max_messages_tokens * 0.7
+            safe_size = self.agent_config.main_model_config.max_messages_tokens
             if completion_tokens > safe_size:
                 # 如消息内容过长，则对其进行压缩
                 compressed_text, total_tokens = compressed_text_universal(
@@ -461,14 +461,11 @@ Step 4: Please follow the content of the previous step, From {self.name}'s persp
 
         # Calculate the target size of context compression.
         safe_size = self.agent_config.main_model_config.max_messages_tokens - total_tokens
-
         # Compress the historical conversation records.
         request_messages, total_tokens = self._chat_messages_safe_size(task_id, safe_size)
-
         request_messages.insert(0, system_message)
         if focus_message:
             request_messages.insert(0, focus_message)
-
         return generate_chat_completion(self.agent_config.main_model_config, request_messages, self.name, gen, self.response_func, self.stream_mode)
 
     def _super_rich_generate_reply(self, switch: AgentSwitch, task_id: str) -> tuple[Optional[str], Optional[int]]:

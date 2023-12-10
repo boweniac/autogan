@@ -4,3 +4,5 @@ pyautogan.egg-info/
 autogan.egg-info/
 *.pyc
 *.out
+**/.ipynb_checkpoints/
+notebook/extensions
