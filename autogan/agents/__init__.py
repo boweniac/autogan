@@ -1,17 +1,16 @@
-from .agent_switch import AgentSwitch
-from .human_agent import HumanAgent
-from .tool_agent_code_execution import ToolAgentCodeExecution
-from .tool_agent_file import ToolAgentFile
-from .tool_agent_mail import ToolAgentMail
-from .tool_agent_search import ToolAgentSearch
+from .human_agent import HumanAgent, InputModel
 from .universal_agent import UniversalAgent
+from .tool_agent.tool_agent_code_execution import ToolAgentCodeExecution
+from .tool_agent.tool_agent_file import ToolAgentFile
+from .tool_agent.tool_agent_mail import ToolAgentMail
+from .tool_agent.tool_agent_search import ToolAgentSearch
 
 __all__ = [
-    "AgentSwitch",
     "HumanAgent",
+    "UniversalAgent",
     "ToolAgentCodeExecution",
     "ToolAgentFile",
     "ToolAgentMail",
     "ToolAgentSearch",
-    "UniversalAgent",
+    "InputModel",
 ]

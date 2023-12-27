@@ -1,0 +1,21 @@
+{
+  "name": "AI 博闻",
+  "short_name": "AI 博闻",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "description": "AI 博闻",
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "path/to/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "path/to/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

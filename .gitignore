@@ -6,3 +6,4 @@ autogan.egg-info/
 *.out
 **/.ipynb_checkpoints/
 notebook/extensions
+apps/web_demo/backend/extensions

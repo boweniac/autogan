@@ -1,0 +1,18 @@
+
+syntax = "proto3";
+
+package Agent;
+
+service Agent {
+  rpc ReceiveStream (ReceiveRequest) returns (stream ReceiveReply) {}
+}
+
+message ReceiveRequest {
+  int64 user_id = 1;
+  int64 conversation_id = 2;
+  string content = 3;
+}
+
+message ReceiveReply {
+  string text = 1;
+}

@@ -4,7 +4,7 @@ from autogan.tools.code_execution_tool import CodeExecution
 
 from autogan.utils.json_utils import text_to_json
 
-from autogan.agents.universal_agent import UniversalAgent
+from autogan.agents.universal_agent import UniversalAgent, ToolFunctionUsage
 from autogan.oai.count_tokens_utils import count_text_tokens
 from autogan.tools.file_tool import File
 
@@ -75,11 +75,11 @@ Note: When you decide to use a tool, please do not @ anyone.""",
             agent_config=agent_config,
             duty=duty,
             work_flow=work_flow,
-            use_tool="join"
+            tool_function_usage=ToolFunctionUsage.JOIN
         )
         self._file = File(work_dir)
 
-    def tool_function(self, task_id: str, param: Optional[str] = None,
+    def tool_function(self, task_id: int, param: Optional[str] = None,
                       tokens: Optional[int] = None) -> tuple[str, int]:
         lang, code = CodeExecution.extract_code(param)
         if lang == "reader" and code:

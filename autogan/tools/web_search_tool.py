@@ -4,7 +4,8 @@ import requests
 from typing import Optional, Dict
 from urllib.parse import quote
 from bs4 import BeautifulSoup
-from autogan.utils.response import ResponseFuncType
+
+from autogan.protocol.response_protocol import ResponseProtocol
 
 
 class WebSearch:
@@ -16,8 +17,7 @@ class WebSearch:
         self._cx = google_search_config["cx"]
         self._key = google_search_config["key"]
 
-    def get_search_detail(self, keyword: str, start: int, agent_name: str, gen: str, response_func: ResponseFuncType)\
-            -> Optional[str]:
+    def get_search_detail(self, keyword: str, start: int) -> Optional[str]:
         """Obtain the main text content of a search result page
 
         :param keyword: Search keywords
@@ -40,8 +40,6 @@ class WebSearch:
             return None
 
         url = result[0]["link"]
-
-        response_func(agent_name, gen, "", False, 0, url, 0, None)
 
         # Obtain the main content of the URL page
         response = requests.get(url)

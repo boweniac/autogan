@@ -1,13 +1,11 @@
 import json
 from typing import Dict, Optional, List
-from autogan.oai.generate_utils import generate_chat_completion
+from autogan.oai.generate_utils import generate_chat_completion_internal
 from autogan.oai.config_utils import LLMConfig
-from autogan.utils.response import ResponseFuncType
+from autogan.protocol.response_protocol import ResponseProtocol
 
 
-def compressed_messages(messages: List[Dict], focus: str, summary_model_config: LLMConfig, agent_name: str,
-                        response_func: ResponseFuncType, stream_mode: Optional[bool] = None,
-                        safe_size: Optional[int] = 4096) -> tuple[Optional[list], Optional[list], Optional[int]]:
+def compressed_messages(messages: List[Dict], focus: str, summary_model_config: LLMConfig, safe_size: Optional[int] = 4096) -> tuple[Optional[list], Optional[list], Optional[int]]:
     """Compress Conversation Context
     压缩会话上下文
 
@@ -45,7 +43,7 @@ def compressed_messages(messages: List[Dict], focus: str, summary_model_config: 
     :param summary_model_config: The LLM model configuration used to compress distant conversation records
         用于压缩远期会话记录的 LLM 模型配置
     :param agent_name:
-    :param response_func: Used to return results to the interface or terminal.
+    :param response: Used to return results to the interface or terminal.
         用于向接口或终端返回结果
     :param stream_mode:
     :param safe_size: 'max_messages_tokens' of 'agent main model' minus the tokens of 'system message' and 'focus message'. When 'safe_size' is less than 0, it will be forcibly defined as 1024
@@ -87,7 +85,7 @@ def compressed_messages(messages: List[Dict], focus: str, summary_model_config: 
             compressed_size = 1024
 
         # 压缩剩余 messages
-        content, tokens = generate_messages_summary(messages[:i], focus, summary_model_config, compressed_size, agent_name, response_func, stream_mode)
+        content, tokens = generate_messages_summary(messages[:i], focus, summary_model_config, compressed_size)
 
         if content:
             conversation_messages.insert(
@@ -106,8 +104,7 @@ def compressed_messages(messages: List[Dict], focus: str, summary_model_config: 
         return None, None, None
 
 
-def generate_messages_summary(messages: List[Dict], focus: str, summary_model_config: LLMConfig, summary_size: int, agent_name: str,
-                              response_func: ResponseFuncType, stream_mode: Optional[bool] = None) -> tuple[str, int]:
+def generate_messages_summary(messages: List[Dict], focus: str, summary_model_config: LLMConfig, summary_size: int) -> tuple[str, int]:
     """Generate message summary
     生成消息摘要
 
@@ -127,7 +124,7 @@ def generate_messages_summary(messages: List[Dict], focus: str, summary_model_co
     :param summary_model_config: The LLM model configuration for compressing long-term conversation records
         用于压缩远期会话记录的 LLM 模型配置
     :param agent_name:
-    :param response_func: Used to return results to the interface or terminal.
+    :param response: Used to return results to the interface or terminal.
         用于向接口或终端返回结果
     :param stream_mode:
 
@@ -154,5 +151,4 @@ def generate_messages_summary(messages: List[Dict], focus: str, summary_model_co
     # 设置用户提示词
     user_prompt = f"""max_tokens: {summary_size}\n\nHistorical information: {json.dumps(summary_messages)}\n\nUser's latest message: {focus}"""
     chat_messages = [{'role': 'system', 'content': system_prompt}, {'role': 'user', 'content': user_prompt}]
-    return generate_chat_completion(summary_model_config, chat_messages, agent_name, "text_summary", response_func,
-                                    stream_mode)
+    return generate_chat_completion_internal(summary_model_config, chat_messages)

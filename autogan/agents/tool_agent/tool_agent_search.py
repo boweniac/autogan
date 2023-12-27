@@ -8,7 +8,7 @@ from autogan.tools.wolfram_alpha_tool import WolframAlphaAPIWrapper
 
 from autogan.oai.count_tokens_utils import count_text_tokens
 
-from autogan.agents.universal_agent import UniversalAgent
+from autogan.agents.universal_agent import UniversalAgent, ToolFunctionUsage
 from autogan.utils.compressed_text_utils import compressed_text_universal
 from autogan.tools.web_search_tool import WebSearch
 
@@ -89,7 +89,7 @@ Note: When you decide to use a tool, please do not @ anyone.""",
             agent_config=agent_config,
             duty=duty,
             work_flow=work_flow,
-            use_tool="join"
+            tool_function_usage=ToolFunctionUsage.JOIN
         )
         self._web_search = WebSearch(search_config["google_search"]) if "google_search" in search_config else None
         self._wolfram_alpha = WolframAlphaAPIWrapper(
@@ -97,7 +97,7 @@ Note: When you decide to use a tool, please do not @ anyone.""",
         self._conversation_search_index = defaultdict(int)
         self._retry_times = retry_times
 
-    def tool_function(self, task_id: str, param: Optional[str] = None,
+    def tool_function(self, task_id: int, param: Optional[str] = None,
                       tokens: Optional[int] = None) -> tuple[str, int]:
         lang, code = CodeExecution.extract_code(param)
         if lang == "web" and code:
@@ -116,7 +116,7 @@ Note: When you decide to use a tool, please do not @ anyone.""",
 one wolfram query
 ```""", 18
 
-    def _web_function(self, task_id: str, param: str) -> tuple[str, int]:
+    def _web_function(self, task_id: int, param: str) -> tuple[str, int]:
         loop = self._retry_times
         for i in range(loop):
             # Accumulate the search offset of the same task and the same keyword.
@@ -124,13 +124,12 @@ one wolfram query
             start = self._conversation_search_index[task_id]
 
             # Get webpage content.
-            detail = self._web_search.get_search_detail(param, start, self.name, "search", self.response_func)
+            detail = self._web_search.get_search_detail(param, start)
 
             if detail:
                 # Extract content related to the user's question from the webpage content.
                 compressed_text, total_tokens = compressed_text_universal(
-                    detail, self.agent_config.summary_model_config, self.name, self.response_func, self.stream_mode,
-                    self._conversation_focus[task_id],
+                    detail, self.agent_config.summary_model_config, self._conversation_focus[task_id]['task_content'],
                     self.agent_config.summary_model_config.max_messages_tokens)
                 if compressed_text:
                     return compressed_text, total_tokens
@@ -142,7 +141,7 @@ one wolfram query
         pattern = "```wolfram\n(.*?)```"
         param = re.search(pattern, param, re.DOTALL).group(1)
 
-        # Call wolfram alpha api
+        # Call wolfram alpha apps
         reply = self._wolfram_alpha.run(param)
         if reply:
             tokens = count_text_tokens(reply)

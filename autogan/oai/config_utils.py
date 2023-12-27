@@ -90,6 +90,7 @@ class AgentConfig:
         self._request_interval_time = config["request_interval_time"]
         self._request_timeout = config["request_timeout"]
         self._max_retries = config["max_retries"]
+        self._max_conv_turns = config["max_conv_turns"] if "max_conv_turns" in config else None
 
     @property
     def main_model_config(self):
@@ -98,7 +99,8 @@ class AgentConfig:
             self._main_model_max_messages_tokens,
             self._request_interval_time,
             self._request_timeout,
-            self._max_retries
+            self._max_retries,
+            self._max_conv_turns
         )
 
     @property
@@ -108,7 +110,8 @@ class AgentConfig:
             self._summary_model_max_messages_tokens,
             self._request_interval_time,
             self._request_timeout,
-            self._max_retries
+            self._max_retries,
+            self._max_conv_turns
         )
 
 
@@ -122,13 +125,15 @@ class LLMConfig:
             max_messages_tokens: str,
             request_interval_time: int,
             request_timeout: int,
-            max_retries: int
+            max_retries: int,
+            max_conv_turns: Optional[int]
     ):
         self._api_key_list = api_key_list
         self._max_messages_tokens = max_messages_tokens
         self._request_interval_time = request_interval_time
         self._request_timeout = request_timeout
         self._max_retries = max_retries
+        self._max_conv_turns = max_conv_turns
 
     def api_key(self, index):
         """Get the one configuration in the api_key_list.
@@ -170,3 +175,7 @@ class LLMConfig:
     @property
     def max_retries(self):
         return self._max_retries
+
+    @property
+    def max_conv_turns(self):
+        return self._max_conv_turns

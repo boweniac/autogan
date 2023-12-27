@@ -21,6 +21,25 @@ def chat_completions(messages: list, api_key: Dict, request_timeout: int, max_re
         return openai_like_chat_completions(messages, api_key, request_timeout, max_retries, stream_mode)
 
 
+def process_response(message: dict, stream_mode: Optional[bool] = None):
+    content = ""
+    tokens = 0
+    if stream_mode:
+        if (message and "choices" in message and "delta" in message["choices"][0]
+                and "content" in message["choices"][0]["delta"]
+                and message["choices"][0]["delta"]["content"]):
+            content = message["choices"][0]["delta"]["content"]
+    else:
+        if (message and "choices" in message and "message" in message["choices"][0]
+                and "content" in message["choices"][0]["message"]
+                and message["choices"][0]["message"]["content"]):
+            content = message["choices"][0]["message"]["content"]
+        if message and "usage" in message and "completion_tokens" in message["usage"]:
+            tokens = message["usage"]["completion_tokens"]
+
+    return content, tokens
+
+
 def openai_chat_completions(messages: list, api_key: Dict, request_timeout: int, max_retries: int,
                             stream_mode: Optional[bool] = None):
     if stream_mode is None:

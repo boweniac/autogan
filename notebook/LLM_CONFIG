@@ -45,5 +45,6 @@
     },
     "request_interval_time": 1,
     "request_timeout": 120,
-    "max_retries": 3
+    "max_retries": 3,
+    "max_conv_turns": 50
 }

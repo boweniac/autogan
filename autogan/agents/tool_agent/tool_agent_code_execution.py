@@ -1,5 +1,5 @@
 from typing import Optional
-from autogan.agents.universal_agent import UniversalAgent
+from autogan.agents.universal_agent import UniversalAgent, ToolFunctionUsage
 from autogan.tools.code_execution_tool import CodeExecution
 
 
@@ -11,7 +11,7 @@ class ToolAgentCodeExecution(UniversalAgent):
             # duty: Optional[str] = "我不会写代码，但可以执行你提交给我的代码，并返回执行结果。",
             work_dir: Optional[str] = "extensions"
     ):
-        """"CodeExecutionSpecialist
+        """CodeExecutionSpecialist
 
         Execute code and return results
 
@@ -30,11 +30,11 @@ class ToolAgentCodeExecution(UniversalAgent):
         super().__init__(
             name,
             duty=duty,
-            use_tool="only"
+            tool_function_usage=ToolFunctionUsage.ONLY
         )
         self._code_execution = CodeExecution(work_dir)
 
-    def tool_function(self, task_id: str, param: Optional[str] = None,
+    def tool_function(self, task_id: int, param: Optional[str] = None,
                       tokens: Optional[int] = None) -> tuple[str, int]:
         try:
             execution_result, tokens = self._code_execution.code_execution_reply(param)
@@ -47,4 +47,3 @@ class ToolAgentCodeExecution(UniversalAgent):
             return ("Code execution failed, please make sure that the code guard has added ``` symbols at the， To "
                     "install dependencies, use the python3 -m pip install xxx statement"
                     "beginning and end"), 20
-

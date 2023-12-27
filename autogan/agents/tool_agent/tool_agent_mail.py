@@ -1,5 +1,5 @@
 from typing import Optional, Dict
-from autogan.agents.universal_agent import UniversalAgent
+from autogan.agents.universal_agent import UniversalAgent, ToolFunctionUsage
 from autogan.utils.json_utils import text_to_json
 from autogan.tools.mail_tool import SendEmail
 
@@ -37,11 +37,11 @@ class ToolAgentMail(UniversalAgent):
         super().__init__(
             name,
             duty=duty,
-            use_tool="only"
+            tool_function_usage=ToolFunctionUsage.ONLY
         )
         self._send_email = SendEmail(email_config, work_dir)
 
-    def tool_function(self, task_id: str, param: Optional[str] = None,
+    def tool_function(self, task_id: int, param: Optional[str] = None,
                       tokens: Optional[int] = None) -> tuple[str, int]:
         try:
             param = text_to_json(param)
