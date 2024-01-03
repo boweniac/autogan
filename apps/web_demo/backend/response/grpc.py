@@ -57,22 +57,27 @@ class GrpcResponse(ResponseProtocol):
         # await asyncio.sleep(0)
         print(content)
         text = ""
-        if content:
-            if gen == "main":
-                if index == 1:
-                    text += f"{agent_name}: "
-                text += content
-            elif gen == "idea" or gen == "tool_call":
-                if index == 1:
-                    text += f"{agent_name}: "
-                text += content
-            elif gen == "system":
-                text += f"{agent_name}: {content}"
-            elif gen == "tool":
-                text += f"{agent_name}: {content}"
-            elif gen == "search":
-                text += f"url: {content}"
-        text = 'data: {"text":"' + text + '"}\n'
+        # if content:
+        #     if gen == "main":
+        #         if index == 1:
+        #             text += f"{agent_name}: "
+        #         text += content
+        #     elif gen == "user":
+        #         if index == 1:
+        #             text += f"{agent_name}: "
+        #         text += content
+        #     elif gen == "idea" or gen == "tool_call":
+        #         if index == 1:
+        #             text += f"{agent_name}: "
+        #         text += content
+        #     elif gen == "system":
+        #         text += f"{agent_name}: {content}"
+        #     elif gen == "tool":
+        #         text += f"{agent_name}: {content}"
+        #     elif gen == "search":
+        #         text += f"url: {content}"
+        text = f'data: {"agent_name": "{agent_name}", "role": "{gen}", "content": "{content}", "tokens": "{tokens}", "msg_id": "{msg_id}", "task_id": "{task_id}"}\n\n'
+
         self._reply.put(text)
 
     def need_to_stop(self):

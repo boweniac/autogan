@@ -14,17 +14,28 @@ class AgentStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.ReceiveStream = channel.unary_stream(
-                '/Agent.Agent/ReceiveStream',
-                request_serializer=agent__pb2.ReceiveRequest.SerializeToString,
-                response_deserializer=agent__pb2.ReceiveReply.FromString,
+        self.AgentStream = channel.unary_stream(
+                '/Agent.Agent/AgentStream',
+                request_serializer=agent__pb2.AgentRequest.SerializeToString,
+                response_deserializer=agent__pb2.AgentResponse.FromString,
+                )
+        self.AudioAndLip = channel.unary_unary(
+                '/Agent.Agent/AudioAndLip',
+                request_serializer=agent__pb2.AudioAndLipRequest.SerializeToString,
+                response_deserializer=agent__pb2.AudioAndLipResponse.FromString,
                 )
 
 
 class AgentServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def ReceiveStream(self, request, context):
+    def AgentStream(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def AudioAndLip(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -33,10 +44,15 @@ class AgentServicer(object):
 
 def add_AgentServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'ReceiveStream': grpc.unary_stream_rpc_method_handler(
-                    servicer.ReceiveStream,
-                    request_deserializer=agent__pb2.ReceiveRequest.FromString,
-                    response_serializer=agent__pb2.ReceiveReply.SerializeToString,
+            'AgentStream': grpc.unary_stream_rpc_method_handler(
+                    servicer.AgentStream,
+                    request_deserializer=agent__pb2.AgentRequest.FromString,
+                    response_serializer=agent__pb2.AgentResponse.SerializeToString,
+            ),
+            'AudioAndLip': grpc.unary_unary_rpc_method_handler(
+                    servicer.AudioAndLip,
+                    request_deserializer=agent__pb2.AudioAndLipRequest.FromString,
+                    response_serializer=agent__pb2.AudioAndLipResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -49,7 +65,7 @@ class Agent(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def ReceiveStream(request,
+    def AgentStream(request,
             target,
             options=(),
             channel_credentials=None,
@@ -59,8 +75,25 @@ class Agent(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_stream(request, target, '/Agent.Agent/ReceiveStream',
-            agent__pb2.ReceiveRequest.SerializeToString,
-            agent__pb2.ReceiveReply.FromString,
+        return grpc.experimental.unary_stream(request, target, '/Agent.Agent/AgentStream',
+            agent__pb2.AgentRequest.SerializeToString,
+            agent__pb2.AgentResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def AudioAndLip(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/Agent.Agent/AudioAndLip',
+            agent__pb2.AudioAndLipRequest.SerializeToString,
+            agent__pb2.AudioAndLipResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

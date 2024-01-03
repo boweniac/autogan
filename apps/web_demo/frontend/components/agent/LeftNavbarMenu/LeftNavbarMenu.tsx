@@ -41,7 +41,7 @@ const tabs = {
   ],
 };
 
-export function NavbarSegmented() {
+export function LeftNavbarMenu() {
   const [section, setSection] = useState<'account' | 'general'>('account');
   const [active, setActive] = useState('Billing');
 

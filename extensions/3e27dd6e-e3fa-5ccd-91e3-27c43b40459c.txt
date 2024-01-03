@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "soundFile": "/root/agent/autogan/extensions/3e27dd6e-e3fa-5ccd-91e3-27c43b40459c.wav",
+    "duration": 4.56
+  },
+  "mouthCues": [
+    { "start": 0.00, "end": 0.04, "value": "X" },
+    { "start": 0.04, "end": 0.28, "value": "B" },
+    { "start": 0.28, "end": 0.35, "value": "E" },
+    { "start": 0.35, "end": 0.42, "value": "B" },
+    { "start": 0.42, "end": 0.91, "value": "C" },
+    { "start": 0.91, "end": 1.04, "value": "A" },
+    { "start": 1.04, "end": 1.19, "value": "B" },
+    { "start": 1.19, "end": 1.27, "value": "A" },
+    { "start": 1.27, "end": 1.38, "value": "E" },
+    { "start": 1.38, "end": 1.45, "value": "F" },
+    { "start": 1.45, "end": 1.52, "value": "E" },
+    { "start": 1.52, "end": 1.73, "value": "F" },
+    { "start": 1.73, "end": 1.87, "value": "C" },
+    { "start": 1.87, "end": 2.01, "value": "B" },
+    { "start": 2.01, "end": 2.22, "value": "D" },
+    { "start": 2.22, "end": 2.29, "value": "C" },
+    { "start": 2.29, "end": 2.57, "value": "F" },
+    { "start": 2.57, "end": 2.64, "value": "C" },
+    { "start": 2.64, "end": 2.71, "value": "E" },
+    { "start": 2.71, "end": 2.85, "value": "B" },
+    { "start": 2.85, "end": 2.93, "value": "A" },
+    { "start": 2.93, "end": 3.09, "value": "C" },
+    { "start": 3.09, "end": 3.37, "value": "B" },
+    { "start": 3.37, "end": 3.57, "value": "A" },
+    { "start": 3.57, "end": 3.72, "value": "B" },
+    { "start": 3.72, "end": 3.93, "value": "E" },
+    { "start": 3.93, "end": 4.49, "value": "B" },
+    { "start": 4.49, "end": 4.56, "value": "X" }
+  ]
+}

@@ -5,7 +5,7 @@ from autogan.oai.config_utils import LLMConfig
 from autogan.oai.count_tokens_utils import count_text_tokens
 from autogan.protocol.response_protocol import ResponseProtocol
 from autogan.utils.environment_utils import environment_info
-from autogan.oai.generate_utils import generate_chat_completion_internal
+from autogan.oai.chat_generate_utils import generate_chat_completion_internal
 
 
 def compressed_text_universal(text: str, summary_model_config: LLMConfig, focus: Optional[str] = None, safe_size: Optional[int] = None) \

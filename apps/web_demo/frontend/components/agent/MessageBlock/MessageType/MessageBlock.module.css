@@ -1,0 +1,23 @@
+.agentName {
+    margin-top: rem(3px);
+    margin-bottom: rem(4px);
+}
+
+.agentMessage {
+    border: 1px solid #000; /* 边框宽度为2px，颜色为黑色 */
+    border-radius: var(--mantine-spacing-xs); /* 圆角半径为10px */
+    /* padding: var(--mantine-spacing-sm); */
+    padding: 0;
+    & p {
+        margin: 0;
+    }
+    & div {
+        font-size: rem(14px) !important;;
+    }
+    & span {
+        font-size: rem(14px) !important;;
+    }
+    & code {
+        font-size: rem(14px) !important;;
+    }
+}

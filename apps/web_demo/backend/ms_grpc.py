@@ -1,4 +1,7 @@
+import os
 import threading
+
+import autogan
 import consul
 from concurrent import futures
 import grpc
@@ -11,6 +14,8 @@ from fastapi import HTTPException, FastAPI
 from starlette import status
 
 from apps.web_demo.backend.service.test_service import TestService
+from apps.web_demo.backend.util.aliyun_oss import bucket
+from autogan.oai.audio_generate_utils import generate_audio
 from grpcdata.grpc_py import agent_pb2_grpc, agent_pb2
 from grpcdata.grpc_py import helloworld_pb2
 from grpcdata.grpc_py import helloworld_pb2_grpc
@@ -33,7 +38,7 @@ class Health(health_pb2_grpc.HealthServicer):
 
 
 class Agent(agent_pb2_grpc.AgentServicer):
-    def ReceiveStream(self, request, context):
+    def AgentStream(self, request, context):
         try:
             user_id = request.user_id
             conversation_id = request.conversation_id
@@ -45,11 +50,12 @@ class Agent(agent_pb2_grpc.AgentServicer):
                 data_queue = queue.Queue()
                 stop_event = threading.Event()
                 stream_response = GrpcResponse(data_queue, stop_event)
-                test_thread = threading.Thread(target=test_service.receive, args=(conversation_id, conversation_id, "客户", content, stream_response))
+                test_thread = threading.Thread(target=test_service.receive, args=(
+                    conversation_id, conversation_id, "客户", content, stream_response))
                 test_thread.start()
                 while True:
                     while not data_queue.empty():
-                        yield agent_pb2.ReceiveReply(text=data_queue.get())
+                        yield agent_pb2.AgentResponse(text=data_queue.get())
                     if not context.is_active() or not test_thread.is_alive():
                         stop_event.set()
                         test_thread.join()
@@ -60,6 +66,21 @@ class Agent(agent_pb2_grpc.AgentServicer):
             return e
         except Exception as e:
             return HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+    def AudioAndLip(self, request, context):
+        text = request.text
+        voice = request.voice
+        speed = request.speed
+
+        file_name, lips_data = generate_audio("LLM_CONFIG", "tts-1", text, voice, "mp3", speed)
+
+        # 读取 MP3 文件
+        # with open(audio_path, "rb") as file:
+        #     mp3_data = file.read()
+
+        file_url = f"https://aibowen-base.boweniac.top/{file_name}"
+
+        return agent_pb2.AudioAndLipResponse(audio_file=file_url, lips_data=lips_data)
 
 
 def serve():

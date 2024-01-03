@@ -5,7 +5,7 @@ from autogan.utils.compressed_messages_utils import compressed_messages
 from autogan.utils.compressed_text_utils import compressed_text_universal
 from autogan.oai.config_utils import AgentConfig
 from autogan.oai.count_tokens_utils import count_text_tokens
-from autogan.oai.generate_utils import a_generate_chat_completion, generate_chat_completion
+from autogan.oai.chat_generate_utils import a_generate_chat_completion, generate_chat_completion
 from autogan.utils.environment_utils import environment_info
 from autogan.protocol.switch_protocol import SwitchProtocol
 from enum import Enum

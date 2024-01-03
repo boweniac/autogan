@@ -14,17 +14,21 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0b\x61gent.proto\x12\x05\x41gent\"K\n\x0eReceiveRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\x03\x12\x17\n\x0f\x63onversation_id\x18\x02 \x01(\x03\x12\x0f\n\x07\x63ontent\x18\x03 \x01(\t\"\x1c\n\x0cReceiveReply\x12\x0c\n\x04text\x18\x01 \x01(\t2H\n\x05\x41gent\x12?\n\rReceiveStream\x12\x15.Agent.ReceiveRequest\x1a\x13.Agent.ReceiveReply\"\x00\x30\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0b\x61gent.proto\x12\x05\x41gent\"I\n\x0c\x41gentRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\x03\x12\x17\n\x0f\x63onversation_id\x18\x02 \x01(\x03\x12\x0f\n\x07\x63ontent\x18\x03 \x01(\t\"\x1d\n\rAgentResponse\x12\x0c\n\x04text\x18\x01 \x01(\t\"@\n\x12\x41udioAndLipRequest\x12\x0c\n\x04text\x18\x01 \x01(\t\x12\r\n\x05voice\x18\x02 \x01(\t\x12\r\n\x05speed\x18\x03 \x01(\x07\"<\n\x13\x41udioAndLipResponse\x12\x12\n\naudio_file\x18\x01 \x01(\t\x12\x11\n\tlips_data\x18\x02 \x01(\t2\x8b\x01\n\x05\x41gent\x12<\n\x0b\x41gentStream\x12\x13.Agent.AgentRequest\x1a\x14.Agent.AgentResponse\"\x00\x30\x01\x12\x44\n\x0b\x41udioAndLip\x12\x19.Agent.AudioAndLipRequest\x1a\x1a.Agent.AudioAndLipResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'agent_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._options = None
-  _globals['_RECEIVEREQUEST']._serialized_start=22
-  _globals['_RECEIVEREQUEST']._serialized_end=97
-  _globals['_RECEIVEREPLY']._serialized_start=99
-  _globals['_RECEIVEREPLY']._serialized_end=127
-  _globals['_AGENT']._serialized_start=129
-  _globals['_AGENT']._serialized_end=201
+  _globals['_AGENTREQUEST']._serialized_start=22
+  _globals['_AGENTREQUEST']._serialized_end=95
+  _globals['_AGENTRESPONSE']._serialized_start=97
+  _globals['_AGENTRESPONSE']._serialized_end=126
+  _globals['_AUDIOANDLIPREQUEST']._serialized_start=128
+  _globals['_AUDIOANDLIPREQUEST']._serialized_end=192
+  _globals['_AUDIOANDLIPRESPONSE']._serialized_start=194
+  _globals['_AUDIOANDLIPRESPONSE']._serialized_end=254
+  _globals['_AGENT']._serialized_start=257
+  _globals['_AGENT']._serialized_end=396
 # @@protoc_insertion_point(module_scope)

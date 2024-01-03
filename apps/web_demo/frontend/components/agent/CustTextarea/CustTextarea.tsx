@@ -21,9 +21,7 @@ export default function CustTextarea(props: CustTextareaProps) {
                 value,
                 undefined,
                 (res) => {
-                    console.log(`res:`+JSON.stringify(res));
-                    console.log(`res.text:`+JSON.stringify(res.text));
-                    text += res.text
+                    text += res.content
                     props.setTest(text)
                 },
                 undefined

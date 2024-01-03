@@ -1,6 +1,6 @@
 import json
 from typing import Dict, Optional, List
-from autogan.oai.generate_utils import generate_chat_completion_internal
+from autogan.oai.chat_generate_utils import generate_chat_completion_internal
 from autogan.oai.config_utils import LLMConfig
 from autogan.protocol.response_protocol import ResponseProtocol
 

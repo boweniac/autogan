@@ -1,10 +1,13 @@
 import { AppProps } from "next/app";
-import {AppShell, createTheme, MantineProvider, rem} from '@mantine/core';
-import '@mantine/core/styles.css';
+import {AppShell, MantineProvider, rem} from '@mantine/core';
 import CustHeader from "@/components/appshell/CustHeader";
 import {NavbarMinimal} from "@/components/appshell/NavbarMinimal/NavbarMinimal";
 import { BottomNavbar } from "@/components/appshell/BottomNavbar/BottomNavbar";
 import {LocalState, localStore} from "@/stores/LocalStore";
+import '@mantine/core/styles.css';
+import "highlight.js/styles/stackoverflow-dark.css";
+import '@/styles/globals.css';
+
 
 export default function App({ Component, pageProps }: AppProps) {
     const appName = localStore((state: LocalState) => state.appName);
@@ -21,7 +24,7 @@ export default function App({ Component, pageProps }: AppProps) {
                 <AppShell
                     navbar={{
                             width: rem(50),
-                            breakpoint: 'sm',
+                            breakpoint: 'xs',
                             collapsed: { mobile: true },
                         }}
                 >

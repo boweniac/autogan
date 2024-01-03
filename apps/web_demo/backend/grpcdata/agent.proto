@@ -4,15 +4,27 @@ syntax = "proto3";
 package Agent;
 
 service Agent {
-  rpc ReceiveStream (ReceiveRequest) returns (stream ReceiveReply) {}
+  rpc AgentStream (AgentRequest) returns (stream AgentResponse) {}
+  rpc AudioAndLip(AudioAndLipRequest) returns (AudioAndLipResponse);
 }
 
-message ReceiveRequest {
+message AgentRequest {
   int64 user_id = 1;
   int64 conversation_id = 2;
   string content = 3;
 }
 
-message ReceiveReply {
+message AgentResponse {
   string text = 1;
+}
+
+message AudioAndLipRequest {
+  string text = 1;
+  string voice = 2;
+  fixed32 speed = 3;
+}
+
+message AudioAndLipResponse {
+  string audio_file = 1;
+  string lips_data = 2;
 }

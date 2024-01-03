@@ -1,0 +1,21 @@
+{
+  "metadata": {
+    "soundFile": "/root/agent/autogan/extensions/e30712e1-56e7-5e00-b7bc-16042d0bfdb7.wav",
+    "duration": 1.63
+  },
+  "mouthCues": [
+    { "start": 0.00, "end": 0.01, "value": "X" },
+    { "start": 0.01, "end": 0.05, "value": "B" },
+    { "start": 0.05, "end": 0.09, "value": "A" },
+    { "start": 0.09, "end": 0.17, "value": "C" },
+    { "start": 0.17, "end": 0.38, "value": "E" },
+    { "start": 0.38, "end": 0.45, "value": "B" },
+    { "start": 0.45, "end": 0.66, "value": "E" },
+    { "start": 0.66, "end": 0.80, "value": "F" },
+    { "start": 0.80, "end": 1.08, "value": "B" },
+    { "start": 1.08, "end": 1.22, "value": "E" },
+    { "start": 1.22, "end": 1.29, "value": "F" },
+    { "start": 1.29, "end": 1.36, "value": "B" },
+    { "start": 1.36, "end": 1.63, "value": "X" }
+  ]
+}

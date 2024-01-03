@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from "next/router";
 import Head from "next/head";
-import { useMantineColorScheme } from '@mantine/core';
+import { rem, useMantineColorScheme } from '@mantine/core';
 
 type CustHeaderProps = {
     appName: string;

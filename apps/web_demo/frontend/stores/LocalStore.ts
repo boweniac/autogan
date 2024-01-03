@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { AgentConversation } from "./TypeAgentChat";
 
 export const excludeFromState = [
     "appName",
@@ -12,13 +13,18 @@ export interface LocalState {
     gateWayProtocol: string;
     gateWayHost: string;
     gateWayPort: string;
+
+    agentConversations: AgentConversation[];
 }
 
 export const initialState = {
     appName: "AI 博闻",
+    activePage: "/",
     gateWayProtocol: "http://",
     gateWayHost: "localhost",
     gateWayPort: "60507",
+    
+    agentConversations: [],
 }
 
 const store = () => ({ ...initialState } as LocalState);

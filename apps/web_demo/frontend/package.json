@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "-": "^0.0.1",
     "@mantine/carousel": "^7.3.2",
     "@mantine/code-highlight": "^7.3.2",
     "@mantine/core": "^7.3.2",
@@ -30,10 +31,14 @@
     "@tiptap/starter-kit": "^2.1.13",
     "@types/three": "^0.160.0",
     "axios": "^1.6.2",
+    "clipboard": "^2.0.11",
     "dayjs": "^1.11.10",
     "embla-carousel-react": "^8.0.0-rc15",
     "gltfjsx": "^6.2.16",
+    "import-three-examples": "^2.2.4",
     "install": "^0.13.0",
+    "markdown-it": "^14.0.0",
+    "markdown-it-highlightjs": "^4.0.1",
     "next": "^14.0.4",
     "npm": "^10.2.5",
     "react": "^18",
@@ -43,6 +48,7 @@
     "zustand": "^4.4.7"
   },
   "devDependencies": {
+    "@types/markdown-it": "^13.0.7",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

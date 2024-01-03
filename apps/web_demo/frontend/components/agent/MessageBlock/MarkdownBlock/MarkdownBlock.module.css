@@ -1,0 +1,25 @@
+.message {
+  font-size: rem(14px);
+
+  & pre {
+    font-size: rem(14px);
+  }
+
+  & span {
+    font-size: rem(14px);
+  }
+
+  & code {
+    font-size: rem(14px);
+  }
+}
+  .copyText::before {
+    content: "copy";
+    font-size: rem(14px);
+    opacity: 0.6;
+  }
+  
+  .copyText:active::before {
+    font-size: rem(14px);
+    content: "copied!";
+  }

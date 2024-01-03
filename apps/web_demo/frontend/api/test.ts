@@ -27,25 +27,20 @@ export async function streamTestAPI(content: string, abortController?: AbortCont
             },
             (res) => {
                 if (res.statusCode === 200) {
-                    console.log("res", res)
-                    // callback?.(res);
                     res.on("data", (chunk) => {
-                        // console.log("res.on(\"data\", (chunk) => {")
                         if (abortController?.signal.aborted) {
                             res.destroy();
                             endCallback?.();
                             return;
                         }
-
                         // 将响应拆分成单独的消息
-                        const allMessages = chunk.toString().split("\n");
+                        const allMessages = chunk.toString().split("\n\n");
                         for (const message of allMessages) {
                             // 切掉响应数据前缀
                             const cleaned = message.toString().match(/(?<=data:).*$/s);
                             if (!cleaned || cleaned === " [DONE]") {
                                 return;
                             }
-                            console.log(`cleaned:`+JSON.stringify(cleaned));
                             // 序列化
                             let parsed;
                             try {
@@ -54,12 +49,10 @@ export async function streamTestAPI(content: string, abortController?: AbortCont
                                 console.error(e);
                                 return;
                             }
-                            console.log(`parsed:`+JSON.stringify(parsed));
                             callback?.(parsed);
                         }
                     });
                     res.on("end", () => {
-                        console.log("res.on(\"end\", () => {")
                         endCallback?.();
                     });
                 } else {
