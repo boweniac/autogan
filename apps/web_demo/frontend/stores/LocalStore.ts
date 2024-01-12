@@ -14,6 +14,7 @@ export interface LocalState {
     gateWayHost: string;
     gateWayPort: string;
 
+    initConversationRequest: string;
     agentConversations: AgentConversation[];
 }
 
@@ -24,6 +25,7 @@ export const initialState = {
     gateWayHost: "localhost",
     gateWayPort: "60507",
     
+    initConversationRequest: "",
     agentConversations: [],
 }
 

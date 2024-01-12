@@ -1,0 +1,10 @@
+.copyText::before {
+  content: "copy";
+  font-size: rem(14px);
+  opacity: 0.6;
+}
+  
+.copyText:active::before {
+  font-size: rem(14px);
+  content: "copied!";
+}

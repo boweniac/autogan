@@ -16,23 +16,28 @@ class RedisStorage(StorageProtocol):
         self._redis = redis.Redis(host=host, port=port, db=db, decode_responses=True)
 
     def add_conversation(self, user_id: int, conversation_id: int) -> Optional[str]:
-        existing_user_id = self._redis.hget('conv_user_map', str(conversation_id))
-        if existing_user_id:
-            if int(existing_user_id) == user_id:
-                return "The conversation already exists."
-            else:
-                return "Conversation permission error."
+        is_existing = self._redis.hexists(f'user_convs_{user_id}', str(conversation_id))
+        if is_existing:
+            return "The conversation already exists."
         else:
-            self._redis.hset('conv_user_map', str(conversation_id), str(user_id))
+            self._redis.hset(f'user_convs_{user_id}', str(conversation_id), json.dumps({"id": conversation_id}))
             return None
 
+    def update_conversation_title(self, user_id: int, conversation_id: int, title: str):
+        self._redis.hset(f'user_convs_{user_id}', str(conversation_id), json.dumps({"id": conversation_id, "title": title}))
+
+    def delete_conversation(self, user_id: int, conversation_id: int):
+        conversation_ids = [str(conversation_id)]
+        self._redis.hdel(f'user_convs_{user_id}', *conversation_ids)
+
+    def get_conversations(self, user_id: int) -> Optional[list]:
+        return self._redis.hvals(f'user_convs_{user_id}')
+
+
     def user_conversation_permissions(self, user_id: int, conversation_id: int) -> bool:
-        existing_user_id = self._redis.hget('conv_user_map', str(conversation_id))
-        if existing_user_id:
-            if int(existing_user_id) == user_id:
-                return True
-            else:
-                return False
+        is_existing = self._redis.hexists(f'user_convs_{user_id}', str(conversation_id))
+        if is_existing:
+            return True
         else:
             return False
 
@@ -67,6 +72,8 @@ class RedisStorage(StorageProtocol):
             return None
 
     def add_message(self, conversation_id: int, message: dict) -> None:
+        if message["agent_name"] == "客户":
+            message["role"] = "user"
         self._redis.rpush(f'conv_messages_{conversation_id}', json.dumps(message))
         self._redis.hset('conv_last_msg_id', str(conversation_id), message["id"])
 

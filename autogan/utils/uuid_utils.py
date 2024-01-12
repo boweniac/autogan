@@ -61,7 +61,7 @@ class SnowflakeIdGenerator:
             time.sleep(0.001)
         return timestamp
 
-    def next_id(self):
+    def next_id_init(self):
         with self.lock:
             timestamp = int(time.time() * 1000)
             if timestamp < self.last_timestamp:
@@ -82,3 +82,6 @@ class SnowflakeIdGenerator:
                 (self.datacenter_id << (self.worker_id_bits + self.sequence_bits)) | \
                 (self.worker_id << self.sequence_bits) | \
                 self.sequence
+
+    def next_id(self):
+        return str(self.next_id_init())

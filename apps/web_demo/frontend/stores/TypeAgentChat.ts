@@ -7,10 +7,10 @@ export interface AgentConversation {
 }
 
 export interface Message {
-    taskID?: string | undefined;
-    localID: string;
-    remoteID?: string | undefined;
-    name?: string | undefined;
+    task_id?: string | undefined;
+    localID?: string | undefined;
+    id?: string | undefined;
+    agent_name?: string | undefined;
     role?: string | undefined;
     content?: string | undefined;
     tokens?: number | undefined;

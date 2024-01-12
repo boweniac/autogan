@@ -76,7 +76,7 @@ class GrpcResponse(ResponseProtocol):
         #         text += f"{agent_name}: {content}"
         #     elif gen == "search":
         #         text += f"url: {content}"
-        text = f'data: {"agent_name": "{agent_name}", "role": "{gen}", "content": "{content}", "tokens": "{tokens}", "msg_id": "{msg_id}", "task_id": "{task_id}"}\n\n'
+        text = f'data: {{"agent_name": "{agent_name}", "role": "{gen}", "content": "{content}", "tokens": "{tokens}", "msg_id": "{msg_id}", "task_id": "{task_id}"}}\n\n'
 
         self._reply.put(text)
 

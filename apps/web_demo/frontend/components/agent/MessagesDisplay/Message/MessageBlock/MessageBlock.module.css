@@ -1,0 +1,25 @@
+.agentName {
+    margin-top: rem(4px);
+    margin-bottom: rem(7px);
+    margin-left: rem(4px);
+    margin-right: rem(4px);
+}
+
+.messageBlock {
+    & p {
+        margin: 0;
+    }
+}
+
+.messageLeft {
+    background-color: light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-6));
+    margin-left: rem(4px);
+    margin-right: rem(32px);
+}
+
+.messageRight {
+    background-color: light-dark(var(--mantine-color-blue-6), var(--mantine-color-blue-6));
+    color: white;
+    margin-left: rem(32px);
+    margin-right: rem(4px);
+}

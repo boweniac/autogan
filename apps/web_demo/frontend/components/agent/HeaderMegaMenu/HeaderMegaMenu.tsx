@@ -28,7 +28,7 @@ import {
     IconCoin,
     IconChevronDown,
 } from '@tabler/icons-react';
-import classes from '@/components/appshell/HeaderMegaMenu/HeaderMegaMenu.module.css';
+import classes from './HeaderMegaMenu.module.css';
 
 const mockdata = [
     {

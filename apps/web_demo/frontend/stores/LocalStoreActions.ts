@@ -4,17 +4,27 @@ import { AgentConversation, Message } from "./TypeAgentChat";
 const get = localStore.getState;
 const set = localStore.setState;
 
-export const updateActivePage = (page: string) => {
+export const updateActivePageState = (page: string) => {
     set(() => ({ activePage: page }));
 }
 
-export const addAgentConversation = (id: string) => {
+export const updateInitConversationRequest = (value: string) => {
+    set(() => ({ initConversationRequest: value }));
+}
+
+export const burnAfterGetInitConversationRequest = () => {
+    const initConversationRequest = get().initConversationRequest
+    set(() => ({ initConversationRequest: "" }));
+    return initConversationRequest
+}
+
+export const addAgentConversationState = (id: string, title: string | undefined) => {
     set((state) => ({
         agentConversations: [
             ...state.agentConversations,
             {
                 id: id,
-                title: undefined,
+                title: title,
                 messages: [],
                 orgStructure: undefined,
                 model: undefined
@@ -23,13 +33,13 @@ export const addAgentConversation = (id: string) => {
     }));
 };
 
-export const deleteAgentConversation = (id: string) => {
+export const deleteAgentConversationState = (id: string) => {
     set((state) => ({
         agentConversations: state.agentConversations.filter((c) => c.id !== id),
     }));
 }
 
-export const updateAgentConversationTitle = (id: string, conversation: Partial<AgentConversation>) => {
+export const updateAgentConversationState = (id: string, conversation: Partial<AgentConversation>) => {
     set((state) => ({
         agentConversations: state.agentConversations.map((c) => {
             if (c.id === id) {
@@ -40,16 +50,34 @@ export const updateAgentConversationTitle = (id: string, conversation: Partial<A
     }));
 };
 
-export const addAgentConversationMessage = (conversationID: string, localID: string, content: string | undefined) => {
+export const getAgentConversationState = (conversationID: string) => {
+    return get().agentConversations.find(c => c.id === conversationID);
+};
+
+export const clearConversationState = (conversationIDList: string[]) => {
+    let deletedConversations: string[] = []
+    set((state) => ({
+        agentConversations: state.agentConversations.filter(
+            (c) => {
+                if (conversationIDList.includes(c.id)) {
+                    return true
+                } else {
+                    deletedConversations = [...deletedConversations, c.id]
+                    return false
+                }
+            }
+          ),
+    }));
+    return deletedConversations
+};
+
+export const addAgentConversationMessageState = (conversationID: string, message: Partial<Message>) => {
     set((state) => ({
         agentConversations: state.agentConversations.map((c) => {
             if (c.id === conversationID) {
                 c.messages = [
                     ...c.messages,
-                    {
-                        localID: localID,
-                        content: content
-                    },
+                    message,
                 ];
             }
             return c;
@@ -57,7 +85,7 @@ export const addAgentConversationMessage = (conversationID: string, localID: str
     }));
 };
 
-export const updateAgentConversationMessage = (conversationID: string, localID: string, message: Partial<Message>) => {
+export const updateAgentConversationMessageState = (conversationID: string, localID: string, message: Partial<Message>) => {
     set((state) => ({
         agentConversations: state.agentConversations.map((c) => {
             if (c.id === conversationID) {
@@ -73,7 +101,7 @@ export const updateAgentConversationMessage = (conversationID: string, localID: 
     }));
 };
 
-export const getAgentConversationMessageLastRemoteID = (conversationID: string) => {
+export const getAgentConversationMessageLastRemoteIDState = (conversationID: string) => {
     const conversation = get().agentConversations.find(c => c.id === conversationID);
     if (conversation == undefined) {
         return undefined
@@ -83,5 +111,5 @@ export const getAgentConversationMessageLastRemoteID = (conversationID: string) 
     if (len == 0) {
         return undefined
     }
-    return messages[len-1].remoteID
+    return messages[len-1].id
 };

@@ -7,6 +7,7 @@ import {LocalState, localStore} from "@/stores/LocalStore";
 import '@mantine/core/styles.css';
 import "highlight.js/styles/stackoverflow-dark.css";
 import '@/styles/globals.css';
+import { syncConversations } from "@/components/agent/AgentFrameUtil";
 
 
 export default function App({ Component, pageProps }: AppProps) {

@@ -14,28 +14,94 @@ class AgentStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.AgentStream = channel.unary_stream(
-                '/Agent.Agent/AgentStream',
+        self.RpcAgentStream = channel.unary_stream(
+                '/Agent.Agent/RpcAgentStream',
                 request_serializer=agent__pb2.AgentRequest.SerializeToString,
                 response_deserializer=agent__pb2.AgentResponse.FromString,
                 )
-        self.AudioAndLip = channel.unary_unary(
-                '/Agent.Agent/AudioAndLip',
+        self.RpcAudioAndLip = channel.unary_unary(
+                '/Agent.Agent/RpcAudioAndLip',
                 request_serializer=agent__pb2.AudioAndLipRequest.SerializeToString,
                 response_deserializer=agent__pb2.AudioAndLipResponse.FromString,
+                )
+        self.RpcAddConversation = channel.unary_unary(
+                '/Agent.Agent/RpcAddConversation',
+                request_serializer=agent__pb2.AddConversationRequest.SerializeToString,
+                response_deserializer=agent__pb2.AddConversationResponse.FromString,
+                )
+        self.RpcUpdateConversationTitle = channel.unary_unary(
+                '/Agent.Agent/RpcUpdateConversationTitle',
+                request_serializer=agent__pb2.UpdateConversationTitleRequest.SerializeToString,
+                response_deserializer=agent__pb2.UpdateConversationTitleResponse.FromString,
+                )
+        self.RpcGetConversations = channel.unary_unary(
+                '/Agent.Agent/RpcGetConversations',
+                request_serializer=agent__pb2.GetConversationsRequest.SerializeToString,
+                response_deserializer=agent__pb2.GetConversationsResponse.FromString,
+                )
+        self.RpcDeleteConversation = channel.unary_unary(
+                '/Agent.Agent/RpcDeleteConversation',
+                request_serializer=agent__pb2.DeleteConversationRequest.SerializeToString,
+                response_deserializer=agent__pb2.DeleteConversationResponse.FromString,
+                )
+        self.RpcGetLastMsgId = channel.unary_unary(
+                '/Agent.Agent/RpcGetLastMsgId',
+                request_serializer=agent__pb2.GetLastMsgIdRequest.SerializeToString,
+                response_deserializer=agent__pb2.GetLastMsgIdResponse.FromString,
+                )
+        self.RpcGetMessages = channel.unary_unary(
+                '/Agent.Agent/RpcGetMessages',
+                request_serializer=agent__pb2.GetMessagesRequest.SerializeToString,
+                response_deserializer=agent__pb2.GetMessagesResponse.FromString,
                 )
 
 
 class AgentServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def AgentStream(self, request, context):
+    def RpcAgentStream(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def AudioAndLip(self, request, context):
+    def RpcAudioAndLip(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def RpcAddConversation(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def RpcUpdateConversationTitle(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def RpcGetConversations(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def RpcDeleteConversation(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def RpcGetLastMsgId(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def RpcGetMessages(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -44,15 +110,45 @@ class AgentServicer(object):
 
 def add_AgentServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'AgentStream': grpc.unary_stream_rpc_method_handler(
-                    servicer.AgentStream,
+            'RpcAgentStream': grpc.unary_stream_rpc_method_handler(
+                    servicer.RpcAgentStream,
                     request_deserializer=agent__pb2.AgentRequest.FromString,
                     response_serializer=agent__pb2.AgentResponse.SerializeToString,
             ),
-            'AudioAndLip': grpc.unary_unary_rpc_method_handler(
-                    servicer.AudioAndLip,
+            'RpcAudioAndLip': grpc.unary_unary_rpc_method_handler(
+                    servicer.RpcAudioAndLip,
                     request_deserializer=agent__pb2.AudioAndLipRequest.FromString,
                     response_serializer=agent__pb2.AudioAndLipResponse.SerializeToString,
+            ),
+            'RpcAddConversation': grpc.unary_unary_rpc_method_handler(
+                    servicer.RpcAddConversation,
+                    request_deserializer=agent__pb2.AddConversationRequest.FromString,
+                    response_serializer=agent__pb2.AddConversationResponse.SerializeToString,
+            ),
+            'RpcUpdateConversationTitle': grpc.unary_unary_rpc_method_handler(
+                    servicer.RpcUpdateConversationTitle,
+                    request_deserializer=agent__pb2.UpdateConversationTitleRequest.FromString,
+                    response_serializer=agent__pb2.UpdateConversationTitleResponse.SerializeToString,
+            ),
+            'RpcGetConversations': grpc.unary_unary_rpc_method_handler(
+                    servicer.RpcGetConversations,
+                    request_deserializer=agent__pb2.GetConversationsRequest.FromString,
+                    response_serializer=agent__pb2.GetConversationsResponse.SerializeToString,
+            ),
+            'RpcDeleteConversation': grpc.unary_unary_rpc_method_handler(
+                    servicer.RpcDeleteConversation,
+                    request_deserializer=agent__pb2.DeleteConversationRequest.FromString,
+                    response_serializer=agent__pb2.DeleteConversationResponse.SerializeToString,
+            ),
+            'RpcGetLastMsgId': grpc.unary_unary_rpc_method_handler(
+                    servicer.RpcGetLastMsgId,
+                    request_deserializer=agent__pb2.GetLastMsgIdRequest.FromString,
+                    response_serializer=agent__pb2.GetLastMsgIdResponse.SerializeToString,
+            ),
+            'RpcGetMessages': grpc.unary_unary_rpc_method_handler(
+                    servicer.RpcGetMessages,
+                    request_deserializer=agent__pb2.GetMessagesRequest.FromString,
+                    response_serializer=agent__pb2.GetMessagesResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -65,7 +161,7 @@ class Agent(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def AgentStream(request,
+    def RpcAgentStream(request,
             target,
             options=(),
             channel_credentials=None,
@@ -75,14 +171,14 @@ class Agent(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_stream(request, target, '/Agent.Agent/AgentStream',
+        return grpc.experimental.unary_stream(request, target, '/Agent.Agent/RpcAgentStream',
             agent__pb2.AgentRequest.SerializeToString,
             agent__pb2.AgentResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def AudioAndLip(request,
+    def RpcAudioAndLip(request,
             target,
             options=(),
             channel_credentials=None,
@@ -92,8 +188,110 @@ class Agent(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/Agent.Agent/AudioAndLip',
+        return grpc.experimental.unary_unary(request, target, '/Agent.Agent/RpcAudioAndLip',
             agent__pb2.AudioAndLipRequest.SerializeToString,
             agent__pb2.AudioAndLipResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def RpcAddConversation(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/Agent.Agent/RpcAddConversation',
+            agent__pb2.AddConversationRequest.SerializeToString,
+            agent__pb2.AddConversationResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def RpcUpdateConversationTitle(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/Agent.Agent/RpcUpdateConversationTitle',
+            agent__pb2.UpdateConversationTitleRequest.SerializeToString,
+            agent__pb2.UpdateConversationTitleResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def RpcGetConversations(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/Agent.Agent/RpcGetConversations',
+            agent__pb2.GetConversationsRequest.SerializeToString,
+            agent__pb2.GetConversationsResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def RpcDeleteConversation(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/Agent.Agent/RpcDeleteConversation',
+            agent__pb2.DeleteConversationRequest.SerializeToString,
+            agent__pb2.DeleteConversationResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def RpcGetLastMsgId(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/Agent.Agent/RpcGetLastMsgId',
+            agent__pb2.GetLastMsgIdRequest.SerializeToString,
+            agent__pb2.GetLastMsgIdResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def RpcGetMessages(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/Agent.Agent/RpcGetMessages',
+            agent__pb2.GetMessagesRequest.SerializeToString,
+            agent__pb2.GetMessagesResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

@@ -6,11 +6,11 @@ import {localStore} from "@/stores/LocalStore";
 
 const get = localStore.getState;
 
-export async function streamTestAPI(content: string, abortController?: AbortController | undefined, callback?: ((res: any) => void) | undefined, endCallback?: (() => void) | undefined, errorCallback?: (() => void) | undefined): Promise<void>{
+export async function streamTestAPI(content: string, conversationID: string, abortController?: AbortController | undefined, callback?: ((res: any) => void) | undefined, endCallback?: (() => void) | undefined, errorCallback?: (() => void) | undefined): Promise<void>{
     try {
         const payload = JSON.stringify({
             user_id: 1,
-            conversation_id: 1,
+            conversation_id: conversationID,
             content: content,
         });
 
@@ -34,10 +34,12 @@ export async function streamTestAPI(content: string, abortController?: AbortCont
                             return;
                         }
                         // 将响应拆分成单独的消息
-                        const allMessages = chunk.toString().split("\n\n");
+                        let buffer = '';
+                        const allMessages = chunk.toString().split("\n\n\n");
                         for (const message of allMessages) {
+                            buffer += message.toString();
                             // 切掉响应数据前缀
-                            const cleaned = message.toString().match(/(?<=data:).*$/s);
+                            const cleaned = buffer.match(/(?<=data:).*$/s)?.toString();
                             if (!cleaned || cleaned === " [DONE]") {
                                 return;
                             }
@@ -46,10 +48,12 @@ export async function streamTestAPI(content: string, abortController?: AbortCont
                             try {
                                 parsed = JSON.parse(cleaned);
                             } catch (e) {
+                                buffer += "\\n\\n\\n"
                                 console.error(e);
-                                return;
+                                continue;
                             }
                             callback?.(parsed);
+                            buffer = '';
                         }
                     });
                     res.on("end", () => {
@@ -80,3 +84,62 @@ export async function streamTestAPI(content: string, abortController?: AbortCont
         throw e;
     }
 };
+
+export async function getOpenRequestAPI(path: string) {
+    try {
+        const res = await axios.get(get().gateWayProtocol + get().gateWayHost + ":" + get().gateWayPort + path);
+        if (res.status === 200) {
+            if (res.data) {
+                return res.data;
+            } else {
+                return true
+            }
+        }
+        notifications.show({
+            message: "请求错误：" + res.data.msg,
+            color: "red",
+        });
+    } catch (e: any) {
+        if (axios.isAxiosError(e)) {
+            console.error(e.response?.data);
+        }
+        notifications.show({
+            message: "请求错误：" + e,
+            color: "red",
+        });
+        throw e;
+    }
+}
+
+export async function postOpenRequestAPI(path: string, payload: any) {
+    try {
+        const res = await axios.post(get().gateWayProtocol + get().gateWayHost + ":" + get().gateWayPort + path, payload);
+        if (res.status === 200) {
+            if (res.data) {
+                return res.data;
+            } else {
+                return true
+            }
+        }
+        notifications.show({
+            message: "请求错误：" + res.data.msg,
+            color: "red",
+        });
+    } catch (e: any) {
+        if (axios.isAxiosError(e)) {
+            console.error(e.response?.data);
+        }
+        notifications.show({
+            message: "请求错误：" + e,
+            color: "red",
+        });
+        throw e;
+    }
+}
+
+// export const reviver = (key: string, value: any) => {
+//     if (typeof value === 'number') {
+//       return value.toString();
+//     }
+//     return value;
+//   };

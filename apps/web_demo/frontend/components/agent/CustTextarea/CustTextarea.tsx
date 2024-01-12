@@ -1,36 +1,22 @@
+import { addAgentConversationAPI } from "@/api/add_conversation";
 import { streamTestAPI } from "@/api/test";
+import { addAgentConversationState } from "@/stores/LocalStoreActions";
 import { Container, Flex, MantineStyleProp, rem, Text, Textarea } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { useState } from "react";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import { syncMessages } from "../AgentFrameUtil";
 
 type CustTextareaProps = {
-    setTest: React.Dispatch<React.SetStateAction<string | undefined>>;
+    conversationID: string | undefined;
+    isLoading: boolean;
+    callback: (value: string) => void;
 }
 
 export default function CustTextarea(props: CustTextareaProps) {
     const [value, setValue] = useState<string | undefined>();
-    const [isLoading, { open: loadingStart, close: loadingEnd }] = useDisclosure(false);  // 注册过程loading
+    const [popoverOpened, setPopoverOpened] = useState(false);
 
-    const doSubmit = async () => {
-        if (!isLoading) {
-          loadingStart()
-          // 并非新对话
-          if (value != undefined) {
-            let text = ""
-            await streamTestAPI(
-                value,
-                undefined,
-                (res) => {
-                    text += res.content
-                    props.setTest(text)
-                },
-                undefined
-              ).then();
-          }
-          setValue("");
-          loadingEnd()
-        }
-      };
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
         event.stopPropagation();
@@ -39,25 +25,40 @@ export default function CustTextarea(props: CustTextareaProps) {
             // 处于输入法选词状态，不做处理
           } else {
             event.preventDefault();
-            doSubmit();
+            if (value) {
+              setValue("")
+              props.callback(value);
+            }
           }
         }
       };
-      const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {setValue(event.target.value)};
+
+    const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {setValue(event.target.value)};
+
+    useEffect(() => {
+      if (popoverOpened && props.conversationID) {
+        syncMessages(props.conversationID)
+      }
+  }, [popoverOpened]);
 
     return (
-        <Textarea
-            maw="100%"
-            radius="md"
-            placeholder="Input placeholder"
-            autosize
-            minRows={2}
-            maxRows={4}
-            style={{ margin: rem(50) }}
-            onKeyDown={handleKeyDown}
-            onKeyUp={(e) => e.stopPropagation()}
-            onChange={handleChange}
-            value={value}
-        />
+      <div
+            onFocusCapture={() => setPopoverOpened(true)}
+            onBlurCapture={() => setPopoverOpened(false)}
+        >
+          <Textarea
+              maw="100%"
+              radius="md"
+              placeholder="Input placeholder"
+              autosize
+              minRows={2}
+              maxRows={7}
+              onKeyDown={handleKeyDown}
+              onKeyUp={(e) => e.stopPropagation()}
+              disabled={props.isLoading}
+              onChange={handleChange}
+              value={value}
+          />
+        </div>
     );
 }

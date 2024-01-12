@@ -1,0 +1,11 @@
+.agentFrame {
+    display: flex;
+    flex-wrap: nowrap;
+}
+
+.conversationFrame {
+    flex-grow: flex;
+    padding-left: rem(50px);
+    padding-right: rem(50px);
+    padding-bottom: rem(50px);
+}

@@ -4,8 +4,14 @@ syntax = "proto3";
 package Agent;
 
 service Agent {
-  rpc AgentStream (AgentRequest) returns (stream AgentResponse) {}
-  rpc AudioAndLip(AudioAndLipRequest) returns (AudioAndLipResponse);
+  rpc RpcAgentStream (AgentRequest) returns (stream AgentResponse) {}
+  rpc RpcAudioAndLip(AudioAndLipRequest) returns (AudioAndLipResponse);
+  rpc RpcAddConversation(AddConversationRequest) returns (AddConversationResponse);
+  rpc RpcUpdateConversationTitle(UpdateConversationTitleRequest) returns (UpdateConversationTitleResponse);
+  rpc RpcGetConversations(GetConversationsRequest) returns (GetConversationsResponse);
+  rpc RpcDeleteConversation(DeleteConversationRequest) returns (DeleteConversationResponse);
+  rpc RpcGetLastMsgId(GetLastMsgIdRequest) returns (GetLastMsgIdResponse);
+  rpc RpcGetMessages(GetMessagesRequest) returns (GetMessagesResponse);
 }
 
 message AgentRequest {
@@ -21,10 +27,63 @@ message AgentResponse {
 message AudioAndLipRequest {
   string text = 1;
   string voice = 2;
-  fixed32 speed = 3;
+  float speed = 3;
 }
 
 message AudioAndLipResponse {
   string audio_file = 1;
   string lips_data = 2;
+}
+
+message AddConversationRequest {
+  string user_id = 1;
+}
+
+message AddConversationResponse {
+  string conversation_id = 1;
+}
+
+message UpdateConversationTitleRequest {
+  string user_id = 1;
+  string conversation_id = 2;
+  string title = 3;
+}
+
+message UpdateConversationTitleResponse {
+  bool is_success = 1;
+}
+
+message GetConversationsRequest {
+  string user_id = 1;
+}
+
+message GetConversationsResponse {
+  repeated string conversations = 1;
+}
+
+message DeleteConversationRequest {
+  string user_id = 1;
+  string conversation_id = 2;
+}
+
+message DeleteConversationResponse {
+  bool is_success = 1;
+}
+
+message GetLastMsgIdRequest {
+  string user_id = 1;
+  string conversation_id = 2;
+}
+
+message GetLastMsgIdResponse {
+  string msg_id = 1;
+}
+
+message GetMessagesRequest {
+  string user_id = 1;
+  string conversation_id = 2;
+}
+
+message GetMessagesResponse {
+  repeated string messages = 1;
 }

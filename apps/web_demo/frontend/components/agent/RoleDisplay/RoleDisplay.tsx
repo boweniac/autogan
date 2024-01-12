@@ -1,15 +1,27 @@
-import { Button, Stack } from "@mantine/core";
+import { Button, SegmentedControl, Stack } from "@mantine/core";
 
 import classes from './RoleDisplay.module.css';
 // import { DefaultAvatar } from "../avatar/DefaultAvatar/DefaultAvatar2";
 
 import dynamic from 'next/dynamic'
-import { FunctionComponent } from "react";
+import { FunctionComponent, useEffect, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import DefaultAvatar from "../avatar/DefaultAvatar/DefaultAvatar";
+import { AudioAndLip } from "@/stores/TypeAudioAndLip";
+
+type RoleDisplayProps = {
+    morphTargetName: string;
+    audioAndLip: AudioAndLip | undefined;
+  }
 
 
-export default function RoleDisplay() {
+export default function RoleDisplay(props: RoleDisplayProps) {
+    const [morphTargetName, setMorphTargetName] = useState<string>("viseme_O");
+
+    useEffect(() => {
+        setMorphTargetName(props.morphTargetName)
+    }, [props.morphTargetName]);
+
     return (
         <Stack
             className={classes.roleDisplay}
@@ -25,7 +37,7 @@ export default function RoleDisplay() {
             {/* <Canvas>
                 <DefaultAvatar />
             </Canvas> */}
-            <DefaultAvatar />
+            <DefaultAvatar morphTargetName={morphTargetName} audioAndLip={props.audioAndLip}/>
         </Stack>
     );
 }

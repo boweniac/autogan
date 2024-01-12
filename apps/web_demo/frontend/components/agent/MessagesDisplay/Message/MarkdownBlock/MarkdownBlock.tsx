@@ -36,8 +36,10 @@ export default function MarkdownBlock(props: MarkdownBlockProps) {
   
     return (
       <div
-        style={{fontSize: rem(14)}}
-        // className={classes.message}
+        style={{
+          fontSize: rem(14),
+          wordBreak: 'break-all'
+        }}
         dangerouslySetInnerHTML={{ __html: htmlString() }}
       >
       </div>

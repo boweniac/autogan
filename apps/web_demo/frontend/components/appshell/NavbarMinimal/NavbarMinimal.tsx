@@ -15,7 +15,7 @@ import { MantineLogo } from '@mantinex/mantine-logo';
 import classes from './NavbarMinimal.module.css';
 import { useRouter } from 'next/router';
 import { LocalState, localStore } from '@/stores/LocalStore';
-import { updateActivePage } from '@/stores/LocalStoreActions';
+import { updateActivePageState } from '@/stores/LocalStoreActions';
 
 interface NavbarLinkProps {
   icon: typeof IconHome2;

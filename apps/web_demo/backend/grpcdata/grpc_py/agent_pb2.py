@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0b\x61gent.proto\x12\x05\x41gent\"I\n\x0c\x41gentRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\x03\x12\x17\n\x0f\x63onversation_id\x18\x02 \x01(\x03\x12\x0f\n\x07\x63ontent\x18\x03 \x01(\t\"\x1d\n\rAgentResponse\x12\x0c\n\x04text\x18\x01 \x01(\t\"@\n\x12\x41udioAndLipRequest\x12\x0c\n\x04text\x18\x01 \x01(\t\x12\r\n\x05voice\x18\x02 \x01(\t\x12\r\n\x05speed\x18\x03 \x01(\x07\"<\n\x13\x41udioAndLipResponse\x12\x12\n\naudio_file\x18\x01 \x01(\t\x12\x11\n\tlips_data\x18\x02 \x01(\t2\x8b\x01\n\x05\x41gent\x12<\n\x0b\x41gentStream\x12\x13.Agent.AgentRequest\x1a\x14.Agent.AgentResponse\"\x00\x30\x01\x12\x44\n\x0b\x41udioAndLip\x12\x19.Agent.AudioAndLipRequest\x1a\x1a.Agent.AudioAndLipResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0b\x61gent.proto\x12\x05\x41gent\"I\n\x0c\x41gentRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\x03\x12\x17\n\x0f\x63onversation_id\x18\x02 \x01(\x03\x12\x0f\n\x07\x63ontent\x18\x03 \x01(\t\"\x1d\n\rAgentResponse\x12\x0c\n\x04text\x18\x01 \x01(\t\"@\n\x12\x41udioAndLipRequest\x12\x0c\n\x04text\x18\x01 \x01(\t\x12\r\n\x05voice\x18\x02 \x01(\t\x12\r\n\x05speed\x18\x03 \x01(\x02\"<\n\x13\x41udioAndLipResponse\x12\x12\n\naudio_file\x18\x01 \x01(\t\x12\x11\n\tlips_data\x18\x02 \x01(\t\")\n\x16\x41\x64\x64\x43onversationRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\"2\n\x17\x41\x64\x64\x43onversationResponse\x12\x17\n\x0f\x63onversation_id\x18\x01 \x01(\t\"Y\n\x1eUpdateConversationTitleRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\x12\x17\n\x0f\x63onversation_id\x18\x02 \x01(\t\x12\r\n\x05title\x18\x03 \x01(\t\"5\n\x1fUpdateConversationTitleResponse\x12\x12\n\nis_success\x18\x01 \x01(\x08\"*\n\x17GetConversationsRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\"1\n\x18GetConversationsResponse\x12\x15\n\rconversations\x18\x01 \x03(\t\"E\n\x19\x44\x65leteConversationRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\x12\x17\n\x0f\x63onversation_id\x18\x02 \x01(\t\"0\n\x1a\x44\x65leteConversationResponse\x12\x12\n\nis_success\x18\x01 \x01(\x08\"?\n\x13GetLastMsgIdRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\x12\x17\n\x0f\x63onversation_id\x18\x02 \x01(\t\"&\n\x14GetLastMsgIdResponse\x12\x0e\n\x06msg_id\x18\x01 \x01(\t\">\n\x12GetMessagesRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\x12\x17\n\x0f\x63onversation_id\x18\x02 \x01(\t\"\'\n\x13GetMessagesResponse\x12\x10\n\x08messages\x18\x01 \x03(\t2\x9e\x05\n\x05\x41gent\x12?\n\x0eRpcAgentStream\x12\x13.Agent.AgentRequest\x1a\x14.Agent.AgentResponse\"\x00\x30\x01\x12G\n\x0eRpcAudioAndLip\x12\x19.Agent.AudioAndLipRequest\x1a\x1a.Agent.AudioAndLipResponse\x12S\n\x12RpcAddConversation\x12\x1d.Agent.AddConversationRequest\x1a\x1e.Agent.AddConversationResponse\x12k\n\x1aRpcUpdateConversationTitle\x12%.Agent.UpdateConversationTitleRequest\x1a&.Agent.UpdateConversationTitleResponse\x12V\n\x13RpcGetConversations\x12\x1e.Agent.GetConversationsRequest\x1a\x1f.Agent.GetConversationsResponse\x12\\\n\x15RpcDeleteConversation\x12 .Agent.DeleteConversationRequest\x1a!.Agent.DeleteConversationResponse\x12J\n\x0fRpcGetLastMsgId\x12\x1a.Agent.GetLastMsgIdRequest\x1a\x1b.Agent.GetLastMsgIdResponse\x12G\n\x0eRpcGetMessages\x12\x19.Agent.GetMessagesRequest\x1a\x1a.Agent.GetMessagesResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -29,6 +29,30 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _globals['_AUDIOANDLIPREQUEST']._serialized_end=192
   _globals['_AUDIOANDLIPRESPONSE']._serialized_start=194
   _globals['_AUDIOANDLIPRESPONSE']._serialized_end=254
-  _globals['_AGENT']._serialized_start=257
-  _globals['_AGENT']._serialized_end=396
+  _globals['_ADDCONVERSATIONREQUEST']._serialized_start=256
+  _globals['_ADDCONVERSATIONREQUEST']._serialized_end=297
+  _globals['_ADDCONVERSATIONRESPONSE']._serialized_start=299
+  _globals['_ADDCONVERSATIONRESPONSE']._serialized_end=349
+  _globals['_UPDATECONVERSATIONTITLEREQUEST']._serialized_start=351
+  _globals['_UPDATECONVERSATIONTITLEREQUEST']._serialized_end=440
+  _globals['_UPDATECONVERSATIONTITLERESPONSE']._serialized_start=442
+  _globals['_UPDATECONVERSATIONTITLERESPONSE']._serialized_end=495
+  _globals['_GETCONVERSATIONSREQUEST']._serialized_start=497
+  _globals['_GETCONVERSATIONSREQUEST']._serialized_end=539
+  _globals['_GETCONVERSATIONSRESPONSE']._serialized_start=541
+  _globals['_GETCONVERSATIONSRESPONSE']._serialized_end=590
+  _globals['_DELETECONVERSATIONREQUEST']._serialized_start=592
+  _globals['_DELETECONVERSATIONREQUEST']._serialized_end=661
+  _globals['_DELETECONVERSATIONRESPONSE']._serialized_start=663
+  _globals['_DELETECONVERSATIONRESPONSE']._serialized_end=711
+  _globals['_GETLASTMSGIDREQUEST']._serialized_start=713
+  _globals['_GETLASTMSGIDREQUEST']._serialized_end=776
+  _globals['_GETLASTMSGIDRESPONSE']._serialized_start=778
+  _globals['_GETLASTMSGIDRESPONSE']._serialized_end=816
+  _globals['_GETMESSAGESREQUEST']._serialized_start=818
+  _globals['_GETMESSAGESREQUEST']._serialized_end=880
+  _globals['_GETMESSAGESRESPONSE']._serialized_start=882
+  _globals['_GETMESSAGESRESPONSE']._serialized_end=921
+  _globals['_AGENT']._serialized_start=924
+  _globals['_AGENT']._serialized_end=1594
 # @@protoc_insertion_point(module_scope)

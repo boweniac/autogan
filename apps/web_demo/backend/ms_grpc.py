@@ -38,7 +38,7 @@ class Health(health_pb2_grpc.HealthServicer):
 
 
 class Agent(agent_pb2_grpc.AgentServicer):
-    def AgentStream(self, request, context):
+    def RpcAgentStream(self, request, context):
         try:
             user_id = request.user_id
             conversation_id = request.conversation_id
@@ -67,20 +67,80 @@ class Agent(agent_pb2_grpc.AgentServicer):
         except Exception as e:
             return HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-    def AudioAndLip(self, request, context):
+    def RpcAudioAndLip(self, request, context):
         text = request.text
         voice = request.voice
         speed = request.speed
 
         file_name, lips_data = generate_audio("LLM_CONFIG", "tts-1", text, voice, "mp3", speed)
 
-        # 读取 MP3 文件
-        # with open(audio_path, "rb") as file:
-        #     mp3_data = file.read()
-
         file_url = f"https://aibowen-base.boweniac.top/{file_name}"
 
         return agent_pb2.AudioAndLipResponse(audio_file=file_url, lips_data=lips_data)
+
+    def RpcAddConversation(self, request, context):
+        user_id = request.user_id
+
+        conversation_id = test_service.snowflake_id()
+
+        if storage.add_conversation(user_id, conversation_id):
+            return agent_pb2.AddConversationResponse(conversation_id="")
+        else:
+            return agent_pb2.AddConversationResponse(conversation_id=str(conversation_id))
+
+    def RpcUpdateConversationTitle(self, request, context):
+        user_id = request.user_id
+        conversation_id = request.conversation_id
+        title = request.title
+
+        storage.update_conversation_title(user_id, conversation_id, title)
+        return agent_pb2.UpdateConversationTitleResponse(is_success=True)
+
+    def RpcGetConversations(self, request, context):
+        user_id = request.user_id
+
+        conversations = storage.get_conversations(user_id)
+        return agent_pb2.GetConversationsResponse(conversations=conversations)
+
+    def RpcDeleteConversation(self, request, context):
+        user_id = request.user_id
+        conversation_id = request.conversation_id
+
+        storage.delete_conversation(user_id, conversation_id)
+        return agent_pb2.DeleteConversationResponse(is_success=True)
+
+    def RpcGetLastMsgId(self, request, context):
+        try:
+            user_id = request.user_id
+            conversation_id = request.conversation_id
+            if not user_id or not conversation_id:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                    detail="User ID and Conversation ID must not be empty")
+
+            if storage.user_conversation_permissions(user_id, conversation_id):
+                msg_id = storage.get_last_msg_id(conversation_id)
+                return agent_pb2.GetLastMsgIdResponse(msg_id=str(msg_id))
+            else:
+                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Conversation permissions are wrong")
+        except Exception as e:
+            return HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+    def RpcGetMessages(self, request, context):
+        try:
+            user_id = request.user_id
+            conversation_id = request.conversation_id
+            if not user_id or not conversation_id:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                    detail="User ID and Conversation ID must not be empty")
+
+            if storage.user_conversation_permissions(user_id, conversation_id):
+                messages = storage.get_messages(conversation_id)
+                return agent_pb2.GetMessagesResponse(messages=messages)
+            else:
+                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                                    detail="Conversation permissions are wrong")
+        except Exception as e:
+            return HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
 def serve():
