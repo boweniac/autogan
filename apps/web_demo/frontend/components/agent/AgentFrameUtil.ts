@@ -4,7 +4,7 @@ import { getConversationsAPI } from "@/api/get_conversations"
 import { getLastMsgIdAPI } from "@/api/get_last_msg_id"
 import { getMessagesAPI } from "@/api/get_messages"
 import { streamTestAPI } from "@/api/test"
-import { addAgentConversationMessageState, addAgentConversationState, clearConversationState, getAgentConversationMessageLastRemoteIDState, getAgentConversationState, updateAgentConversationMessageState, updateAgentConversationState, updateInitConversationRequest } from "@/stores/LocalStoreActions"
+import { addAgentConversationMessageState, addAgentConversationState, clearConversationState, getAgentConversationMessageLastRemoteIDState, getAgentConversationState, updateAgentConversationMessageState, updateAgentConversationState, updateCurrentAbortController, updateInitConversationRequest } from "@/stores/LocalStoreActions"
 import { Message } from "@/stores/TypeAgentChat"
 import { NextRouter } from "next/router"
 import { useState } from "react"
@@ -53,21 +53,33 @@ export const syncMessages = async (conversation_id: string) => {
 }
 
 export const AgentConversationSend = async (conversationID: string, value: string, speakText: (src: string)=> void) => {
+    const currentAbortController = new AbortController();
+    updateCurrentAbortController(currentAbortController)
+    const regex = /[.,，。；\/#!$%\^&\*;:{}=\-_`~()|\n\r]/g;
     let text = ""
+    let textSlice = ""
+    let hold = true
+    let coding = false
+    let sliceLength = 0
     let agent_name = ""
     let role = ""
     let uuid = ""
     await streamTestAPI(
         value, 
         conversationID,
-        undefined,
+        currentAbortController,
         (res) => {
             if (res) {
                 if (res.content == "[DONE]") {
-                    speakText(text)
+                    if (textSlice) {
+                        speakText(textSlice)
+                    }
                     text = ""
                     agent_name = ""
                     uuid = ""
+                    hold = true
+                    sliceLength = 0
+                    textSlice = ""
                 } else {
                     if (text == "") {
                         uuid = uuidv4()
@@ -82,6 +94,37 @@ export const AgentConversationSend = async (conversationID: string, value: strin
                         })
                     } else {
                         text += res.content
+
+                        if (res.content.includes('```')) {
+                            coding = !coding
+                            if (coding) {
+                                speakText(textSlice)
+                                hold = true
+                                sliceLength = 0
+                                textSlice = ""
+                            }
+                        }
+                        if (!coding) {
+                            textSlice += res.content
+                            sliceLength++
+                            console.log(`textSlice:`+JSON.stringify(textSlice));
+                            console.log(`sliceLength:`+JSON.stringify(sliceLength));
+                            console.log(`hold:`+JSON.stringify(hold));
+                            if (regex.test(res.content)) {
+                                console.log(`regex.test(res.content):`+JSON.stringify(regex.test(res.content)));
+                                if (sliceLength > 15) {
+                                    hold = false
+                                }
+    
+                            }
+                            console.log(`hold:`+JSON.stringify(hold));
+                            if (sliceLength > 15 && !hold && !coding) {
+                                speakText(textSlice)
+                                hold = true
+                                sliceLength = 0
+                                textSlice = ""
+                            }
+                        }
                         updateAgentConversationMessageState(conversationID, uuid, {content: text})
                     }
                 }

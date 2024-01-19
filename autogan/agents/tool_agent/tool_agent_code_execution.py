@@ -1,5 +1,5 @@
 from typing import Optional
-from autogan.agents.universal_agent import UniversalAgent, ToolFunctionUsage
+from autogan.agents.universal_agent import UniversalAgent, AgentType
 from autogan.tools.code_execution_tool import CodeExecution
 
 
@@ -30,7 +30,7 @@ class ToolAgentCodeExecution(UniversalAgent):
         super().__init__(
             name,
             duty=duty,
-            tool_function_usage=ToolFunctionUsage.ONLY
+            agent_type="TOOL"
         )
         self._code_execution = CodeExecution(work_dir)
 

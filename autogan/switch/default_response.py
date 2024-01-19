@@ -13,49 +13,38 @@ class DefaultResponse(ResponseProtocol):
     def __init__(self):
         self.conv_turns: int = 0
         self.req_msg_id: Optional[int] = None
-    def send(self, agent_name: str, gen: str, model: str, stream_mode: bool, index: int,
-             content: Optional[str], tokens: Optional[int], response: any, msg_id: Optional[int], task_id: Optional[int]):
+
+    def send(self, msg_id: int, task_id: int, requester_name: str, index: int, content_type: str,
+             content: str, completion_tokens: int, response: any):
         """default response function
         默认响应函数提供终端打印支持
         The default response function provides terminal printing support.
 
-        :param agent_name:
-        :param gen: Used to distinguish agent replies, deep thoughts, context compression, general summaries, clue summaries
-            用于区分 agent 回复、深思、压缩上下文、普通摘要、线索摘要
-            - main: agent replies
-            - idea: deep thoughts
-            - messages_summary: context compression
-            - text_summary: general summaries
-            - clue_summary: clue summaries
-            - system:
-            - tool:
-            - tool_call:
-        :param model:
-        :param stream_mode:
+        :param msg_id:
+        :param task_id:
+        :param requester_name:
         :param index: response sequence
+        :param content_type:
         :param content: completion content
-            生成内容
-        :param tokens: completion tokens
-            生成内容的 tokens
+        :param completion_tokens: completion tokens
         :param response: Respond to raw data
-            响应原始数据
         :return:
         """
-        if stream_mode:
+        if index > 0:
             end = ""
         else:
             end = "\n"
 
         if content:
-            if gen == "main":
+            if content_type == "main":
                 if index == 1:
-                    print(f"\n{agent_name}: ", end=end)
+                    print(f"\n{requester_name}: ", end=end)
                 print(content, end=end)
-            elif gen == "idea" or gen == "tool_call":
+            elif content_type == "idea" or content_type == "tool_call":
                 if index == 1:
                     print(
                         colored(
-                            f"\n{agent_name}: ",
+                            f"\n{requester_name}: ",
                             "cyan",
                         ),
                         end=end,
@@ -69,25 +58,25 @@ class DefaultResponse(ResponseProtocol):
                     end=end,
                     flush=True,
                 )
-            elif gen == "system":
+            elif content_type == "system":
                 print(
                     colored(
-                        f"\n{agent_name}: {content}",
+                        f"\n{requester_name}: {content}",
                         "red",
                     ),
                     end=end,
                     flush=True,
                 )
-            elif gen == "tool":
+            elif content_type == "tool":
                 print(
                     colored(
-                        f"\n{agent_name}: {content}",
+                        f"\n{requester_name}: {content}",
                         "blue",
                     ),
                     end=end,
                     flush=True,
                 )
-            elif gen == "search":
+            elif content_type == "search":
                 print(
                     colored(
                         f"\nurl: {content}",

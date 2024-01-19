@@ -1,32 +1,32 @@
+from enum import Enum
 from typing import Protocol, Optional
 
-from autogan.oai.config_utils import AgentConfig
-from autogan.protocol.response_protocol import ResponseProtocol
+from autogan.oai.chat_config_utils import AgentConfig
 from autogan.protocol.storage_protocol import StorageProtocol
+from autogan.oai.conv_holder import ConvHolder
 
-from autogan.utils.response import ResponseFuncType
-from autogan.utils.uuid_utils import SnowflakeIdGenerator
+
+class Language(Enum):
+    EN = "EN"
+    CN = "CN"
 
 
 class SwitchProtocol(Protocol):
     default_agent_config: AgentConfig
     task_tag: str
-    snowflake_id: SnowflakeIdGenerator
-    default_super_rich: Optional[str]
+    default_consider_mode: Optional[str]
     default_stream_mode: Optional[bool]
-    response: Optional[ResponseFuncType]
     storage: Optional[StorageProtocol]
+    default_language: Language
 
-    def handle_and_forward(self, conversation_id: int, task_id: int, pusher_name: str, content: str, response: ResponseProtocol,
-                           completion_tokens: Optional[int], msg_id: Optional[int]) -> None:
+    def handle_and_forward(self, conv_info: ConvHolder) -> None:
         pass
 
-    async def a_handle_and_forward(self, conversation_id: int, task_id: int, pusher_name: str, content: str, response: ResponseProtocol,
-                                   completion_tokens: Optional[int], msg_id: Optional[int]) -> None:
+    async def a_handle_and_forward(self, conv_info: ConvHolder) -> None:
         pass
 
-    def system_prompt(self, conversation_id: int, task_id: int, receiver: str, content: str, response: ResponseProtocol) -> None:
+    def system_alert(self, conv_info: ConvHolder) -> None:
         pass
 
-    async def a_system_prompt(self, conversation_id: int, task_id: int, receiver: str, content: str, response: ResponseProtocol) -> None:
+    async def a_system_alert(self, conv_info: ConvHolder) -> None:
         pass

@@ -24,7 +24,10 @@ class RedisStorage(StorageProtocol):
             return None
 
     def update_conversation_title(self, user_id: int, conversation_id: int, title: str):
-        self._redis.hset(f'user_convs_{user_id}', str(conversation_id), json.dumps({"id": conversation_id, "title": title}))
+        self._redis.hset(f'user_convs_{user_id}',
+                         str(conversation_id),
+                         json.dumps({"id": conversation_id, "title": title})
+                         )
 
     def delete_conversation(self, user_id: int, conversation_id: int):
         conversation_ids = [str(conversation_id)]
@@ -32,7 +35,6 @@ class RedisStorage(StorageProtocol):
 
     def get_conversations(self, user_id: int) -> Optional[list]:
         return self._redis.hvals(f'user_convs_{user_id}')
-
 
     def user_conversation_permissions(self, user_id: int, conversation_id: int) -> bool:
         is_existing = self._redis.hexists(f'user_convs_{user_id}', str(conversation_id))
@@ -72,8 +74,6 @@ class RedisStorage(StorageProtocol):
             return None
 
     def add_message(self, conversation_id: int, message: dict) -> None:
-        if message["agent_name"] == "客户":
-            message["role"] = "user"
         self._redis.rpush(f'conv_messages_{conversation_id}', json.dumps(message))
         self._redis.hset('conv_last_msg_id', str(conversation_id), message["id"])
 

@@ -8,7 +8,7 @@ from autogan.tools.wolfram_alpha_tool import WolframAlphaAPIWrapper
 
 from autogan.oai.count_tokens_utils import count_text_tokens
 
-from autogan.agents.universal_agent import UniversalAgent, ToolFunctionUsage
+from autogan.agents.universal_agent import UniversalAgent, AgentType
 from autogan.utils.compressed_text_utils import compressed_text_universal
 from autogan.tools.web_search_tool import WebSearch
 
@@ -89,7 +89,7 @@ Note: When you decide to use a tool, please do not @ anyone.""",
             agent_config=agent_config,
             duty=duty,
             work_flow=work_flow,
-            tool_function_usage=ToolFunctionUsage.JOIN
+            agent_type="TOOLMAN"
         )
         self._web_search = WebSearch(search_config["google_search"]) if "google_search" in search_config else None
         self._wolfram_alpha = WolframAlphaAPIWrapper(
@@ -130,7 +130,7 @@ one wolfram query
                 # Extract content related to the user's question from the webpage content.
                 compressed_text, total_tokens = compressed_text_universal(
                     detail, self.agent_config.summary_model_config, self._conversation_focus[task_id]['task_content'],
-                    self.agent_config.summary_model_config.max_messages_tokens)
+                    self.agent_config.summary_model_config.request_config.max_messages_tokens)
                 if compressed_text:
                     return compressed_text, total_tokens
             if i == loop - 1:

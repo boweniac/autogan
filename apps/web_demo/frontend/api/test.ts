@@ -3,11 +3,13 @@ import http from "http";
 import {notifications} from "@mantine/notifications";
 import axios, {AxiosProgressEvent, AxiosRequestConfig} from "axios";
 import {localStore} from "@/stores/LocalStore";
+import { getCurrentAbortController } from '@/stores/LocalStoreActions';
 
 const get = localStore.getState;
 
 export async function streamTestAPI(content: string, conversationID: string, abortController?: AbortController | undefined, callback?: ((res: any) => void) | undefined, endCallback?: (() => void) | undefined, errorCallback?: (() => void) | undefined): Promise<void>{
     try {
+        // abortController = getCurrentAbortController()
         const payload = JSON.stringify({
             user_id: 1,
             conversation_id: conversationID,
@@ -29,26 +31,35 @@ export async function streamTestAPI(content: string, conversationID: string, abo
                 if (res.statusCode === 200) {
                     res.on("data", (chunk) => {
                         if (abortController?.signal.aborted) {
+                            console.log(`点击成功，中断连接`);
+                            req.abort();
                             res.destroy();
                             endCallback?.();
                             return;
                         }
                         // 将响应拆分成单独的消息
                         let buffer = '';
-                        const allMessages = chunk.toString().split("\n\n\n");
+                        console.log(`chunk.toString():`+chunk.toString());
+                        const allMessages = chunk.toString().split("\\n\\n");
                         for (const message of allMessages) {
+                            console.log(`message.toString():`+message.toString());
                             buffer += message.toString();
+                            console.log(`buffer2.toString():`+buffer.toString());
                             // 切掉响应数据前缀
                             const cleaned = buffer.match(/(?<=data:).*$/s)?.toString();
+                            console.log(`cleaned:`+cleaned);
                             if (!cleaned || cleaned === " [DONE]") {
                                 return;
                             }
                             // 序列化
                             let parsed;
                             try {
+                                // const cleanedString = cleaned.replace(/\n|\r/g, "\\n");
+                                // parsed = JSON.parse(cleanedString);
                                 parsed = JSON.parse(cleaned);
                             } catch (e) {
-                                buffer += "\\n\\n\\n"
+                                buffer += "\n\n\n"
+                                console.log(`buffer1.toString():`+buffer.toString());
                                 console.error(e);
                                 continue;
                             }
@@ -57,8 +68,19 @@ export async function streamTestAPI(content: string, conversationID: string, abo
                         }
                     });
                     res.on("end", () => {
+                        console.log('请求结束');
                         endCallback?.();
                     });
+                    req.on('error', (e) => {
+                        if (e.name === 'AbortError') {
+                          console.log('请求被中断');
+                        } else {
+                          console.error(`请求出现问题: ${e.message}`);
+                        }
+                      });
+                    //   req.on('abort', () => {
+                    //     console.log('请求被中断事件触发');
+                    //   });
                 } else {
                     res.on("data", (chunk) => {
                         const data = JSON.parse(chunk)

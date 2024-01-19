@@ -1,37 +1,55 @@
 import json
-import os
-import time
-import uuid
 from typing import Optional, Dict
 
 import requests
 
+from autogan.oai.audio_config_utils import AudioSpeechRequestConfig
 
-def openai_audio_speech(model: str, input: str, voice: str, api_key: Dict, request_timeout: int, max_retries: int, work_dir: str, file_name: str, response_format: Optional[str] = "mp3",
-                            speed: Optional[float] = 1.0) -> bool:
-    url = "https://api.openai.com/v1/audio/speech"
 
+class AudioSpeechRequest:
+    def __init__(
+            self,
+            input_value: str,
+            model: Optional[str] = None,
+            voice: Optional[str] = None,
+            speed: Optional[float] = None,
+            response_format: Optional[str] = None,
+    ):
+        self.response_format = response_format if response_format else "mp3"
+        self.openai = self._openai(input_value, self.response_format, model, voice, speed)
+
+    @staticmethod
+    def _openai(input_value: str, response_format: str, model: Optional[str] = None, voice: Optional[str] = None,
+                speed: Optional[float] = None):
+        data = {
+            "model": model if model else "tts-1",
+            "response_format": response_format,
+            "input": input_value,
+            "voice": voice if voice else "onyx",
+            "speed": speed if speed else 1.0
+        }
+        return data
+
+    def openai_to_json(self):
+        return json.dumps(self.openai)
+
+
+def openai_audio_speech(api_key: Dict, request_config: AudioSpeechRequestConfig,
+                        request_data: AudioSpeechRequest) -> Optional[bytes]:
+    print(api_key['api_key'])
+    url = "https://api.openai.com/v1/audio/speech" if api_key["api_type"] == "openai" else api_key["url"]
+    print(url)
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {api_key['api_key']}",
     }
 
-    data = {
-        "model": model,
-        "input": input,
-        "voice": voice,
-        "response_format": response_format,
-        "speed": speed
-    }
+    data = request_data.openai_to_json()
 
-    response = requests.post(url, headers=headers, data=json.dumps(data), timeout=request_timeout)
-    for _ in range(max_retries):
-        print(f"response.status_code: {response.status_code}")
-        print(f"response.content: {response.content}")
+    response = requests.post(url, headers=headers, data=data, timeout=request_config.request_timeout)
+    for _ in range(request_config.max_retries):
         if response.status_code == 200:
-            with open(f"{work_dir}{file_name}.{response_format}", 'wb') as f:
-                f.write(response.content)
-            return True
+            return response.content
         else:
-            response = requests.post(url, headers=headers, data=json.dumps(data),timeout=request_timeout)
-    return False
+            response = requests.post(url, headers=headers, data=data, timeout=request_config.request_timeout)
+    return None

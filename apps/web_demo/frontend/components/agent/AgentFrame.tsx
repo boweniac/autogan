@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from 'next/router';
-import { Box, ScrollArea, SegmentedControl, Stack, rem } from "@mantine/core";
+import { Box, Button, ScrollArea, SegmentedControl, Stack, rem } from "@mantine/core";
 import CustTextarea from "@/components/agent/CustTextarea/CustTextarea";
 import { HeaderMegaMenu } from "@/components/agent/HeaderMegaMenu/HeaderMegaMenu";
 import { LeftTableOfContents } from "@/components/agent/LeftTableOfContents/LeftTableOfContents";
 import RoleDisplay from "@/components/agent/RoleDisplay/RoleDisplay";
 import MessagesDisplay from "@/components/agent/MessagesDisplay/MessagesDisplay";
-import { addAgentConversationState, burnAfterGetInitConversationRequest, getAgentConversationState, updateActivePageState } from "@/stores/LocalStoreActions";
+import { abortCurrentRequest, addAgentConversationState, burnAfterGetInitConversationRequest, getAgentConversationState, updateActivePageState, updateCurrentAbortController } from "@/stores/LocalStoreActions";
 import classes from './AgentFrame.module.css';
 import { useDisclosure } from "@mantine/hooks";
 import { addAgentConversationAPI } from "@/api/add_conversation";
@@ -18,7 +18,7 @@ import MessageFrame from "./MessagesDisplay/Message/MessageFrame";
 import {LocalState, localStore} from "@/stores/LocalStore";
 import { audioAndLipAPI } from "@/api/audio_and_lip";
 import AudioPlay from "./Audio/AudioPlay";
-import { AudioAndLip } from "@/stores/TypeAudioAndLip";
+import { AudioAndLip, MouthCues } from "@/stores/TypeAudioAndLip";
 
 
 export default function AgentFrame() {
@@ -32,10 +32,91 @@ export default function AgentFrame() {
     const [messages, setMessages] = useState<Message[]>([]);
     const [speakText, setSpeakText] = useState<string>("");
     const [audioAndLip, setAudioAndLip] = useState<AudioAndLip>();
+    const [lipValue, setLipValue] = useState<string>();
     const agentConversations = localStore((state: LocalState) => state.agentConversations);
     const agentConversation = agentConversations.find((agentConversations) => agentConversations.id == queryConversationID);
     const [morphTargetName, setMorphTargetName] = useState<string>("viseme_O");
+    const [textStack, setTextStack] = useState<string[]>([]);
+    const [audioStack, setAudioStack] = useState<AudioAndLip[]>([]);
+    const isGeting = useRef(false);
+    const isPlaying = useRef(false);
+    // const currentAbortController = new AbortController();
+    // updateCurrentAbortController(currentAbortController)
 
+    const getNextAudio = () => {
+        setTextStack(prevTextStack => {
+            console.log(`prevTextStack2:`+JSON.stringify(prevTextStack));
+            if (prevTextStack && prevTextStack.length > 0) {
+                isGeting.current = true
+                const [nextText, ...textRest] = prevTextStack;
+                console.log(`nextText:`+JSON.stringify(nextText));
+                getAudio(nextText);
+                console.log(`textRest:`+JSON.stringify(textRest));
+                return textRest
+            } else {
+                isGeting.current = false
+                return []
+            }
+          });
+      }
+
+      const getAudio = (audioLink: string) => {
+        audioAndLipAPI(audioLink, "onyx", 1).then((res)=>{
+            isGeting.current = false
+            getNextAudio()
+            setAudioStack(prevStack => [...prevStack, res]);
+            if (!isPlaying.current) {
+                playNextAudio();
+            }
+        })
+      }
+
+    const playNextAudio = () => {
+        setAudioStack(prevStack => {
+            if (prevStack && prevStack.length > 0) {
+                console.log(`prevStack:`+JSON.stringify(prevStack));
+                const [nextAudio, ...rest] = prevStack;
+                console.log(`nextAudio:`+JSON.stringify(nextAudio));
+                console.log(`rest:`+JSON.stringify(rest));
+                playAudio(nextAudio); // 播放下一个音频
+                return rest
+            } else {
+                isPlaying.current = false
+                return []
+            }
+          });
+      }
+
+      const playAudio = (audioLink: AudioAndLip) => {
+        const audio = new Audio(`${audioLink.audioFile}`)
+            audio.play()
+                .then(() => {
+                    isPlaying.current = true
+                    console.log("Audio is playing");
+                })
+                .catch(error => {
+                    isPlaying.current = false
+                    console.error("Error playing audio", error);
+                });
+                const handleTimeUpdate = () => {
+                    const currentTime = audio.currentTime;
+                    for (let i = 0; i < audioLink.lipsData.length; i++) {
+                        const lipsData = audioLink.lipsData[i] as MouthCues;
+                        if (currentTime >= lipsData.start && currentTime <= lipsData.end) {
+                            setLipValue(lipsData.value)
+                          break
+                        }
+                      }
+                };
+              audio.ontimeupdate = () => {
+                handleTimeUpdate();
+            };
+            audio.addEventListener('ended', () => {
+                console.log('音频播放结束');
+                playNextAudio();
+                // 在这里执行你需要的操作，比如播放下一个音频
+              });
+      }
     useEffect(() => {
         if (router.isReady) {
             if (queryConversationID != undefined && agentConversation == undefined) {
@@ -59,14 +140,17 @@ export default function AgentFrame() {
             // getConversations()
         }
     }, [router.isReady]);
+    
 
-    useEffect(() => {
-        if (speakText) {
-            audioAndLipAPI(speakText, "onyx", 1).then((res)=>{
-                setAudioAndLip(res)
-            })
-        }
-    }, [speakText]);
+    // useEffect(() => {
+    //     if (speakText) {
+    //         console.log(`speakText:`+JSON.stringify(speakText));
+    //         setTextStack(prevTextStack => [...prevTextStack, speakText])
+    //         if (!isGeting.current) {
+    //             getNextAudio();
+    //         }
+    //     }
+    // }, [speakText]);
 
 
     const doSubmit = async (value: string) => {
@@ -74,7 +158,18 @@ export default function AgentFrame() {
         if (queryConversationID == undefined) {
             addAgentConversation(value, router)
         } else {
-            AgentConversationSend(queryConversationID, value, setSpeakText)
+            AgentConversationSend(queryConversationID, value, (text)=>{
+                if (text) {
+                    console.log(`speakText:`+JSON.stringify(text));
+                    setTextStack(prevTextStack => {
+                        console.log(`prevTextStack:`+JSON.stringify(prevTextStack));
+                        return [...prevTextStack, text]
+                    })
+                    if (!isGeting.current) {
+                        getNextAudio();
+                    }
+                }
+            })
         }
       };
 
@@ -114,7 +209,12 @@ export default function AgentFrame() {
                     <CustTextarea conversationID={queryConversationID} isLoading={isLoading} callback={doSubmit} ></CustTextarea>
                 </Stack>
             </Stack>
-            <RoleDisplay morphTargetName={morphTargetName} audioAndLip={audioAndLip} />
+            <Button 
+                onClick={()=>{abortCurrentRequest()}} 
+            >
+            停止链接
+            </Button>
+            <RoleDisplay morphTargetName={morphTargetName} audioAndLip={audioAndLip} lipValue={lipValue}/>
             {/* <AudioPlay src={audioAndLip?.audioFile} onFinishedPlaying={()=>console.log(`播放完成`)} onPlaying={()=>{}}></AudioPlay> */}
             {/* <AudioPlay src={audioSrc} onFinishedPlaying={()=>console.log(`播放完成`)}></AudioPlay> */}
         </Box>

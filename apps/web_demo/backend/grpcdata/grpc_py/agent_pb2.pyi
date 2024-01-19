@@ -22,14 +22,16 @@ class AgentResponse(_message.Message):
     def __init__(self, text: _Optional[str] = ...) -> None: ...
 
 class AudioAndLipRequest(_message.Message):
-    __slots__ = ("text", "voice", "speed")
+    __slots__ = ("text", "model", "voice", "speed")
     TEXT_FIELD_NUMBER: _ClassVar[int]
+    MODEL_FIELD_NUMBER: _ClassVar[int]
     VOICE_FIELD_NUMBER: _ClassVar[int]
     SPEED_FIELD_NUMBER: _ClassVar[int]
     text: str
+    model: str
     voice: str
     speed: float
-    def __init__(self, text: _Optional[str] = ..., voice: _Optional[str] = ..., speed: _Optional[float] = ...) -> None: ...
+    def __init__(self, text: _Optional[str] = ..., model: _Optional[str] = ..., voice: _Optional[str] = ..., speed: _Optional[float] = ...) -> None: ...
 
 class AudioAndLipResponse(_message.Message):
     __slots__ = ("audio_file", "lips_data")
@@ -120,3 +122,35 @@ class GetMessagesResponse(_message.Message):
     MESSAGES_FIELD_NUMBER: _ClassVar[int]
     messages: _containers.RepeatedScalarFieldContainer[str]
     def __init__(self, messages: _Optional[_Iterable[str]] = ...) -> None: ...
+
+class AliyunStsRequest(_message.Message):
+    __slots__ = ("user_id",)
+    USER_ID_FIELD_NUMBER: _ClassVar[int]
+    user_id: str
+    def __init__(self, user_id: _Optional[str] = ...) -> None: ...
+
+class AliyunStsResponse(_message.Message):
+    __slots__ = ("access_key_id", "access_key_secret", "expiration", "security_token")
+    ACCESS_KEY_ID_FIELD_NUMBER: _ClassVar[int]
+    ACCESS_KEY_SECRET_FIELD_NUMBER: _ClassVar[int]
+    EXPIRATION_FIELD_NUMBER: _ClassVar[int]
+    SECURITY_TOKEN_FIELD_NUMBER: _ClassVar[int]
+    access_key_id: str
+    access_key_secret: str
+    expiration: str
+    security_token: str
+    def __init__(self, access_key_id: _Optional[str] = ..., access_key_secret: _Optional[str] = ..., expiration: _Optional[str] = ..., security_token: _Optional[str] = ...) -> None: ...
+
+class AudioToTextRequest(_message.Message):
+    __slots__ = ("user_id", "content")
+    USER_ID_FIELD_NUMBER: _ClassVar[int]
+    CONTENT_FIELD_NUMBER: _ClassVar[int]
+    user_id: str
+    content: bytes
+    def __init__(self, user_id: _Optional[str] = ..., content: _Optional[bytes] = ...) -> None: ...
+
+class AudioToTextResponse(_message.Message):
+    __slots__ = ("text",)
+    TEXT_FIELD_NUMBER: _ClassVar[int]
+    text: str
+    def __init__(self, text: _Optional[str] = ...) -> None: ...

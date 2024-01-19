@@ -10,11 +10,13 @@ from fastapi import FastAPI, WebSocket, Request
 from apps.web_demo.backend.response.stream import StreamResponse
 from apps.web_demo.backend.response.websocket import WebsocketResponse
 from apps.web_demo.backend.service.test_service import TestService
+from autogan.utils.uuid_utils import SnowflakeIdGenerator
 
 app = FastAPI()
 # data_queue = asyncio.Queue()
 storage = RedisStorage("172.17.0.1", 60101, 0)
-test_service = TestService("LLM_CONFIG", "off", True, storage)
+snowflake_id = SnowflakeIdGenerator(datacenter_id=1, worker_id=1)
+test_service = TestService("LLM_CONFIG", "auto", True, storage)
 
 
 @app.get("/add_conversation")
@@ -70,7 +72,8 @@ async def stream_route(request: Request):
             stream_response = StreamResponse(data_queue)
             try:
                 asyncio.create_task(
-                    test_service.a_receive(conversation_id, conversation_id, "客户", content, stream_response))
+                    test_service.a_receive(conversation_id, conversation_id, "Customer", content,
+                                           stream_response, snowflake_id))
                 return StreamingResponse(stream_response.a_receive(), media_type="text/event-stream")
             except asyncio.CancelledError:
                 stream_response.disconnected = True
@@ -101,7 +104,8 @@ async def websocket_endpoint(websocket: WebSocket):
             if storage.user_conversation_permissions(user_id, conversation_id):
                 # while True:
                 websocket_response = WebsocketResponse(websocket)
-                await test_service.a_receive(conversation_id, conversation_id, "客户", content, websocket_response)
+                await test_service.a_receive(conversation_id, conversation_id, "Customer", content,
+                                             websocket_response, snowflake_id)
             else:
                 raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Conversation permissions are wrong")
     except HTTPException as e:

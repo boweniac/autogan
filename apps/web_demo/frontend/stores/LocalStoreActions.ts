@@ -12,6 +12,19 @@ export const updateInitConversationRequest = (value: string) => {
     set(() => ({ initConversationRequest: value }));
 }
 
+export const updateCurrentAbortController = (abortController: AbortController | undefined) => {
+    set(() => ({ currentAbortController: abortController }));
+}
+
+export const getCurrentAbortController = () => {
+    return get().currentAbortController;
+  };
+
+export const abortCurrentRequest = () => {
+    const currentAbortController = get().currentAbortController;
+    if (currentAbortController?.abort) currentAbortController?.abort();
+  };
+
 export const burnAfterGetInitConversationRequest = () => {
     const initConversationRequest = get().initConversationRequest
     set(() => ({ initConversationRequest: "" }));

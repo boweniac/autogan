@@ -15,18 +15,18 @@ class TestService(UniversalService):
             storage: Optional[StorageProtocol] = None
     ):
         llm_config_dict = autogan.dict_from_json(default_agent_config)
-        human = autogan.HumanAgent("客户", "请帮助我完成业务", autogan.InputModel.API)
+        human = autogan.HumanAgent("Customer", "请帮助我完成业务", autogan.InputModel.API)
         human.pipeline = "\\"
-        cust_manager = autogan.UniversalAgent("客户经理", "负责接待客户", work_flow="""
+        cust_manager = autogan.UniversalAgent("CustomerManager", "负责接待客户", work_flow="""
 1. 你是一个富有经验的客户经理，请尽一切可能满足客户的合法需求。
 
 2. 如果没有正确答案，请明确告知，而不是给出错误结果""")
         search_config_dict = autogan.dict_from_json("SEARCH_CONFIG")
-        search_exp = autogan.ToolAgentSearch(search_config_dict, name="搜索专家")
+        search_exp = autogan.ToolAgentSearch(search_config_dict, name="SearchExpert")
         mail_config_dict = autogan.dict_from_json("MAIL_CONFIG")
-        secretary = autogan.ToolAgentMail(mail_config_dict, "秘书")
-        file_exp = autogan.ToolAgentFile(name="文件助手")
-        coder = autogan.UniversalAgent("程序员", duty="我可以编写 python 代码并执行", work_flow="""
+        secretary = autogan.ToolAgentMail(mail_config_dict, "Secretary")
+        file_exp = autogan.ToolAgentFile(name="FileAssistant")
+        coder = autogan.UniversalAgent("Coder", duty="我可以编写 python 代码并执行", work_flow="""
 1. 我希望你是一个有经验的Python程序员，将接收到的需求用代码来实现。不用管你自己是否有能力执行代码，因为 测试员 可以帮你执行。
 
 2. 你的代码需要先 @测试员，并将代码使用 ``` 符号封装，他会回复执行结果，例如：
@@ -34,7 +34,7 @@ class TestService(UniversalService):
 ```python
 Your code
 ```""")
-        test_staff = autogan.ToolAgentCodeExecution("测试员")
+        test_staff = autogan.ToolAgentCodeExecution("Tester")
 
         org_structure = [human, cust_manager, search_exp, secretary, file_exp, [coder, test_staff]]
 

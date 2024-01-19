@@ -1,12 +1,12 @@
 import sys
 from typing import Optional
 
-from autogan.protocol.response_protocol import ResponseProtocol
-
 from autogan.oai.count_tokens_utils import count_text_tokens
 
-from autogan.agents.universal_agent import UniversalAgent, ToolFunctionUsage
+from autogan.agents.universal_agent import UniversalAgent, AgentType
 from enum import Enum
+
+from autogan.oai.conv_holder import ConvHolder
 
 
 class InputModel(Enum):
@@ -31,29 +31,25 @@ class HumanAgent(UniversalAgent):
         super().__init__(
             name,
             duty=duty,
-            tool_function_usage=ToolFunctionUsage.ONLY
+            agent_type="HUMAN"
         )
         self._model = model
 
-    def new_task(self, conversation_id: int, task_id: int, sender_name: str, content: str, completion_tokens: int,
-                 response_proxy: ResponseProtocol):
+    def new_task(self, conv_info: ConvHolder):
         if self._model == InputModel.TERMINAL:
-            super().new_task(conversation_id, task_id, sender_name, content, completion_tokens, response_proxy)
+            super().new_task(conv_info)
 
-    async def a_new_task(self, conversation_id: int, task_id: int, sender_name: str, content: str,
-                         completion_tokens: int, response_proxy: ResponseProtocol):
+    async def a_new_task(self, conv_info: ConvHolder):
         if self._model == InputModel.TERMINAL:
-            await super().a_new_task(conversation_id, task_id, sender_name, content, completion_tokens, response_proxy)
+            await super().a_new_task(conv_info)
 
-    def receive(self, conversation_id: int, task_id: int, sender_name: str, content: str, completion_tokens: int,
-                response_proxy: ResponseProtocol):
+    def receive(self, conv_info: ConvHolder):
         if self._model == InputModel.TERMINAL:
-            super().receive(conversation_id, task_id, sender_name, content, completion_tokens, response_proxy)
+            super().receive(conv_info)
 
-    async def a_receive(self, conversation_id: int, task_id: int, sender_name: str, content: str, completion_tokens: int,
-                response_proxy: ResponseProtocol):
+    async def a_receive(self, conv_info: ConvHolder):
         if self._model == InputModel.TERMINAL:
-            await super().a_receive(conversation_id, task_id, sender_name, content, completion_tokens, response_proxy)
+            await super().a_receive(conv_info)
 
     def tool_function(self, task_id: int, param: Optional[str] = None,
                       tokens: Optional[int] = None) -> tuple[str, int]:
@@ -69,4 +65,3 @@ class HumanAgent(UniversalAgent):
                 sys.exit()
             except Exception as e:
                 sys.exit()
-

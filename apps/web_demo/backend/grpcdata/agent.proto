@@ -12,6 +12,8 @@ service Agent {
   rpc RpcDeleteConversation(DeleteConversationRequest) returns (DeleteConversationResponse);
   rpc RpcGetLastMsgId(GetLastMsgIdRequest) returns (GetLastMsgIdResponse);
   rpc RpcGetMessages(GetMessagesRequest) returns (GetMessagesResponse);
+  rpc RpcAliyunSts(AliyunStsRequest) returns (AliyunStsResponse);
+  rpc RpcAudioToText(AudioToTextRequest) returns (AudioToTextResponse);
 }
 
 message AgentRequest {
@@ -26,8 +28,9 @@ message AgentResponse {
 
 message AudioAndLipRequest {
   string text = 1;
-  string voice = 2;
-  float speed = 3;
+  string model = 2;
+  string voice = 3;
+  float speed = 4;
 }
 
 message AudioAndLipResponse {
@@ -87,3 +90,24 @@ message GetMessagesRequest {
 message GetMessagesResponse {
   repeated string messages = 1;
 }
+
+message AliyunStsRequest {
+  string user_id = 1;
+}
+
+message AliyunStsResponse {
+  string access_key_id = 1;
+  string access_key_secret = 2;
+  string expiration = 3;
+  string security_token = 4;
+}
+
+message AudioToTextRequest {
+  string user_id = 1;
+  bytes content = 2;
+}
+
+message AudioToTextResponse {
+  string text = 1;
+}
+

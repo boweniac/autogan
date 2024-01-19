@@ -6,6 +6,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { syncMessages } from "../AgentFrameUtil";
+import RecordButton from "./AudioToText/AudioToText";
 
 type CustTextareaProps = {
     conversationID: string | undefined;
@@ -46,6 +47,7 @@ export default function CustTextarea(props: CustTextareaProps) {
             onFocusCapture={() => setPopoverOpened(true)}
             onBlurCapture={() => setPopoverOpened(false)}
         >
+          <RecordButton></RecordButton>
           <Textarea
               maw="100%"
               radius="md"

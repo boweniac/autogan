@@ -1,15 +1,18 @@
 import math
 import re
 from typing import Optional, List
-from autogan.oai.config_utils import LLMConfig
+
+from autogan.oai.chat_api_utils import ChatCompletionsRequest
+from autogan.oai.chat_config_utils import LLMConfig
 from autogan.oai.count_tokens_utils import count_text_tokens
-from autogan.protocol.response_protocol import ResponseProtocol
 from autogan.utils.environment_utils import environment_info
 from autogan.oai.chat_generate_utils import generate_chat_completion_internal
 
 
-def compressed_text_universal(text: str, summary_model_config: LLMConfig, focus: Optional[str] = None, safe_size: Optional[int] = None) \
-        -> tuple[Optional[str], Optional[int]]:
+def compressed_text_universal(text: str,
+                              summary_model_config: LLMConfig,
+                              focus: Optional[str] = None,
+                              safe_size: Optional[int] = None) -> tuple[Optional[str], Optional[int]]:
     """Compress the text, generating either a regular summary or a cue summary.
     压缩文本，可生成普通摘要或线索摘要。
 
@@ -26,10 +29,6 @@ def compressed_text_universal(text: str, summary_model_config: LLMConfig, focus:
         待压缩的文本。
     :param summary_model_config: LLM configuration used for text compression.
         用于压缩文本的 LLM 配置。
-    :param agent_name:
-    :param response: Used to return results to the interface or terminal.
-        用于向接口或终端返回结果
-    :param stream_mode:
     :param focus: The focus direction when compressing text.
         压缩文本时的专注方向。
     :param safe_size: The target size of the text after compression, if not provided there is no limit.
@@ -45,7 +44,7 @@ def compressed_text_universal(text: str, summary_model_config: LLMConfig, focus:
     compressed_text = ""
     total_tokens = 0
 
-    split_texts = split_text(text, summary_model_config.max_messages_tokens, summary_model_config.model)
+    split_texts = split_text(text, summary_model_config.request_config.max_messages_tokens, summary_model_config.model)
 
     for st in split_texts:
         if focus:
@@ -83,10 +82,6 @@ def compressed_text_into_safe_size(text: str, safe_size: int, summary_model_conf
         文本压缩后的目标尺寸。
     :param summary_model_config: LLM configuration used for text compression.
         用于压缩文本的 LLM 配置。
-    :param agent_name:
-    :param response: Used to return results to the interface or terminal.
-        用于向接口或终端返回结果
-    :param stream_mode:
 
 
     :return:
@@ -99,7 +94,7 @@ def compressed_text_into_safe_size(text: str, safe_size: int, summary_model_conf
     compressed_text = ""
     total_tokens = 0
 
-    split_texts = split_text(text, summary_model_config.max_messages_tokens, summary_model_config.model)
+    split_texts = split_text(text, summary_model_config.request_config.max_messages_tokens, summary_model_config.model)
 
     # Calculate the approximate size of the text slices proportionally
     split_safe_size = int(safe_size / len(split_texts))
@@ -126,10 +121,6 @@ def generate_text_summary(text: str, summary_model_config: LLMConfig, safe_size:
         待压缩的文本。
     :param summary_model_config: LLM configuration used for text compression.
         用于压缩文本的 LLM 配置。
-    :param agent_name:
-    :param response: Used to return results to the interface or terminal.
-        用于向接口或终端返回结果
-    :param stream_mode:
     :param safe_size: The target size of the text after compression, if not provided there is no limit.
         文本压缩后的目标尺寸，如果为空则不做限制。
 
@@ -162,8 +153,8 @@ Please note that the perspective and chapter structure of the extracted content 
         # chat_prompt = f"文章内容：\n{text}"
 
     chat_messages = [{'role': 'system', 'content': system_prompt}, {'role': 'user', 'content': chat_prompt}]
-
-    return generate_chat_completion_internal(summary_model_config, chat_messages)
+    request_data = ChatCompletionsRequest(chat_messages, False)
+    return generate_chat_completion_internal(summary_model_config, request_data)
 
 
 def generate_text_clues(text: str, focus: str, summary_model_config: LLMConfig) -> tuple[str, int]:
@@ -176,10 +167,6 @@ def generate_text_clues(text: str, focus: str, summary_model_config: LLMConfig) 
         压缩文本时的专注方向。
     :param summary_model_config: LLM configuration used for text compression.
         用于压缩文本的 LLM 配置。
-    :param agent_name:
-    :param response: Used to return results to the interface or terminal.
-        用于向接口或终端返回结果
-    :param stream_mode:
 
     :return:
         --compressed_text: The text after compression.
@@ -196,8 +183,8 @@ Please note that if the content of the information has no extractable value, ple
     chat_messages = [{'role': 'system', 'content': system_prompt}, {'role': 'user',
                                                                     'content': f'The current question is:{focus}\n\nEnvironmental information:\n{info}\n\nMaterial content:\n\n{text}'}]
     # chat_messages = [{'role': 'user', 'content': f'当前的问题是：{focus}\n\n环境信息：\n{info}\n\n资料内容：\n\n{text}'}]
-
-    return generate_chat_completion_internal(summary_model_config, chat_messages)
+    request_data = ChatCompletionsRequest(chat_messages, False)
+    return generate_chat_completion_internal(summary_model_config, request_data)
 
 
 def split_text(text: str, split_size: int, model: Optional[str] = None) -> List[str]:

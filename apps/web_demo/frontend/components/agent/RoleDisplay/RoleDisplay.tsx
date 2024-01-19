@@ -12,6 +12,7 @@ import { AudioAndLip } from "@/stores/TypeAudioAndLip";
 type RoleDisplayProps = {
     morphTargetName: string;
     audioAndLip: AudioAndLip | undefined;
+    lipValue: string | undefined
   }
 
 
@@ -37,7 +38,7 @@ export default function RoleDisplay(props: RoleDisplayProps) {
             {/* <Canvas>
                 <DefaultAvatar />
             </Canvas> */}
-            <DefaultAvatar morphTargetName={morphTargetName} audioAndLip={props.audioAndLip}/>
+            <DefaultAvatar morphTargetName={morphTargetName} audioAndLip={props.audioAndLip} lipValue={props.lipValue}/>
         </Stack>
     );
 }

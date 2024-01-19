@@ -5,6 +5,8 @@ import { AgentConversation } from "./TypeAgentChat";
 export const excludeFromState = [
     "appName",
     "activePage",
+
+    "currentAbortController",
 ];
 
 export interface LocalState {
@@ -16,6 +18,8 @@ export interface LocalState {
 
     initConversationRequest: string;
     agentConversations: AgentConversation[];
+
+    currentAbortController: AbortController | undefined;
 }
 
 export const initialState = {
@@ -27,6 +31,8 @@ export const initialState = {
     
     initConversationRequest: "",
     agentConversations: [],
+
+    currentAbortController: undefined,
 }
 
 const store = () => ({ ...initialState } as LocalState);

@@ -4,7 +4,7 @@ from autogan.tools.code_execution_tool import CodeExecution
 
 from autogan.utils.json_utils import text_to_json
 
-from autogan.agents.universal_agent import UniversalAgent, ToolFunctionUsage
+from autogan.agents.universal_agent import UniversalAgent, AgentType
 from autogan.oai.count_tokens_utils import count_text_tokens
 from autogan.tools.file_tool import File
 
@@ -75,7 +75,7 @@ Note: When you decide to use a tool, please do not @ anyone.""",
             agent_config=agent_config,
             duty=duty,
             work_flow=work_flow,
-            tool_function_usage=ToolFunctionUsage.JOIN
+            agent_type="TOOLMAN"
         )
         self._file = File(work_dir)
 

@@ -1,11 +1,13 @@
 import json
 from typing import Dict, Optional, List
+
+from autogan.oai.chat_api_utils import ChatCompletionsRequest
 from autogan.oai.chat_generate_utils import generate_chat_completion_internal
-from autogan.oai.config_utils import LLMConfig
-from autogan.protocol.response_protocol import ResponseProtocol
+from autogan.oai.chat_config_utils import LLMConfig
 
 
-def compressed_messages(messages: List[Dict], focus: str, summary_model_config: LLMConfig, safe_size: Optional[int] = 4096) -> tuple[Optional[list], Optional[list], Optional[int]]:
+def compressed_messages(messages: List[Dict], focus: str, summary_model_config: LLMConfig,
+                        safe_size: Optional[int] = 4096) -> tuple[Optional[list], Optional[list], Optional[int]]:
     """Compress Conversation Context
     压缩会话上下文
 
@@ -42,10 +44,6 @@ def compressed_messages(messages: List[Dict], focus: str, summary_model_config: 
         压缩远期会话记录时的专注方向
     :param summary_model_config: The LLM model configuration used to compress distant conversation records
         用于压缩远期会话记录的 LLM 模型配置
-    :param agent_name:
-    :param response: Used to return results to the interface or terminal.
-        用于向接口或终端返回结果
-    :param stream_mode:
     :param safe_size: 'max_messages_tokens' of 'agent main model' minus the tokens of 'system message' and 'focus message'. When 'safe_size' is less than 0, it will be forcibly defined as 1024
         agent main model 的 max_messages_tokens 减去 system message 和 focus message 的 tokens，当 safe_size 小于 0 时，将被强制定义为 1024
 
@@ -104,7 +102,8 @@ def compressed_messages(messages: List[Dict], focus: str, summary_model_config: 
         return None, None, None
 
 
-def generate_messages_summary(messages: List[Dict], focus: str, summary_model_config: LLMConfig, summary_size: int) -> tuple[str, int]:
+def generate_messages_summary(messages: List[Dict], focus: str, summary_model_config: LLMConfig,
+                              summary_size: int) -> tuple[str, int]:
     """Generate message summary
     生成消息摘要
 
@@ -123,10 +122,7 @@ def generate_messages_summary(messages: List[Dict], focus: str, summary_model_co
         生成摘要时的专注方向
     :param summary_model_config: The LLM model configuration for compressing long-term conversation records
         用于压缩远期会话记录的 LLM 模型配置
-    :param agent_name:
-    :param response: Used to return results to the interface or terminal.
-        用于向接口或终端返回结果
-    :param stream_mode:
+    :param summary_size:
 
     :return:
         --content: Compressed content
@@ -134,7 +130,19 @@ def generate_messages_summary(messages: List[Dict], focus: str, summary_model_co
         --tokens: tokens of compressed content
             压缩内容的tokens
     """
-    system_prompt = "Please make a concise summary based on the following historical information. Make sure your summary does not exceed the max_tokens limit. And when summarizing, please focus on the latest message sent by the user."
+    system_prompt = """# role
+You are a professional conference secretary, skilled in summarizing conference content.
+
+## Skills
+### Skills 1: Targeted Summary
+Each meeting has a core topic. When summarizing the content, attention should be focused on the core topic.
+
+### Skills 2: Content Compression
+Each meeting summary has a word limit. The summarized content needs to be compressed to within max_tokens.
+
+## Constraints
+- This is a serious professional meeting, please only output the summarized conference content.
+- Do not greet or interact with others, for example, do not reply: hello, I understand, etc."""
     # system_prompt = "请根据以下的历史信息，进行简洁的总结。请确保您的总结不超过 max_tokens 的限制。并且在总结时，请将你的关注点集中在用户最新发送的消息上。"
 
     summary_messages = []
@@ -142,13 +150,24 @@ def generate_messages_summary(messages: List[Dict], focus: str, summary_model_co
     # 反向遍历 message 提取内容
     for index, message in enumerate(reversed(messages)):
         tokens = message["tokens"]
-        if total_tokens + tokens > summary_model_config.max_messages_tokens and index != 0:
+        if total_tokens + tokens > summary_model_config.request_config.max_messages_tokens and index != 0:
             break
         message_copy = message.copy()
         message_copy.pop('tokens', None)
         summary_messages.insert(0, message_copy)
         total_tokens += tokens
     # 设置用户提示词
-    user_prompt = f"""max_tokens: {summary_size}\n\nHistorical information: {json.dumps(summary_messages)}\n\nUser's latest message: {focus}"""
+    user_prompt = f"""The following are the conference-related content and requirements, please help me to summarize.
+    
+# core topic
+{focus}
+
+# max_tokens
+{summary_size}
+
+# conference content
+{json.dumps(summary_messages)}"""
+
     chat_messages = [{'role': 'system', 'content': system_prompt}, {'role': 'user', 'content': user_prompt}]
-    return generate_chat_completion_internal(summary_model_config, chat_messages)
+    request_data = ChatCompletionsRequest(chat_messages, False)
+    return generate_chat_completion_internal(summary_model_config, request_data)

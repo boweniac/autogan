@@ -1,7 +1,7 @@
-import os
 import threading
+from pydub import AudioSegment
+from apps.web_demo.backend.utils.aliyun_nls import TestSr
 
-import autogan
 import consul
 from concurrent import futures
 import grpc
@@ -14,8 +14,10 @@ from fastapi import HTTPException, FastAPI
 from starlette import status
 
 from apps.web_demo.backend.service.test_service import TestService
-from apps.web_demo.backend.util.aliyun_oss import bucket
+from apps.web_demo.backend.utils.aliyun_oss import Sample
+from autogan.oai.audio_api_utils import AudioSpeechRequest
 from autogan.oai.audio_generate_utils import generate_audio
+from autogan.utils.uuid_utils import SnowflakeIdGenerator
 from grpcdata.grpc_py import agent_pb2_grpc, agent_pb2
 from grpcdata.grpc_py import helloworld_pb2
 from grpcdata.grpc_py import helloworld_pb2_grpc
@@ -24,6 +26,7 @@ from grpcdata.grpc_py import health_pb2_grpc
 
 app = FastAPI()
 storage = RedisStorage("172.17.0.1", 60101, 0)
+snowflake_id = SnowflakeIdGenerator(datacenter_id=1, worker_id=1)
 test_service = TestService("LLM_CONFIG", "off", True, storage)
 
 
@@ -51,7 +54,7 @@ class Agent(agent_pb2_grpc.AgentServicer):
                 stop_event = threading.Event()
                 stream_response = GrpcResponse(data_queue, stop_event)
                 test_thread = threading.Thread(target=test_service.receive, args=(
-                    conversation_id, conversation_id, "客户", content, stream_response))
+                    conversation_id, conversation_id, "Customer", content, stream_response, snowflake_id))
                 test_thread.start()
                 while True:
                     while not data_queue.empty():
@@ -69,10 +72,13 @@ class Agent(agent_pb2_grpc.AgentServicer):
 
     def RpcAudioAndLip(self, request, context):
         text = request.text
+        model = request.model
         voice = request.voice
         speed = request.speed
 
-        file_name, lips_data = generate_audio("LLM_CONFIG", "tts-1", text, voice, "mp3", speed)
+        audio_speech_request = AudioSpeechRequest(text, model, voice, speed)
+
+        file_name, lips_data = generate_audio(audio_speech_request)
 
         file_url = f"https://aibowen-base.boweniac.top/{file_name}"
 
@@ -81,7 +87,7 @@ class Agent(agent_pb2_grpc.AgentServicer):
     def RpcAddConversation(self, request, context):
         user_id = request.user_id
 
-        conversation_id = test_service.snowflake_id()
+        conversation_id = snowflake_id.next_id()
 
         if storage.add_conversation(user_id, conversation_id):
             return agent_pb2.AddConversationResponse(conversation_id="")
@@ -141,6 +147,32 @@ class Agent(agent_pb2_grpc.AgentServicer):
                                     detail="Conversation permissions are wrong")
         except Exception as e:
             return HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+    def RpcAliyunSts(self, request, context):
+        try:
+            user_id = request.user_id
+            assumeRoleResponse = Sample.main()
+            return agent_pb2.AliyunStsResponse(access_key_id=assumeRoleResponse.access_key_id,
+                                               access_key_secret=assumeRoleResponse.access_key_secret,
+                                               expiration=assumeRoleResponse.expiration,
+                                               security_token=assumeRoleResponse.security_token)
+        except Exception as e:
+            return HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+    def RpcAudioToText(self, request, context):
+        file_content = request.content
+
+        # 这里可以添加保存文件的逻辑
+        with open("file_name.mp4", "wb") as f:
+            f.write(file_content)
+
+        audio = AudioSegment.from_file("file_name.mp4", format="mp4")
+        audio.export("file_name.wav", format="wav")
+        # token = nls_token()
+        name = "thread" + str(1)
+        t = TestSr(name, "file_name.wav")
+        t.start()
+        return agent_pb2.AudioToTextResponse(text="assumeRoleResponse.access_key_id")
 
 
 def serve():

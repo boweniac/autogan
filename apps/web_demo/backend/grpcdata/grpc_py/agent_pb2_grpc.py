@@ -54,6 +54,16 @@ class AgentStub(object):
                 request_serializer=agent__pb2.GetMessagesRequest.SerializeToString,
                 response_deserializer=agent__pb2.GetMessagesResponse.FromString,
                 )
+        self.RpcAliyunSts = channel.unary_unary(
+                '/Agent.Agent/RpcAliyunSts',
+                request_serializer=agent__pb2.AliyunStsRequest.SerializeToString,
+                response_deserializer=agent__pb2.AliyunStsResponse.FromString,
+                )
+        self.RpcAudioToText = channel.unary_unary(
+                '/Agent.Agent/RpcAudioToText',
+                request_serializer=agent__pb2.AudioToTextRequest.SerializeToString,
+                response_deserializer=agent__pb2.AudioToTextResponse.FromString,
+                )
 
 
 class AgentServicer(object):
@@ -107,6 +117,18 @@ class AgentServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def RpcAliyunSts(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def RpcAudioToText(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_AgentServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -149,6 +171,16 @@ def add_AgentServicer_to_server(servicer, server):
                     servicer.RpcGetMessages,
                     request_deserializer=agent__pb2.GetMessagesRequest.FromString,
                     response_serializer=agent__pb2.GetMessagesResponse.SerializeToString,
+            ),
+            'RpcAliyunSts': grpc.unary_unary_rpc_method_handler(
+                    servicer.RpcAliyunSts,
+                    request_deserializer=agent__pb2.AliyunStsRequest.FromString,
+                    response_serializer=agent__pb2.AliyunStsResponse.SerializeToString,
+            ),
+            'RpcAudioToText': grpc.unary_unary_rpc_method_handler(
+                    servicer.RpcAudioToText,
+                    request_deserializer=agent__pb2.AudioToTextRequest.FromString,
+                    response_serializer=agent__pb2.AudioToTextResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -293,5 +325,39 @@ class Agent(object):
         return grpc.experimental.unary_unary(request, target, '/Agent.Agent/RpcGetMessages',
             agent__pb2.GetMessagesRequest.SerializeToString,
             agent__pb2.GetMessagesResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def RpcAliyunSts(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/Agent.Agent/RpcAliyunSts',
+            agent__pb2.AliyunStsRequest.SerializeToString,
+            agent__pb2.AliyunStsResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def RpcAudioToText(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/Agent.Agent/RpcAudioToText',
+            agent__pb2.AudioToTextRequest.SerializeToString,
+            agent__pb2.AudioToTextResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
