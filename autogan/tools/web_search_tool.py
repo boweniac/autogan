@@ -40,7 +40,7 @@ class WebSearch:
             return None
 
         url = result[0]["link"]
-
+        print(url)
         # Obtain the main content of the URL page
         response = requests.get(url)
         response.encoding = response.apparent_encoding
@@ -49,7 +49,7 @@ class WebSearch:
 
         # Remove extra line breaks
         s = re.sub('\n+', '\n', main_text)
-
+        # print(s)
         if s:
             return s
         else:
@@ -69,9 +69,9 @@ class WebSearch:
 
         # 接口参数
         url = "https://www.googleapis.com/customsearch/v1"
-
+        print(f"quote(keyword): {quote(keyword)}")
         params = {
-            'q': quote(keyword),
+            'q': keyword,
             'start': start,
             'num': num,
             'cx': self._cx,

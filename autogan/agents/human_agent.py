@@ -51,14 +51,14 @@ class HumanAgent(UniversalAgent):
         if self._model == InputModel.TERMINAL:
             await super().a_receive(conv_info)
 
-    def tool_function(self, task_id: int, param: Optional[str] = None,
-                      tokens: Optional[int] = None) -> tuple[str, int]:
+    def tool_function(self, task_id: int, lang: Optional[str] = None, code: Optional[str] = None,
+                      tokens: Optional[int] = None) -> tuple[str, int, str, str]:
         if self._model == InputModel.TERMINAL:
             try:
                 reply = input("Please enter: ")
                 if reply:
                     tokens = count_text_tokens(reply)
-                    return reply, tokens
+                    return reply, tokens, "", ""
                 else:
                     sys.exit()
             except KeyboardInterrupt:

@@ -9,9 +9,20 @@ export interface AgentConversation {
 export interface Message {
     task_id?: string | undefined;
     localID?: string | undefined;
-    id?: string | undefined;
+    msg_id?: string | undefined;
     agent_name?: string | undefined;
-    role?: string | undefined;
+    message_blocks: MessageBlock[];
+}
+
+export interface MessageBlock {
+    task_id?: string | undefined;
+    localID?: string | undefined;
+    msg_id?: string | undefined;
+    agent_name?: string | undefined;
+    content_type?: string | undefined;
+    content_tag?: string | undefined;
     content?: string | undefined;
     tokens?: number | undefined;
-  }
+    add_document_progress?: number | undefined;
+    text_to_vectors_progress?: number | undefined;
+}

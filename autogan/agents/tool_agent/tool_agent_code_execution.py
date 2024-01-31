@@ -34,10 +34,10 @@ class ToolAgentCodeExecution(UniversalAgent):
         )
         self._code_execution = CodeExecution(work_dir)
 
-    def tool_function(self, task_id: int, param: Optional[str] = None,
+    def tool_function(self, task_id: int, lang: Optional[str] = None, code: Optional[str] = None,
                       tokens: Optional[int] = None) -> tuple[str, int]:
         try:
-            execution_result, tokens = self._code_execution.code_execution_reply(param)
+            execution_result, tokens = self._code_execution.code_execution_reply(code)
             if execution_result:
                 return execution_result, tokens
             else:

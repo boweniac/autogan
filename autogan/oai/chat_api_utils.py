@@ -39,6 +39,7 @@ def chat_completions(api_key: Dict, request_config: LLMRequestConfig, request_da
         :param request_config: request configuration.
         :param request_data:
     """
+    print(api_key)
     if api_key["api_type"] == "openai" or api_key["api_type"] == "azure":
         return openai_chat_completions(api_key, request_config, request_data)
     else:
@@ -107,12 +108,12 @@ def openai_like_chat_completions(api_key: Dict, request_config: LLMRequestConfig
         headers['Authorization'] = api_key["Authorization"]
 
     data = request_data.openai_to_json(api_key["model"])
-    print(f"request_data: {data}")
+
     if request_data.stream_mode:
         with requests.post(api_key["url"], headers=headers, data=data,
                            timeout=request_config.request_timeout,
                            stream=True) as response:
-            if response.status_code == 200:
+            if response and response.status_code == 200:
                 for line in response.iter_lines():
                     if line:
                         line_str = line.decode('utf-8')
@@ -133,4 +134,5 @@ def openai_like_chat_completions(api_key: Dict, request_config: LLMRequestConfig
             else:
                 response = requests.post(api_key["url"], headers=headers, data=data,
                                          timeout=request_config.request_timeout)
+        print("end")
         return None

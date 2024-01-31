@@ -1,0 +1,37 @@
+.roleDisplay {
+    height: 100%;
+    /* width: calc(200vw - rem(440px)); */
+    width: 100%;
+    flex-shrink: 0;
+}
+
+.space {
+    width: calc(100vw/13);;
+}
+
+.title {
+    font-family:
+      Greycliff CF,
+      var(--mantine-font-family);
+    /* margin-top: rem(200px); */
+    /* padding-top: calc(100vh/20); */
+    font-size: calc(100vw/13);
+    font-weight: 900;
+    line-height: 1.1;
+    /* margin: 0;
+    padding: 0; */
+    color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
+  
+    /* @media (max-width: $mantine-breakpoint-sm) {
+      font-size: rem(42px);
+      line-height: 1.2;
+    } */
+  }
+
+  .controls {
+    margin-top: calc(var(--mantine-spacing-xl) * 2);
+  
+    @media (max-width: $mantine-breakpoint-sm) {
+      margin-top: var(--mantine-spacing-xl);
+    }
+  }

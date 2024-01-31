@@ -1,5 +1,9 @@
 import tiktoken
 from typing import Optional
+import nltk
+
+nltk.download('punkt')
+from nltk.tokenize import word_tokenize
 
 
 def count_text_tokens(text: str, model: Optional[str] = "gpt-3.5-turbo") -> int:
@@ -26,3 +30,13 @@ def count_text_tokens(text: str, model: Optional[str] = "gpt-3.5-turbo") -> int:
         num_tokens = 0
 
     return num_tokens
+
+
+def slice_text_by_tokens(text, num_tokens):
+    # 将文本分词
+    tokens = word_tokenize(text)
+
+    # 根据指定的token数量进行切片
+    slices = [tokens[i:i + num_tokens] for i in range(0, len(tokens), num_tokens)]
+
+    return slices

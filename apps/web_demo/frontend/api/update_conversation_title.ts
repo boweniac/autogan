@@ -1,5 +1,5 @@
 import { notifications } from "@mantine/notifications";
-import { getOpenRequestAPI, postOpenRequestAPI } from "./test";
+import { getOpenRequestAPI, postOpenRequestAPI } from "./request_open";
 
 export const updateConversationTitleAPI = async (conversation_id: string, title: string | undefined) => {
   if (title == undefined) {

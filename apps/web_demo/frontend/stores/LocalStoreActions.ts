@@ -1,31 +1,34 @@
 import { localStore } from "./LocalStore";
-import { AgentConversation, Message } from "./TypeAgentChat";
+import { AgentConversation, Message, MessageBlock } from "./TypeAgentChat";
 
 const get = localStore.getState;
 const set = localStore.setState;
+
+export const updateUserTokenState = (value: string) => {
+    set(() => ({ userToken: value }));
+}
+
+export const updateUserPhoneState = (value: string) => {
+    set(() => ({ userPhone: value }));
+}
+
+export const updateUserStateState = (value: number) => {
+    set(() => ({ userState: value }));
+}
 
 export const updateActivePageState = (page: string) => {
     set(() => ({ activePage: page }));
 }
 
-export const updateInitConversationRequest = (value: string) => {
+export const updateHelloStartState = (value: boolean) => {
+    set(() => ({ helloStart: value }));
+}
+
+export const updateInitConversationRequestState = (value: string) => {
     set(() => ({ initConversationRequest: value }));
 }
 
-export const updateCurrentAbortController = (abortController: AbortController | undefined) => {
-    set(() => ({ currentAbortController: abortController }));
-}
-
-export const getCurrentAbortController = () => {
-    return get().currentAbortController;
-  };
-
-export const abortCurrentRequest = () => {
-    const currentAbortController = get().currentAbortController;
-    if (currentAbortController?.abort) currentAbortController?.abort();
-  };
-
-export const burnAfterGetInitConversationRequest = () => {
+export const burnAfterGetInitConversationRequestState = () => {
     const initConversationRequest = get().initConversationRequest
     set(() => ({ initConversationRequest: "" }));
     return initConversationRequest
@@ -67,6 +70,10 @@ export const getAgentConversationState = (conversationID: string) => {
     return get().agentConversations.find(c => c.id === conversationID);
 };
 
+export const resetAgentConversationsState = () => {
+    set(() => ({ agentConversations: [] }));
+};
+
 export const clearConversationState = (conversationIDList: string[]) => {
     let deletedConversations: string[] = []
     set((state) => ({
@@ -84,7 +91,7 @@ export const clearConversationState = (conversationIDList: string[]) => {
     return deletedConversations
 };
 
-export const addAgentConversationMessageState = (conversationID: string, message: Partial<Message>) => {
+export const addAgentConversationMessageState = (conversationID: string, message: Message) => {
     set((state) => ({
         agentConversations: state.agentConversations.map((c) => {
             if (c.id === conversationID) {
@@ -98,16 +105,54 @@ export const addAgentConversationMessageState = (conversationID: string, message
     }));
 };
 
-export const updateAgentConversationMessageState = (conversationID: string, localID: string, message: Partial<Message>) => {
+export const updateAgentConversationMessageState = (conversationID: string, messageLocalID: string, message: Message) => {
     set((state) => ({
         agentConversations: state.agentConversations.map((c) => {
             if (c.id === conversationID) {
                 c.messages = c.messages.map((m) => {
-                    if (m.localID === localID) {
+                    if (m.localID === messageLocalID) {
                         return {...m, ...message}
                     }
                     return m;
                 });
+            }
+            return c;
+        }),
+    }));
+};
+
+export const addAgentConversationMessageBlockState = (conversationID: string, messageLocalID: string, messageBlock: MessageBlock) => {
+    set((state) => ({
+        agentConversations: state.agentConversations.map((c) => {
+            if (c.id === conversationID) {
+                c.messages.map((m)=>{
+                    if (m.localID === messageLocalID) {
+                        m.message_blocks = [
+                            ...m.message_blocks,
+                            messageBlock
+                        ]
+                    }
+                })
+            }
+            return c;
+        }),
+    }));
+};
+
+export const updateAgentConversationMessageBlockState = (conversationID: string, messageLocalID: string, messageBlockLocalID: string, messageBlock: MessageBlock) => {
+    set((state) => ({
+        agentConversations: state.agentConversations.map((c) => {
+            if (c.id === conversationID) {
+                c.messages.map((m)=>{
+                    if (m.localID === messageLocalID) {
+                        m.message_blocks = m.message_blocks.map((mb) => {
+                            if (mb.localID === messageBlockLocalID) {
+                                return {...mb, ...messageBlock}
+                            }
+                            return mb;
+                        });
+                    }
+                })
             }
             return c;
         }),
@@ -124,5 +169,55 @@ export const getAgentConversationMessageLastRemoteIDState = (conversationID: str
     if (len == 0) {
         return undefined
     }
-    return messages[len-1].id
+    return messages[len-1].msg_id
+};
+
+export const addIntroductionConversationMessageState = (messageLocalID: string, agent_name: string) => {
+    console.log(`messageLocalID:`+messageLocalID);
+    console.log(`agent_name:`+agent_name);
+    set((state) => ({
+        introductionConversations: [
+            ...state.introductionConversations,
+            {
+                localID: messageLocalID,
+                agent_name: agent_name,
+                message_blocks: [],
+            },
+        ],
+    }));
+};
+
+export const addIntroductionConversationMessageBlockState = (messageLocalID: string, messageBlock: MessageBlock) => {
+    set((state) => ({
+        introductionConversations: state.introductionConversations.map((m)=>{
+            if (m.localID === messageLocalID) {
+                m.message_blocks = [
+                    ...m.message_blocks,
+                    messageBlock
+                ]
+            }
+            return m
+        }),
+    }));
+};
+
+export const updateIntroductionConversationMessageBlockState = (messageLocalID: string, messageBlockLocalID: string, messageBlock: MessageBlock) => {
+    set((state) => ({
+        introductionConversations: state.introductionConversations.map((m) => {
+            if (m.localID === messageLocalID) {
+                m.message_blocks.map((mb)=>{
+                    if (mb.localID === messageBlockLocalID) {
+                        mb.content = messageBlock.content
+                        return mb
+                    }
+                    return mb;
+                })
+            }
+            return m;
+        }),
+    }));
+};
+
+export const resetIntroductionConversationsState = () => {
+    set(() => ({ introductionConversations: [] }));
 };

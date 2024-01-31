@@ -1,3 +1,4 @@
+import json
 import time
 from typing import Optional
 from autogan.oai.chat_api_utils import chat_completions, process_response, ChatCompletionsRequest
@@ -7,7 +8,7 @@ from autogan.oai.conv_holder import ConvHolder
 
 
 def generate_chat_completion(llm_config: LLMConfig, request_data: ChatCompletionsRequest, conv_info: ConvHolder,
-                             content_type: str) \
+                             content_type: str, content_tag: str) \
         -> tuple[Optional[str], Optional[int]]:
     """Call the LLM interface
 
@@ -24,13 +25,11 @@ def generate_chat_completion(llm_config: LLMConfig, request_data: ChatCompletion
     loop = llm_config.len_of_api_key_list
     for i in range(loop):
         time.sleep(llm_config.request_config.request_interval_time)
-        print(f"llm_config: {llm_config}")
-        api_key = llm_config.next_api_key
-        print(f"api_key: {api_key}")
+        api_key = llm_config.api_key(i)
         try:
             completion_content = ""
             completion_tokens = 0
-            index = 1
+            index = 0
             for message in chat_completions(api_key, llm_config.request_config, request_data):
                 if conv_info.response_proxy.need_to_stop():
                     break
@@ -41,6 +40,7 @@ def generate_chat_completion(llm_config: LLMConfig, request_data: ChatCompletion
                         completion_tokens = tokens
                         conv_info.response(index,
                                            content_type,
+                                           content_tag,
                                            content,
                                            completion_tokens,
                                            message)
@@ -51,6 +51,7 @@ def generate_chat_completion(llm_config: LLMConfig, request_data: ChatCompletion
                     completion_tokens = count_text_tokens(completion_content, api_key['model'])
                 conv_info.response(index,
                                    content_type,
+                                   content_tag,
                                    '[DONE]',
                                    completion_tokens,
                                    None)
@@ -64,7 +65,7 @@ def generate_chat_completion(llm_config: LLMConfig, request_data: ChatCompletion
 
 
 async def a_generate_chat_completion(llm_config: LLMConfig, request_data: ChatCompletionsRequest, conv_info: ConvHolder,
-                                     content_type: str) \
+                                     content_type: str, content_tag: str) \
         -> tuple[Optional[str], Optional[int]]:
     """Call the LLM interface
 
@@ -81,11 +82,11 @@ async def a_generate_chat_completion(llm_config: LLMConfig, request_data: ChatCo
     loop = llm_config.len_of_api_key_list
     for i in range(loop):
         time.sleep(llm_config.request_config.request_interval_time)
-        api_key = llm_config.next_api_key
+        api_key = llm_config.api_key(i)
         try:
             completion_content = ""
             completion_tokens = 0
-            index = 1
+            index = 0
             for message in chat_completions(api_key, llm_config.request_config, request_data):
                 if conv_info.response_proxy.need_to_stop():
                     break
@@ -96,6 +97,7 @@ async def a_generate_chat_completion(llm_config: LLMConfig, request_data: ChatCo
                         completion_tokens = tokens
                         await conv_info.a_response(index,
                                                    content_type,
+                                                   content_tag,
                                                    content,
                                                    completion_tokens,
                                                    message)
@@ -106,6 +108,7 @@ async def a_generate_chat_completion(llm_config: LLMConfig, request_data: ChatCo
                     completion_tokens = count_text_tokens(completion_content, api_key['model'])
                 await conv_info.a_response(index,
                                            content_type,
+                                           content_tag,
                                            '[DONE]',
                                            completion_tokens,
                                            None)
@@ -135,17 +138,34 @@ def generate_chat_completion_internal(llm_config: LLMConfig, request_data: ChatC
     loop = llm_config.len_of_api_key_list
     for i in range(loop):
         time.sleep(llm_config.request_config.request_interval_time)
-        api_key = llm_config.next_api_key
+        api_key = llm_config.api_key(i)
         try:
-            message = chat_completions(api_key, llm_config.request_config, request_data)
-            content, tokens = process_response(message, False)
-            if content:
-                if tokens == 0:
-                    tokens = count_text_tokens(tokens, api_key['model'])
-                return content, tokens
-            else:
-                raise ValueError("The return value is empty.")
+            print(i)
+            for message in chat_completions(api_key, llm_config.request_config, request_data):
+                print(f"message: {message}")
+                if message:
+                    content, tokens = process_response(message, False)
+                    print(f"content: {content}")
+                    if content:
+                        if tokens == 0:
+                            tokens = count_text_tokens(tokens, api_key['model'])
+                        return content, tokens
+
+            raise ValueError("The return value is empty.")
+
+
+            # message = chat_completions(api_key, llm_config.request_config, request_data)
+            # content, tokens = process_response(message, False)
+            #
+            # if content:
+            #     if tokens == 0:
+            #         tokens = count_text_tokens(tokens, api_key['model'])
+            #     print(f"content: {content}")
+            #     return content, tokens
+            # else:
+            #     raise ValueError("The return value is empty.")
         except Exception as e:
+            print("e")
             if i == loop - 1:
                 print(f"generate_chat_completion Exception: {e}")
                 return None, None

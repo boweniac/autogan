@@ -37,3 +37,9 @@ class StorageProtocol(Protocol):
 
     def get_compressed_messages(self, task_id: int) -> Optional[list]:
         pass
+
+    def save_conversation_latest_task(self, conversation_id: int, agent_name: str, task_id: int) -> None:
+        pass
+
+    def get_conversation_latest_task(self, conversation_id: int, agent_name: str) -> Optional[int]:
+        pass

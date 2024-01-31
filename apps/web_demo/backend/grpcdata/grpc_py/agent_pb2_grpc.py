@@ -17,7 +17,7 @@ class AgentStub(object):
         self.RpcAgentStream = channel.unary_stream(
                 '/Agent.Agent/RpcAgentStream',
                 request_serializer=agent__pb2.AgentRequest.SerializeToString,
-                response_deserializer=agent__pb2.AgentResponse.FromString,
+                response_deserializer=agent__pb2.StreamResponse.FromString,
                 )
         self.RpcAudioAndLip = channel.unary_unary(
                 '/Agent.Agent/RpcAudioAndLip',
@@ -63,6 +63,16 @@ class AgentStub(object):
                 '/Agent.Agent/RpcAudioToText',
                 request_serializer=agent__pb2.AudioToTextRequest.SerializeToString,
                 response_deserializer=agent__pb2.AudioToTextResponse.FromString,
+                )
+        self.RpcAddFileStream = channel.unary_stream(
+                '/Agent.Agent/RpcAddFileStream',
+                request_serializer=agent__pb2.AddFileRequest.SerializeToString,
+                response_deserializer=agent__pb2.StreamResponse.FromString,
+                )
+        self.RpcGetIntroduction = channel.unary_unary(
+                '/Agent.Agent/RpcGetIntroduction',
+                request_serializer=agent__pb2.GetIntroductionRequest.SerializeToString,
+                response_deserializer=agent__pb2.GetIntroductionResponse.FromString,
                 )
 
 
@@ -129,13 +139,25 @@ class AgentServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def RpcAddFileStream(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def RpcGetIntroduction(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_AgentServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'RpcAgentStream': grpc.unary_stream_rpc_method_handler(
                     servicer.RpcAgentStream,
                     request_deserializer=agent__pb2.AgentRequest.FromString,
-                    response_serializer=agent__pb2.AgentResponse.SerializeToString,
+                    response_serializer=agent__pb2.StreamResponse.SerializeToString,
             ),
             'RpcAudioAndLip': grpc.unary_unary_rpc_method_handler(
                     servicer.RpcAudioAndLip,
@@ -182,6 +204,16 @@ def add_AgentServicer_to_server(servicer, server):
                     request_deserializer=agent__pb2.AudioToTextRequest.FromString,
                     response_serializer=agent__pb2.AudioToTextResponse.SerializeToString,
             ),
+            'RpcAddFileStream': grpc.unary_stream_rpc_method_handler(
+                    servicer.RpcAddFileStream,
+                    request_deserializer=agent__pb2.AddFileRequest.FromString,
+                    response_serializer=agent__pb2.StreamResponse.SerializeToString,
+            ),
+            'RpcGetIntroduction': grpc.unary_unary_rpc_method_handler(
+                    servicer.RpcGetIntroduction,
+                    request_deserializer=agent__pb2.GetIntroductionRequest.FromString,
+                    response_serializer=agent__pb2.GetIntroductionResponse.SerializeToString,
+            ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
             'Agent.Agent', rpc_method_handlers)
@@ -205,7 +237,7 @@ class Agent(object):
             metadata=None):
         return grpc.experimental.unary_stream(request, target, '/Agent.Agent/RpcAgentStream',
             agent__pb2.AgentRequest.SerializeToString,
-            agent__pb2.AgentResponse.FromString,
+            agent__pb2.StreamResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -359,5 +391,39 @@ class Agent(object):
         return grpc.experimental.unary_unary(request, target, '/Agent.Agent/RpcAudioToText',
             agent__pb2.AudioToTextRequest.SerializeToString,
             agent__pb2.AudioToTextResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def RpcAddFileStream(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(request, target, '/Agent.Agent/RpcAddFileStream',
+            agent__pb2.AddFileRequest.SerializeToString,
+            agent__pb2.StreamResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def RpcGetIntroduction(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/Agent.Agent/RpcGetIntroduction',
+            agent__pb2.GetIntroductionRequest.SerializeToString,
+            agent__pb2.GetIntroductionResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

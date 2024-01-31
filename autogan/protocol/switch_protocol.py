@@ -6,9 +6,9 @@ from autogan.protocol.storage_protocol import StorageProtocol
 from autogan.oai.conv_holder import ConvHolder
 
 
-class Language(Enum):
-    EN = "EN"
-    CN = "CN"
+# class Language(Enum):
+#     EN = "EN"
+#     CN = "CN"
 
 
 class SwitchProtocol(Protocol):
@@ -17,7 +17,11 @@ class SwitchProtocol(Protocol):
     default_consider_mode: Optional[str]
     default_stream_mode: Optional[bool]
     storage: Optional[StorageProtocol]
-    default_language: Language
+    default_language: str
+    # default_agent_name: str
+
+    def default_agent_name(self) -> Optional[str]:
+        pass
 
     def handle_and_forward(self, conv_info: ConvHolder) -> None:
         pass

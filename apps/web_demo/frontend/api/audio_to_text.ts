@@ -1,5 +1,5 @@
 import { notifications } from "@mantine/notifications";
-import { getOpenRequestAPI, postOpenRequestAPI } from "./test";
+import { getOpenRequestAPI, postOpenRequestAPI } from "./request_open";
 import { AudioAndLip, LipsData, MouthCues } from "@/stores/TypeAudioAndLip";
 
 
@@ -12,6 +12,6 @@ export const audioToTextAPI = async (formData: FormData) => {
           color: "green",
         });
       }
-      console.log(`audioToTextAPI.res:`+JSON.stringify(res));
-      return res
+      // console.log(`audioToTextAPI.res:`+JSON.stringify(res.text));
+      return res.text
   };

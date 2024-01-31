@@ -3,6 +3,7 @@ from typing import Optional, Dict, Any
 
 from autogan.oai.chat_api_utils import ChatCompletionsRequest
 from autogan.oai.conv_holder import ConvHolder
+from autogan.prompt.agent.universal_agent import UniversalAgentPrompt, ConsiderMessage
 from autogan.utils.compressed_messages_utils import compressed_messages
 from autogan.utils.compressed_text_utils import compressed_text_universal
 from autogan.oai.chat_config_utils import AgentConfig
@@ -80,9 +81,11 @@ class UniversalAgent:
         # Translate the session id of the sender into the superior session id of the receiver.
         self._main_to_sub_task_id = defaultdict(int)
         self._work_flow = work_flow
-        self._agent_type:AgentType = None if agent_type is None else AgentType(agent_type)
+        self.agent_type: AgentType = None if agent_type is None else AgentType(agent_type)
         self._conversation_messages = defaultdict(list)  # key: task id，value: Conversation history
         self._conversation_focus = defaultdict(Dict)  # key: task id，value: {"task_publisher": "", "task_content": ""}
+        self._conversation_latest_task = defaultdict(int)
+        self._prompts: Optional[UniversalAgentPrompt] = None
 
     @property
     def get_agent_config(self) -> AgentConfig:
@@ -90,6 +93,9 @@ class UniversalAgent:
             return self.agent_config
         else:
             return self.switch.default_agent_config
+
+    def init_prompts(self, lang: str, task_tag: str, workmates: str, pipeline: str):
+        self._prompts = UniversalAgentPrompt(self.name, self._work_flow, lang, task_tag, workmates, pipeline)
 
     def _save_task_info(self, task_id: int, task_info: dict) -> None:
         self.switch.storage and self.switch.storage.save_task_info(task_id, task_info)
@@ -101,9 +107,12 @@ class UniversalAgent:
         elif self.switch.storage:
             return self.switch.storage.get_task_info(task_id)
 
-    def save_main_to_sub_task_id(self, main_task_id: int, sub_task_id: int) -> None:
+    def save_main_to_sub_task_id(self, conversation_id: int, main_task_id: int, sub_task_id: int) -> None:
         self.switch.storage and self.switch.storage.save_main_to_sub_task_id(main_task_id, sub_task_id)
         self._main_to_sub_task_id[main_task_id] = sub_task_id
+        self.switch.storage and self.switch.storage.save_conversation_latest_task(conversation_id, self.name,
+                                                                                  sub_task_id)
+        self._conversation_latest_task[conversation_id] = sub_task_id
 
     def convert_main_to_sub_task_id(self, task_id: int) -> Optional[int]:
         if task_id in self._main_to_sub_task_id and self._main_to_sub_task_id[task_id]:
@@ -135,13 +144,23 @@ class UniversalAgent:
         elif self.switch.storage:
             return self.switch.storage.get_compressed_messages(task_id)
 
+    # def _save_conversation_latest_task(self, conversation_id: int, task_id: int) -> None:
+    #     self.switch.storage and self.switch.storage.save_conversation_latest_task(conversation_id, self.name, task_id)
+    #     self._conversation_latest_task[conversation_id] = task_id
+
+    def get_conversation_latest_task(self, conversation_id: int) -> int:
+        if conversation_id in self._conversation_latest_task and self._conversation_latest_task[conversation_id]:
+            return self._conversation_latest_task[conversation_id]
+        elif self.switch.storage:
+            return self.switch.storage.get_conversation_latest_task(conversation_id, self.name)
+
     def new_task(self, conv_info: ConvHolder):
         """Accept tasks posted by other agent.
 
         :param conv_info:
         """
         # Avoid excessively long task content
-        if ((self._agent_type != AgentType.TOOL and self._agent_type != AgentType.HUMAN) and conv_info.completion_tokens >
+        if ((self.agent_type != AgentType.TOOL and self.agent_type != AgentType.HUMAN) and conv_info.completion_tokens >
                 self.get_agent_config.main_model_config.request_config.max_messages_tokens * 0.5):
             conv_info.to_system_alert(f"@{conv_info.requester_name} The task is too long")
             self.switch.system_alert(conv_info)
@@ -149,8 +168,17 @@ class UniversalAgent:
             # Cache task information to maintain focus during task execution
             task_content = conv_info.content.replace(f"@{self.name}", "please help me")
             task_content = task_content.replace(f"{self.switch.task_tag}", "")
-            self._save_task_info(conv_info.task_id, {'task_publisher': conv_info.requester_name,
-                                                     'task_content': task_content, 'task_publisher_type': conv_info.requester_type})
+            if conv_info.requester_type != AgentType.HUMAN:
+                self._save_task_info(conv_info.task_id, {'task_publisher': conv_info.requester_name,
+                                                         'task_content': task_content,
+                                                         'task_publisher_type': conv_info.requester_type})
+            else:
+                self._add_compressed_message(conv_info.task_id, {
+                    'role': 'user',
+                    'content': task_content,
+                    'name': conv_info.requester_name,
+                    'tokens': conv_info.completion_tokens}
+                                             )
             # Start the generation process
             self._generate_process(conv_info)
 
@@ -160,7 +188,7 @@ class UniversalAgent:
         :param conv_info: 
         """
         # Avoid excessively long task content
-        if ((self._agent_type != AgentType.TOOL and self._agent_type != AgentType.HUMAN) and conv_info.completion_tokens >
+        if ((self.agent_type != AgentType.TOOL and self.agent_type != AgentType.HUMAN) and conv_info.completion_tokens >
                 self.get_agent_config.main_model_config.request_config.max_messages_tokens * 0.5):
             conv_info.to_system_alert(f"@{conv_info.requester_name} The task is too long")
             await self.switch.a_system_alert(conv_info)
@@ -168,8 +196,16 @@ class UniversalAgent:
             # Cache task information to maintain focus during task execution
             task_content = conv_info.content.replace(f"@{self.name}", "please help me")
             task_content = task_content.replace(f"{self.switch.task_tag}", "")
-            self._save_task_info(conv_info.task_id, {'task_publisher': conv_info.requester_name,
-                                                     'task_content': task_content, 'task_publisher_type': conv_info.requester_type})
+            if conv_info.requester_type != AgentType.HUMAN:
+                self._save_task_info(conv_info.task_id, {'task_publisher': conv_info.requester_name,
+                                                         'task_content': task_content,
+                                                         'task_publisher_type': conv_info.requester_type})
+            else:
+                self._add_compressed_message(conv_info.task_id, {
+                    'role': 'user',
+                    'content': task_content,
+                    'name': conv_info.requester_name,
+                    'tokens': conv_info.completion_tokens})
             # Start the generation process
             await self._a_generate_process(conv_info)
 
@@ -178,7 +214,7 @@ class UniversalAgent:
 
         :param conv_info: 
         """
-        if self._agent_type != AgentType.TOOL and self._agent_type != AgentType.HUMAN:
+        if self.agent_type != AgentType.TOOL and self.agent_type != AgentType.HUMAN:
             safe_size = self.get_agent_config.main_model_config.request_config.max_messages_tokens
             if conv_info.completion_tokens > safe_size:
                 content, completion_tokens = compressed_text_universal(conv_info.content,
@@ -188,10 +224,11 @@ class UniversalAgent:
                                                                        safe_size)
                 conv_info.content = content
                 conv_info.completion_tokens = completion_tokens
-            self._add_compressed_message(conv_info.task_id, {'role': 'user' if conv_info.requester_type == AgentType.HUMAN.value else "assistant",
-                                                             'content': conv_info.content,
-                                                             'name': conv_info.requester_name,
-                                                             'tokens': conv_info.completion_tokens}
+            self._add_compressed_message(conv_info.task_id, {
+                'role': 'user' if conv_info.requester_type == AgentType.HUMAN.value else "assistant",
+                'content': conv_info.content,
+                'name': conv_info.requester_name,
+                'tokens': conv_info.completion_tokens}
                                          )
         self._generate_process(conv_info)
 
@@ -200,7 +237,7 @@ class UniversalAgent:
 
         :param conv_info: Task id
         """
-        if self._agent_type != AgentType.TOOL and self._agent_type != AgentType.HUMAN:
+        if self.agent_type != AgentType.TOOL and self.agent_type != AgentType.HUMAN:
             safe_size = self.get_agent_config.main_model_config.request_config.max_messages_tokens
             if conv_info.completion_tokens > safe_size:
                 content, completion_tokens = compressed_text_universal(conv_info.content,
@@ -210,15 +247,16 @@ class UniversalAgent:
                                                                        safe_size)
                 conv_info.content = content
                 conv_info.completion_tokens = completion_tokens
-            self._add_compressed_message(conv_info.task_id, {'role': 'user' if conv_info.requester_type == AgentType.HUMAN.value else "assistant",
-                                                             'content': conv_info.content,
-                                                             'name': conv_info.requester_name,
-                                                             'tokens': conv_info.completion_tokens}
+            self._add_compressed_message(conv_info.task_id, {
+                'role': 'user' if conv_info.requester_type == AgentType.HUMAN.value else "assistant",
+                'content': conv_info.content,
+                'name': conv_info.requester_name,
+                'tokens': conv_info.completion_tokens}
                                          )
         await self._a_generate_process(conv_info)
 
-    def _base_message(self, task_id: int) \
-            -> tuple[dict[str, str], Optional[dict[str, Any]], int]:
+    def _focus_message(self, task_id: int) \
+            -> tuple[Optional[dict[str, Any]], int]:
         """This is the paradigm message required for each round of dialogue.
         每轮对话都需要的范式消息
 
@@ -234,66 +272,41 @@ class UniversalAgent:
         """
         total_tokens = 0
 
-        info = environment_info()
+        # info = environment_info()
 
-        # Assemble system message
-        system_prompt = f"""Now your name is {self.name}, you are an assistant who will not give up easily when you encounter difficulties
-
-Environment information:
-{info}"""
-
-        if self._work_flow:
-            system_prompt += f"""
-
-Your work flow is::
-{self._work_flow}"""
-
-        if self.workmates:
-            system_prompt += f"""
-
-The following professionals can help you accomplish the task:
-{self.workmates}"""
-
-        if self._agent_type is None:
-            system_prompt += f"""
-    
-    Please follow these guidelines when replying to any content:
-    1. Be aware that if you do not @recipient at the beginning, the system will give an error.
-    2. When asking for help, you need to first post a task, the method is: @recipient {self.switch.task_tag} task content.
-    3. The recipient does not have any dialogue records before the task begins, nor can they see your conversations with others.
-    4. Do not suggest the recipient to communicate with others.
-    5. Do not explain to the initiator of the task what you are going to do.
-    6. In the reply, do not converse with two recipients at the same time.
-            """
-
-        total_tokens += 37
-
-        system_message = {'role': 'system', 'content': system_prompt}
+        # system_prompt = self._prompts.base_message_system_prompt()
+        #
+        # system_message = {'role': 'system', 'content': system_prompt}
 
         conversation_focus = self._get_task_info(task_id)
         if conversation_focus:
             # Assemble focus message
-            focus_prompt = f"""current task content:
-task issuer: {conversation_focus['task_publisher']}
-task content: {conversation_focus['task_content']}"""
-
-            if self._agent_type is None:
-                if self.pipeline and self.pipeline != "\\":
-                    focus_prompt += f"""
-
-When you have the result of the task, please @{self.pipeline} {self.switch.task_tag} and reply to the execution result, He'll know what to do next"""
-                else:
-                    focus_prompt += f"""
-
-When you have the result of the task, please @{conversation_focus['task_publisher']} and reply to the execution result"""
+            focus_prompt = self._prompts.base_message_focus_prompt(conversation_focus['task_publisher'],
+                                                                   conversation_focus['task_content'])
+            # print(focus_prompt)
+            #             focus_prompt = f"""current task content:
+            # task issuer: {conversation_focus['task_publisher']}
+            # task content: {conversation_focus['task_content']}"""
+            #
+            #             if self.agent_type is None:
+            #                 if self.pipeline and self.pipeline != "\\":
+            #                     focus_prompt += f"""
+            #
+            # When you have the result of the task, please @{self.pipeline} {self.switch.task_tag} and reply to the execution result, He'll know what to do next"""
+            #                 else:
+            #                     focus_prompt += f"""
+            #
+            # When you have the result of the task, please @{conversation_focus['task_publisher']} and reply to the execution result"""
 
             total_tokens += count_text_tokens(focus_prompt)
 
-            focus_message = {'role': 'user' if conversation_focus['task_publisher_type'] == AgentType.HUMAN.value else "assistant", 'content': focus_prompt, 'name': conversation_focus['task_publisher']}
+            focus_message = {
+                'role': 'user' if conversation_focus['task_publisher_type'] == AgentType.HUMAN.value else "assistant",
+                'content': focus_prompt, 'name': conversation_focus['task_publisher']}
         else:
             focus_message = None
 
-        return system_message, focus_message, total_tokens
+        return focus_message, total_tokens
 
     def _consider_message(self, ideas: dict, index: int, task_publisher: str) \
             -> tuple[tuple[str, dict], bool]:
@@ -467,7 +480,7 @@ Step 4: Please follow the content of the previous step, From {self.name}'s persp
 
         return [], 0
 
-    def _base_generate_reply(self, task_id: int) -> list:
+    def _base_generate_reply(self, task_id: int) -> tuple[list, list]:
         """Use the main LLM to generate responses.
 
         Before generating a response, the historical conversation records within the current task scope, excluding system_message and focus_message, will be compressed first.
@@ -477,18 +490,19 @@ Step 4: Please follow the content of the previous step, From {self.name}'s persp
         :return: --content: Generate content
             --tokens: Generate content tokens
         """
-        system_message, focus_message, total_tokens = self._base_message(task_id)
+        system_message, focus_message, total_tokens = self._focus_message(task_id)
 
         # Calculate the target size of context compression.
         safe_size = self.get_agent_config.main_model_config.request_config.max_messages_tokens - total_tokens
         # Compress the historical conversation records.
-        request_messages, total_tokens = self._chat_messages_safe_size(task_id, safe_size)
+        messages_safe_size, total_tokens = self._chat_messages_safe_size(task_id, safe_size)
+        request_messages = messages_safe_size.copy()
         request_messages.insert(0, system_message)
         if focus_message:
             request_messages.insert(0, focus_message)
-        return request_messages
+        return messages_safe_size, request_messages
 
-    def _consider_generate(self, ideas: Dict, task_id: int, request_messages: list) -> tuple[list, str]:
+    def _consider_generate(self, pre_id: str, pre_prompt: str, next_id: str) -> tuple[list, str, str]:
         """Use the main LLM to generate responses.
 
         Before generating a response, the historical conversation records within the current task scope, excluding system_message and focus_message, will be compressed first.
@@ -498,34 +512,56 @@ Step 4: Please follow the content of the previous step, From {self.name}'s persp
         :return: --content: Generate content
             --tokens: Generate content tokens
         """
-        index = 0
+        consider_message = ConsiderMessage(self.switch.default_language, self.switch.task_tag, self.name,
+                                           self._work_flow, self.workmates)
         while True:
-            message, is_end = self._consider_message(ideas, index, self._get_task_info(task_id)["task_publisher"])
-            if is_end:
-                gen = "main"
-            else:
-                gen = "idea"
-
+            print(f"pre_id: {pre_id}")
+            id, idea, prompt, new_next_id = consider_message.next_prompt(pre_id, pre_prompt, next_id)
+            print(f"prompt: {prompt}")
             print(
                 colored(
-                    f"\n\n>>>>>>>> {message[0]}:",
+                    f"\n\n>>>>>>>> {idea}:",
                     "cyan",
                 ),
                 flush=True,
             )
+            # messages = request_messages.copy()
+            # messages.append({'role': 'system', 'content': pre_prompt})
 
-            if message[1]["role"] == "system":
-                messages = request_messages.copy()
-                messages.append(message[1])
-            else:
-                messages = [message[1]]
-
-            yield messages, message[0], gen
-            if is_end:
+            yield id, idea, prompt, new_next_id
+            if next_id == "":
                 break
-            index += 1
+        # index = 0
+        # while True:
+        #     message, is_end = self._consider_message(ideas, index, self._get_task_info(task_id)["task_publisher"])
+        #     if is_end:
+        #         gen = "main"
+        #     else:
+        #         gen = "idea"
+        #
+        #     print(
+        #         colored(
+        #             f"\n\n>>>>>>>> {message[0]}:",
+        #             "cyan",
+        #         ),
+        #         flush=True,
+        #     )
+        #
+        #     if message[1]["role"] == "system":
+        #         messages = request_messages.copy()
+        #         messages.append(message[1])
+        #     else:
+        #         messages = [message[1]]
+        #
+        #     yield messages, message[0], gen
+        #     if is_end:
+        #         break
+        #     index += 1
 
-    def tool_function(self, task_id: int, param: Optional[str] = None,
+    def tool_filter(self, param: Optional[str] = None) -> tuple[str, str, str, str]:
+        return "", param, "", ""
+
+    def tool_function(self, task_id: int, lang: Optional[str] = None, code: Optional[str] = None,
                       tokens: Optional[int] = None) -> tuple[str, int]:
         """When the value of the tool_function_usage parameter is 'only' or 'join', please override this method.
 
@@ -534,13 +570,14 @@ Step 4: Please follow the content of the previous step, From {self.name}'s persp
         """
         pass
 
-    def use_tool(self, task_id: int, content: str, completion_tokens: int, sender_name: str) -> tuple[str, int]:
+    def use_tool(self, task_id: int, sender_name: str, lang: Optional[str] = None, code: Optional[str] = None,
+                 completion_tokens: Optional[int] = None) -> tuple[str, int]:
         """When the value of the tool_function_usage parameter is 'only' or 'join', please override this method.
 
         :return: --content: Generate content
             --tokens: Generate content tokens
         """
-        content, completion_tokens = self.tool_function(task_id, content, completion_tokens)
+        content, completion_tokens = self.tool_function(task_id, lang, code, completion_tokens)
         # 设置接收者
         if not content.startswith("@"):
             if self.pipeline and self.pipeline != "\\":
@@ -568,23 +605,64 @@ Step 4: Please follow the content of the previous step, From {self.name}'s persp
         content = ""
         completion_tokens = 0
         try:
-            conv_info.init_message(self.name, None if self._agent_type is None else self._agent_type.value)
+            conv_info.init_message(self.name, None if self.agent_type is None else self.agent_type.value)
             # 生成回复内容
-            if self._agent_type != AgentType.TOOL and self._agent_type != AgentType.HUMAN:
-                request_messages = self._base_generate_reply(conv_info.task_id)
+            if self.agent_type != AgentType.TOOL and self.agent_type != AgentType.HUMAN:
+                safe_size = self.get_agent_config.main_model_config.request_config.max_messages_tokens
+                messages_safe_size, total_tokens = self._chat_messages_safe_size(conv_info.task_id, safe_size)
+                # request_messages = self._base_generate_reply(conv_info.task_id)
+                system_prompt = ""
                 if self.switch.default_consider_mode == "on" or ((
                                                                          self.switch.default_consider_mode == "auto" or self.switch.default_consider_mode is None) and "gpt-4" not in self.get_agent_config.main_model_config.model):
-                    ideas = defaultdict(str)
-                    for messages, idea_tag, gen in self._consider_generate(ideas, conv_info.task_id, request_messages):
+                    id = ""
+                    idea = ""
+                    next_id = "node_1"
+                    consider_message = ConsiderMessage(self.switch.default_language, self.switch.task_tag, self.name,
+                                                       self._work_flow, self.workmates)
+                    while True:
+                        id, idea, system_prompt, next_id = consider_message.next_prompt(id, system_prompt, next_id)
+                        print(
+                            colored(
+                                f"\n\n>>>>>>>> {idea}:",
+                                "cyan",
+                            ),
+                            flush=True,
+                        )
+                        messages = messages_safe_size.copy()
+                        messages.append({'role': 'system', 'content': system_prompt})
                         request_data = ChatCompletionsRequest(messages, self.switch.default_stream_mode)
                         content, completion_tokens = generate_chat_completion(
-                            self.get_agent_config.main_model_config, request_data, conv_info, gen)
-                        ideas[idea_tag] = content
+                            self.get_agent_config.main_model_config, request_data, conv_info, "idea", idea)
+                        conv_info.content = content
+                        conv_info.completion_tokens = completion_tokens
+                        self.switch.storage and self.switch.storage.add_message(conv_info.conversation_id,
+                                                                                conv_info.message("idea", idea))
+                        if next_id == "":
+                            break
+                    # for new_id, new_idea, new_system_prompt, new_next_id in self._consider_generate(idea_data["id"], idea_data["system_prompt"], idea_data["next_id"]):
+                    #     messages = messages_safe_size.copy()
+                    #     messages.append({'role': 'system', 'content': new_system_prompt})
+                    #     request_data = ChatCompletionsRequest(messages, self.switch.default_stream_mode)
+                    #     content, completion_tokens = generate_chat_completion(
+                    #         self.get_agent_config.main_model_config, request_data, conv_info, "idea", new_idea)
+                    #     conv_info.content = content
+                    #     conv_info.completion_tokens = completion_tokens
+                    #     self.switch.storage and self.switch.storage.add_message(conv_info.conversation_id,
+                    #                                                             conv_info.message("idea", new_idea))
                 else:
-                    request_data = ChatCompletionsRequest(request_messages, self.switch.default_stream_mode)
-                    content, completion_tokens = generate_chat_completion(
-                        self.get_agent_config.main_model_config, request_data, conv_info, "main")
-
+                    system_prompt = self._prompts.base_message_system_prompt()
+                focus_message, total_tokens = self._focus_message(conv_info.task_id)
+                system_message = {'role': 'system', 'content': system_prompt}
+                if focus_message:
+                    messages_safe_size.insert(0, focus_message)
+                messages_safe_size.insert(0, system_message)
+                request_data = ChatCompletionsRequest(messages_safe_size, self.switch.default_stream_mode)
+                content, completion_tokens = generate_chat_completion(
+                    self.get_agent_config.main_model_config, request_data, conv_info, "main", "")
+                conv_info.content = content
+                conv_info.completion_tokens = completion_tokens
+                self.switch.storage and self.switch.storage.add_message(conv_info.conversation_id,
+                                                                        conv_info.message("main", ""))
                 if not content:
                     raise ValueError("Failed to generate content.")
 
@@ -593,20 +671,26 @@ Step 4: Please follow the content of the previous step, From {self.name}'s persp
                 content = content.replace(f"@{self.name} ", "")
 
             # 使用工具
-            if (self._agent_type == AgentType.TOOL and self._agent_type == AgentType.HUMAN) or (
-                    self._agent_type == AgentType.TOOLMAN and not content.startswith("@")):
-                content, completion_tokens = self.use_tool(conv_info.task_id, content, completion_tokens, requester)
-                conv_info.response(0, "tool", content, completion_tokens, None)
+            if (self.agent_type == AgentType.TOOL or self.agent_type == AgentType.HUMAN) or (
+                    self.agent_type == AgentType.TOOLMAN and not content.startswith("@")):
+                lang, code, content_tag, content_tag_end = self.tool_filter(content)
+                conv_info.response(0, "tool", content_tag, "", 0, None)
+                content, completion_tokens = self.use_tool(conv_info.task_id, requester, lang, code, completion_tokens)
+                conv_info.response(1, "tool", content_tag, content, completion_tokens, None)
+                conv_info.response(2, "tool", content_tag_end, '[DONE]', 0, None)
                 # conv_info.response_proxy.send(conv_info.msg_id, conv_info.task_id, conv_info.requester_name, 0, "tool", content, completion_tokens, None)
+            # else:
+            #     conv_info.response(1, "main", "", '[DONE]', 0, None)
             self._add_compressed_message(conv_info.task_id,
-                                         {'role': 'user' if self._agent_type == AgentType.HUMAN else 'assistant', 'name': self.name, 'content': content, 'tokens': completion_tokens})
+                                         {'role': 'user' if self.agent_type == AgentType.HUMAN else 'assistant',
+                                          'name': self.name, 'content': content, 'tokens': completion_tokens})
             conv_info.update_message(content)
             self.switch.handle_and_forward(conv_info)
         except SystemExit:
             print("The task is finished.")
         except Exception as e:
             print(f"generate_process :{e}")
-            if (self._agent_type == AgentType.TOOL and self._agent_type == AgentType.HUMAN):
+            if (self.agent_type == AgentType.TOOL or self.agent_type == AgentType.HUMAN):
                 conv_info.to_system_alert(f"@{requester} Generate error, Please trying again")
                 self.switch.system_alert(conv_info)
 
@@ -626,41 +710,114 @@ Step 4: Please follow the content of the previous step, From {self.name}'s persp
         content = ""
         completion_tokens = 0
         try:
-            conv_info.init_message(self.name, None if self._agent_type is None else self._agent_type.value)
+            conv_info.init_message(self.name, None if self.agent_type is None else self.agent_type.value)
             # 生成回复内容
-            if (self._agent_type != AgentType.TOOL and self._agent_type != AgentType.HUMAN):
-                request_messages = self._base_generate_reply(conv_info.task_id)
+            if (self.agent_type != AgentType.TOOL and self.agent_type != AgentType.HUMAN):
+                safe_size = self.get_agent_config.main_model_config.request_config.max_messages_tokens
+                messages_safe_size, total_tokens = self._chat_messages_safe_size(conv_info.task_id, safe_size)
+                system_prompt = ""
                 if self.switch.default_consider_mode == "on" or ((
                                                                          self.switch.default_consider_mode == "auto" or self.switch.default_consider_mode is None) and "gpt-4" not in self.get_agent_config.main_model_config.model):
-                    ideas = defaultdict(str)
-                    for messages, idea_tag, gen in self._consider_generate(ideas, conv_info.task_id, request_messages):
+                    id = ""
+                    idea = ""
+                    next_id = "node_1"
+                    consider_message = ConsiderMessage(self.switch.default_language, self.switch.task_tag, self.name,
+                                                       self._work_flow, self.workmates)
+                    while True:
+                        id, idea, system_prompt, next_id = consider_message.next_prompt(id, system_prompt, next_id)
+                        print(
+                            colored(
+                                f"\n\n>>>>>>>> {idea}:",
+                                "cyan",
+                            ),
+                            flush=True,
+                        )
+                        messages = messages_safe_size.copy()
+                        messages.append({'role': 'system', 'content': system_prompt})
                         request_data = ChatCompletionsRequest(messages, self.switch.default_stream_mode)
                         content, completion_tokens = await a_generate_chat_completion(
-                            self.get_agent_config.main_model_config, request_data, conv_info, gen)
-                        ideas[idea_tag] = content
+                            self.get_agent_config.main_model_config, request_data, conv_info, "idea", idea)
+                        conv_info.content = content
+                        conv_info.completion_tokens = completion_tokens
+                        self.switch.storage and self.switch.storage.add_message(conv_info.conversation_id,
+                                                                                conv_info.message("idea", idea))
+                        if next_id == "":
+                            break
+                    # for id, idea, system_prompt, next_id in self._consider_generate(id, system_prompt, next_id):
+                    #     messages = messages_safe_size.copy()
+                    #     messages.append({'role': 'system', 'content': system_prompt})
+                    #     request_data = ChatCompletionsRequest(messages, self.switch.default_stream_mode)
+                    #     content, completion_tokens = await a_generate_chat_completion(
+                    #         self.get_agent_config.main_model_config, request_data, conv_info, "idea", idea)
+                    #     conv_info.content = content
+                    #     conv_info.completion_tokens = completion_tokens
+                    #     self.switch.storage and self.switch.storage.add_message(conv_info.conversation_id,
+                    #                                                             conv_info.message("idea", idea))
+                    # ideas = defaultdict(str)
+                    # for messages, idea_tag, gen in self._consider_generate(ideas, conv_info.task_id, request_messages):
+                    #     request_data = ChatCompletionsRequest(messages, self.switch.default_stream_mode)
+                    #     content, completion_tokens = await a_generate_chat_completion(
+                    #         self.get_agent_config.main_model_config, request_data, conv_info, gen, idea_tag)
+                    #     ideas[idea_tag] = content
+                    #     conv_info.content = content
+                    #     conv_info.completion_tokens = completion_tokens
+                    #     self.switch.storage and self.switch.storage.add_message(conv_info.conversation_id,
+                    #                                                             conv_info.message(gen, idea_tag))
+                # else:
+                #     request_data = ChatCompletionsRequest(request_messages, self.switch.default_stream_mode)
+                #     content, completion_tokens = await a_generate_chat_completion(
+                #         self.get_agent_config.main_model_config, request_data, conv_info, "main", "")
+                #     conv_info.content = content
+                #     conv_info.completion_tokens = completion_tokens
+                #     self.switch.storage and self.switch.storage.add_message(conv_info.conversation_id,
+                #                                                             conv_info.message("main", ""))
+                #
+                # if not content:
+                #     # 防止模型 @ 自己
+                #     raise ValueError("Failed to generate content.")
                 else:
-                    request_data = ChatCompletionsRequest(request_messages, self.switch.default_stream_mode)
-                    content, completion_tokens = await a_generate_chat_completion(
-                        self.get_agent_config.main_model_config, request_data, conv_info, "main")
+                    system_prompt = self._prompts.base_message_system_prompt()
+                focus_message, total_tokens = self._focus_message(conv_info.task_id)
+                system_message = {'role': 'system', 'content': system_prompt}
 
+                if focus_message:
+                    messages_safe_size.insert(0, focus_message)
+                messages_safe_size.insert(0, system_message)
+
+                request_data = ChatCompletionsRequest(messages_safe_size, self.switch.default_stream_mode)
+                content, completion_tokens = await a_generate_chat_completion(
+                    self.get_agent_config.main_model_config, request_data, conv_info, "main", "")
+                conv_info.content = content
+                conv_info.completion_tokens = completion_tokens
+                self.switch.storage and self.switch.storage.add_message(conv_info.conversation_id,
+                                                                        conv_info.message("main", ""))
                 if not content:
-                    # 防止模型 @ 自己
                     raise ValueError("Failed to generate content.")
 
+            if content:
+                # 防止模型 @ 自己
+                content = content.replace(f"@{self.name} ", "")
+
             # 使用工具
-            if (self._agent_type == AgentType.TOOL and self._agent_type == AgentType.HUMAN) or (
-                    self._agent_type == AgentType.TOOLMAN and not content.startswith("@")):
-                content, completion_tokens = self.use_tool(conv_info.task_id, content, completion_tokens, requester)
-                await conv_info.a_response(0, "tool", content, completion_tokens, None)
-                # await conv_info.response_proxy.a_send(conv_info.msg_id, conv_info.task_id, conv_info.requester_name, 0, "tool", content, completion_tokens, None)
+            if (self.agent_type == AgentType.TOOL or self.agent_type == AgentType.HUMAN) or (
+                    self.agent_type == AgentType.TOOLMAN and not content.startswith("@")):
+                lang, code, content_tag, content_tag_end = self.tool_filter(content)
+                await conv_info.a_response(0, "tool", content_tag, "", 0, None)
+                content, completion_tokens = self.use_tool(conv_info.task_id, requester, lang, code, completion_tokens)
+                await conv_info.a_response(1, "tool", content_tag, content, completion_tokens, None)
+                await conv_info.a_response(2, "tool", content_tag_end, '[DONE]', 0, None)
+            # else:
+            #     await conv_info.a_response(1, "main", "", '[DONE]', 0, None)
+            # await conv_info.response_proxy.a_send(conv_info.msg_id, conv_info.task_id, conv_info.requester_name, 0, "tool", content, completion_tokens, None)
             self._add_compressed_message(conv_info.task_id,
-                                         {'role': 'user' if self._agent_type == AgentType.HUMAN else 'assistant', 'name': self.name, 'content': content, 'tokens': completion_tokens})
+                                         {'role': 'user' if self.agent_type == AgentType.HUMAN else 'assistant',
+                                          'name': self.name, 'content': content, 'tokens': completion_tokens})
             conv_info.update_message(content)
             await self.switch.a_handle_and_forward(conv_info)
         except SystemExit:
             print("The task is finished.")
         except Exception as e:
             print(f"generate_process :{e}")
-            if (self._agent_type == AgentType.TOOL and self._agent_type == AgentType.HUMAN):
+            if (self.agent_type == AgentType.TOOL or self.agent_type == AgentType.HUMAN):
                 conv_info.to_system_alert(f"@{requester} Generate error, Please trying again")
                 await self.switch.a_system_alert(conv_info)

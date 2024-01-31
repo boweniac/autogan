@@ -1,5 +1,5 @@
 import { notifications } from "@mantine/notifications";
-import { getOpenRequestAPI } from "./test";
+import { getOpenRequestAPI } from "./request_open";
 
 export const addAgentConversationAPI = async () => {
     const res = await getOpenRequestAPI(`/open/agent/add_conversation`)

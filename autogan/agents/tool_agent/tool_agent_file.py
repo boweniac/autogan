@@ -79,9 +79,17 @@ Note: When you decide to use a tool, please do not @ anyone.""",
         )
         self._file = File(work_dir)
 
-    def tool_function(self, task_id: int, param: Optional[str] = None,
-                      tokens: Optional[int] = None) -> tuple[str, int]:
+    def tool_filter(self, param: Optional[str] = None) -> tuple[str, str, str, str]:
         lang, code = CodeExecution.extract_code(param)
+        if lang == "reader" and code:
+            return lang, code, "Opening", "File content"
+        elif lang == "append" and code:
+            return lang, code, "Opening", "File content"
+        else:
+            return "", "", "Opening", "File content"
+
+    def tool_function(self, task_id: int, lang: Optional[str] = None, code: Optional[str] = None,
+                      tokens: Optional[int] = None) -> tuple[str, int]:
         if lang == "reader" and code:
             return self._reader_function(code)
         elif lang == "append" and code:

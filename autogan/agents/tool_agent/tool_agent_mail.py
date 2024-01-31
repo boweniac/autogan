@@ -41,10 +41,10 @@ class ToolAgentMail(UniversalAgent):
         )
         self._send_email = SendEmail(email_config, work_dir)
 
-    def tool_function(self, task_id: int, param: Optional[str] = None,
+    def tool_function(self, task_id: int, lang: Optional[str] = None, code: Optional[str] = None,
                       tokens: Optional[int] = None) -> tuple[str, int]:
         try:
-            param = text_to_json(param)
+            param = text_to_json(code)
             if param:
                 reply = self._send_email.send(param['to'], param['subject'], param['text'], param['files'])
 

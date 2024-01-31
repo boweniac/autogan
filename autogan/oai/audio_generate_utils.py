@@ -3,7 +3,7 @@ import time
 import uuid
 from typing import Optional
 
-from apps.web_demo.backend.utils.aliyun_oss import bucket
+from apps.web_demo.backend.utils.aliyun.aliyun_oss import bucket
 from autogan import dict_from_json
 from autogan.oai.audio_api_utils import openai_audio_speech, AudioSpeechRequest
 from autogan.oai.audio_config_utils import AudioSpeechConfig
@@ -22,7 +22,7 @@ def generate_audio(request: AudioSpeechRequest) \
     file_name = create_time_based_uuid()
 
     for i in range(loop):
-        api_key = audio_speech_config.next_api_key
+        api_key = audio_speech_config.api_key(i)
         try:
             content = openai_audio_speech(api_key, audio_speech_config.request_config, request)
             if content:

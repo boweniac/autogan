@@ -21,7 +21,7 @@ class WebsocketResponse(ResponseProtocol):
         self._websocket = websocket
         self.disconnected = False
 
-    async def a_send(self, msg_id: int, task_id: int, requester_name: str, index: int, content_type: str,
+    async def a_send(self, msg_id: int, task_id: int, requester_name: str, index: int, content_type: str, content_tag: str,
                      content: str, completion_tokens: int, response: any):
         """default response function
         默认响应函数提供终端打印支持

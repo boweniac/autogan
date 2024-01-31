@@ -23,7 +23,7 @@ class GrpcResponse(ResponseProtocol):
         self._reply = reply
         self._stop_event = stop_event
 
-    def send(self, msg_id: int, task_id: int, requester_name: str, index: int, content_type: str,
+    def send(self, msg_id: int, task_id: int, requester_name: str, index: int, content_type: str, content_tag: str,
              content: str, completion_tokens: int, response: any):
         """default response function
         默认响应函数提供终端打印支持
@@ -39,14 +39,16 @@ class GrpcResponse(ResponseProtocol):
         :param response: Respond to raw data
         :return:
         """
-        print(content)
+        # print(content)
         data = {
             "agent_name": requester_name,
             "content_type": content_type,
+            "content_tag": content_tag,
             "content": content,
             "tokens": completion_tokens,
             "msg_id": msg_id,
-            "task_id": task_id
+            "task_id": task_id,
+            "index": index
         }
         text = f'data: {json.dumps(data, ensure_ascii=False)}\n\n'
 

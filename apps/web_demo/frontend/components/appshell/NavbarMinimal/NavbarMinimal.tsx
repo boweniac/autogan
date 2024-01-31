@@ -16,6 +16,8 @@ import classes from './NavbarMinimal.module.css';
 import { useRouter } from 'next/router';
 import { LocalState, localStore } from '@/stores/LocalStore';
 import { updateActivePageState } from '@/stores/LocalStoreActions';
+import UserMenu from './UserMenu/UserMenu';
+import { notifications } from '@mantine/notifications';
 
 interface NavbarLinkProps {
   icon: typeof IconHome2;
@@ -43,7 +45,16 @@ export function NavbarMinimal() {
   const [active, setActive] = useState(2);
   const router = useRouter();
   const activePage = localStore((state: LocalState) => state.activePage);
+  const userToken = localStore((state: LocalState) => state.userToken);
 
+//   useEffect(() => {
+//     if (router.isReady) {
+//       notifications.show({
+//         message: "请求失败：",
+//         color: "red",
+//     });
+//     }
+// }, [router.isReady]);
 
   const links = mockdata.map((link, index) => {
     return (
@@ -73,8 +84,9 @@ export function NavbarMinimal() {
       </div>
 
       <Stack align="center" justify="center" gap={0}>
-        <NavbarLink icon={IconSwitchHorizontal} label="Change account" active={true} />
-        <NavbarLink icon={IconLogout} label="Logout" />
+        <UserMenu></UserMenu>
+        {/* <NavbarLink icon={IconSwitchHorizontal} label="Change account" active={true} />
+        <NavbarLink icon={IconLogout} label="Logout" /> */}
       </Stack>
     </nav>
   );

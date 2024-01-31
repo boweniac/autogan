@@ -6,7 +6,7 @@ def environment_info() -> str:
 
     :return: --current_time: Y.m.d H:M:S week:%w
     """
-    info = f'current time: {get_time()}'
+    info = f'{get_time()}'
 
     return info
 

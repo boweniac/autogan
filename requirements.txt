@@ -19,3 +19,5 @@ oss2
 pydub
 python-consul
 grpcio
+transformers
+torch

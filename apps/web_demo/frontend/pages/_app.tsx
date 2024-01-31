@@ -7,7 +7,9 @@ import {LocalState, localStore} from "@/stores/LocalStore";
 import '@mantine/core/styles.css';
 import "highlight.js/styles/stackoverflow-dark.css";
 import '@/styles/globals.css';
+import '@mantine/notifications/styles.css';
 import { syncConversations } from "@/components/agent/AgentFrameUtil";
+import { Notifications } from "@mantine/notifications";
 
 
 export default function App({ Component, pageProps }: AppProps) {
@@ -21,6 +23,7 @@ export default function App({ Component, pageProps }: AppProps) {
     } else {
         return (
             <MantineProvider>
+                <Notifications />
                 <CustHeader appName={appName}></CustHeader>
                 <AppShell
                     navbar={{

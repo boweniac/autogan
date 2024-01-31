@@ -6,22 +6,17 @@ import classes from './RoleDisplay.module.css';
 import dynamic from 'next/dynamic'
 import { FunctionComponent, useEffect, useState } from "react";
 import { Canvas } from "@react-three/fiber";
-import DefaultAvatar from "../avatar/DefaultAvatar/DefaultAvatar";
 import { AudioAndLip } from "@/stores/TypeAudioAndLip";
+import DefaultScene from "../../avatar/Scene/DefaultScene";
 
 type RoleDisplayProps = {
-    morphTargetName: string;
+    avatarName: string; // 模型文件的路径
     audioAndLip: AudioAndLip | undefined;
-    lipValue: string | undefined
+    audioEndCallback: ()=>void
   }
 
 
 export default function RoleDisplay(props: RoleDisplayProps) {
-    const [morphTargetName, setMorphTargetName] = useState<string>("viseme_O");
-
-    useEffect(() => {
-        setMorphTargetName(props.morphTargetName)
-    }, [props.morphTargetName]);
 
     return (
         <Stack
@@ -38,7 +33,7 @@ export default function RoleDisplay(props: RoleDisplayProps) {
             {/* <Canvas>
                 <DefaultAvatar />
             </Canvas> */}
-            <DefaultAvatar morphTargetName={morphTargetName} audioAndLip={props.audioAndLip} lipValue={props.lipValue}/>
+            <DefaultScene avatarName={props.avatarName} audioAndLip={props.audioAndLip} audioEndCallback={props.audioEndCallback}/>
         </Stack>
     );
 }

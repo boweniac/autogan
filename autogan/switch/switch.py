@@ -7,7 +7,7 @@ from autogan.oai.chat_config_utils import AgentConfig
 from autogan.protocol.storage_protocol import StorageProtocol
 from autogan.oai.conv_holder import ConvHolder
 from autogan.switch.default_response import DefaultResponse
-from autogan.protocol.switch_protocol import SwitchProtocol, Language
+from autogan.protocol.switch_protocol import SwitchProtocol
 from autogan.utils.uuid_utils import SnowflakeIdGenerator
 
 
@@ -22,6 +22,7 @@ class Switch(SwitchProtocol):
             stream_mode: Optional[bool] = None,
             storage: Optional[StorageProtocol] = None,
             default_language: Optional[str] = None,
+            default_agent: Optional[UniversalAgent] = None,
     ):
         """All messages sent by agents need to be forwarded through the AgentSwitch object.
         所有 agent 发送的消息，都需要通过 AgentSwitch 对象进行转发。
@@ -75,17 +76,25 @@ class Switch(SwitchProtocol):
         :param stream_mode: 默认值为 True。
         :param storage: 存储对象，可根据需要自行实现会话记录的持久化存储
         """
+        self.task_tag = task_tag if task_tag else "/task"
+        self.default_language = "EN" if default_language is None else default_language
         self.default_agent_config = AgentConfig(default_agent_config)
         self._agents = defaultdict(UniversalAgent)  # key: agent name value: agent object
         self._init_agents(org_structure)
         self._init_agents_workmates(org_structure)
-        self.task_tag = task_tag if task_tag else "/task"
         if invited_speakers:
             self._inviting_to_speak(invited_speakers)
         self.default_consider_mode = consider_mode if consider_mode else "auto"
         self.default_stream_mode = stream_mode if stream_mode else True
         self.storage = storage
-        self.default_language = Language.EN if default_language is None else Language(default_language)
+        self.default_agent = default_agent
+
+    @property
+    def default_agent_name(self) -> Optional[str]:
+        if self.default_agent:
+            return self.default_agent.name
+        else:
+            return None
 
     def _init_agents(self, org_structure: list):
         """注册组织架构中的所有 agent"""
@@ -155,6 +164,7 @@ class Switch(SwitchProtocol):
                 if not agent.pipeline or agent.pipeline == "\\":
                     agent.workmates += workmates
                     agent.pipeline = name
+                    agent.init_prompts(self.default_language, self.task_tag, workmates, name)
         else:
             # The current list is non-workflow mode.
             # 当前数组是非工作流数组
@@ -201,6 +211,7 @@ class Switch(SwitchProtocol):
                     workmates += f"""
 {name} : {duty}"""
                 main_agent.workmates += workmates
+                main_agent.init_prompts(self.default_language, self.task_tag, workmates, "")
 
     def _inviting_to_speak(self, invited_speaker: UniversalAgent):
         """Invite the human agent to publish the first task
@@ -278,15 +289,16 @@ class Switch(SwitchProtocol):
 
         :param conv_info: pusher task id.
         """
-        # Get pusher object.
         requester = self._agents[conv_info.requester_name]
 
-        # Recognize the recipient's name.
         responder_name = conv_info.responder_name
-
+        print(f"responder_name: {responder_name}")
+        if responder_name is None and self.default_agent and requester.agent_type and requester.agent_type.HUMAN.value == "HUMAN":
+            responder_name = self.default_agent.name
+        print(f"responder_name: {responder_name}")
         content = conv_info.content
 
-        self.storage and self.storage.add_message(conv_info.conversation_id, conv_info.message)
+        self.storage and self.storage.add_message(conv_info.conversation_id, conv_info.message("main"))
 
         if responder_name:
             if responder_name not in self._agents:
@@ -306,7 +318,7 @@ class Switch(SwitchProtocol):
 
                 # Establish a relationship between the push task and the receiver task.
                 requester.save_sub_to_main_task_id(switch_task_id, conv_info.task_id)
-                receiver.save_main_to_sub_task_id(conv_info.task_id, switch_task_id)
+                receiver.save_main_to_sub_task_id(conv_info.conversation_id, conv_info.task_id, switch_task_id)
             else:
                 receiver = self._agents[responder_name]
                 sender_name = conv_info.requester_name
@@ -321,15 +333,21 @@ class Switch(SwitchProtocol):
                     # Translate the session id of the sender into the superior session id of the receiver.
                     switch_task_id = main_task_id
                 if switch_task_id == conv_info.task_id:
-                    # If no subtasks of the task from the requester are found, a prompt is needed to create the task first.
-                    response_type = "new_task"
-                    switch_task_id = conv_info.snowflake_id_generator.next_id()
+                    latest_task_id = receiver.get_conversation_latest_task(conv_info.conversation_id)
+                    if requester.agent_type and requester.agent_type.HUMAN.value == "HUMAN" and latest_task_id:
+                        response_type = "general"
+                        switch_task_id = latest_task_id
+                        receiver.save_main_to_sub_task_id(conv_info.conversation_id, conv_info.task_id, switch_task_id)
+                    else:
+                        # If no subtasks of the task from the requester are found, a prompt is needed to create the task first.
+                        response_type = "new_task"
+                        switch_task_id = conv_info.snowflake_id_generator.next_id()
 
-                    # Establish a relationship between the push task and the receiver task.
-                    requester.save_sub_to_main_task_id(switch_task_id, conv_info.task_id)
-                    receiver.save_main_to_sub_task_id(conv_info.task_id, switch_task_id)
-                    # Create a new task.
-                    content = content.replace(f"@{responder_name} ", f"@{responder_name} {self.task_tag} ")
+                        # Establish a relationship between the push task and the receiver task.
+                        requester.save_sub_to_main_task_id(switch_task_id, conv_info.task_id)
+                        receiver.save_main_to_sub_task_id(conv_info.conversation_id, conv_info.task_id, switch_task_id)
+                        # Create a new task.
+                        content = content.replace(f"@{responder_name} ", f"@{responder_name} {self.task_tag} ")
                 else:
                     response_type = "general"
         else:
@@ -343,7 +361,6 @@ class Switch(SwitchProtocol):
                 content = f"@{conv_info.requester_name} Any reply must start with @ + recipient's name, Also please do not attempt to converse with me, this is just a system message."
             else:
                 return
-
         if (
                 self.default_agent_config.main_model_config.request_config.max_conv_turns >= conv_info.response_proxy.conv_turns) or not conv_info.response_proxy.need_to_stop():
             conv_info.response_proxy.conv_turns += 1
@@ -354,13 +371,15 @@ class Switch(SwitchProtocol):
             return
 
     def system_alert(self, conv_info: ConvHolder) -> None:
-        self.storage and self.storage.add_message(conv_info.conversation_id, conv_info.message)
-        conv_info.response(0, "system", conv_info.content, conv_info.completion_tokens, None)
+        self.storage and self.storage.add_message(conv_info.conversation_id, conv_info.message("system"))
+        conv_info.response(0, "system", "", conv_info.content, conv_info.completion_tokens, None)
+        conv_info.response(1, "system", "", '[DONE]', 0, None)
         # conv_info.response_proxy.send(conv_info.msg_id, conv_info.task_id, conv_info.requester_name, 0, "system", conv_info.content, conv_info.completion_tokens, None)
         self._agents[conv_info.responder_name].receive(conv_info)
 
     async def a_system_alert(self, conv_info: ConvHolder) -> None:
-        self.storage and self.storage.add_message(conv_info.conversation_id, conv_info.message)
-        await conv_info.a_response(0, "system", conv_info.content, conv_info.completion_tokens, None)
+        self.storage and self.storage.add_message(conv_info.conversation_id, conv_info.message("system"))
+        await conv_info.a_response(0, "system", "", conv_info.content, conv_info.completion_tokens, None)
+        await conv_info.a_response(1, "system", "", '[DONE]', 0, None)
         # await conv_info.response_proxy.a_send(conv_info.msg_id, conv_info.task_id, conv_info.requester_name, 0, "system", conv_info.content, conv_info.completion_tokens, None)
         await self._agents[conv_info.responder_name].a_receive(conv_info)

@@ -1,12 +1,13 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { AgentConversation } from "./TypeAgentChat";
+import { AgentConversation, Message } from "./TypeAgentChat";
 
 export const excludeFromState = [
     "appName",
     "activePage",
-
-    "currentAbortController",
+    "gateWayProtocol",
+    "gateWayHost",
+    "gateWayPort",
 ];
 
 export interface LocalState {
@@ -16,10 +17,17 @@ export interface LocalState {
     gateWayHost: string;
     gateWayPort: string;
 
+    userToken:string;
+    userPhone:string;
+    userState:number;
+
+    helloStart: boolean;
+
     initConversationRequest: string;
     agentConversations: AgentConversation[];
+    introductionConversations: Message[];
 
-    currentAbortController: AbortController | undefined;
+    agentAvatarMapping: { [key: string]: string };
 }
 
 export const initialState = {
@@ -27,12 +35,21 @@ export const initialState = {
     activePage: "/",
     gateWayProtocol: "http://",
     gateWayHost: "localhost",
-    gateWayPort: "60507",
+    gateWayPort: "60607",
+
+    userToken: "",
+    userPhone: "",
+    userState: 0,
+
+    helloStart: false,
     
     initConversationRequest: "",
     agentConversations: [],
+    introductionConversations: [],
 
-    currentAbortController: undefined,
+    agentAvatarMapping: {
+        "CustomerManager": "boy"
+    }
 }
 
 const store = () => ({ ...initialState } as LocalState);

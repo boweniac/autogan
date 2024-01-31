@@ -75,7 +75,7 @@ class RedisStorage(StorageProtocol):
 
     def add_message(self, conversation_id: int, message: dict) -> None:
         self._redis.rpush(f'conv_messages_{conversation_id}', json.dumps(message))
-        self._redis.hset('conv_last_msg_id', str(conversation_id), message["id"])
+        self._redis.hset('conv_last_msg_id', str(conversation_id), message["msg_id"])
 
     def get_last_msg_id(self, conversation_id: int) -> Optional[int]:
         last_msg_id = self._redis.hget('conv_last_msg_id', str(conversation_id))
@@ -103,5 +103,15 @@ class RedisStorage(StorageProtocol):
         messages = self._redis.hget(f'task_comp_messages', str(task_id))
         if messages:
             return json.loads(messages)
+        else:
+            return None
+
+    def save_conversation_latest_task(self, conversation_id: int, agent_name: str, task_id: int) -> None:
+        self._redis.hset('conv_last_task', f"{conversation_id}_{agent_name}", str(task_id))
+
+    def get_conversation_latest_task(self, conversation_id: int, agent_name: str) -> Optional[int]:
+        task_id = self._redis.hget(f'conv_last_task', f"{conversation_id}_{agent_name}")
+        if task_id:
+            return int(task_id)
         else:
             return None

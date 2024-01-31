@@ -5,7 +5,7 @@ class ResponseProtocol(Protocol):
     req_msg_id: Optional[int]
     conv_turns: Optional[int]
 
-    def send(self, msg_id: int, task_id: int, requester_name: str, index: int, content_type: str, content: str, completion_tokens: int, response: any):
+    def send(self, msg_id: int, task_id: int, requester_name: str, index: int, content_type: str, content_tag: str, content: str, completion_tokens: int, response: any):
         """default response function
         默认响应函数提供终端打印支持
         The default response function provides terminal printing support.
@@ -34,7 +34,7 @@ class ResponseProtocol(Protocol):
         """
         pass
 
-    async def a_send(self, msg_id: int, task_id: int, requester_name: str, index: int, content_type: str, content: str, completion_tokens: int, response: any):
+    async def a_send(self, msg_id: int, task_id: int, requester_name: str, index: int, content_type: str, content_tag: str, content: str, completion_tokens: int, response: any):
         """default response function
         默认响应函数提供终端打印支持
         The default response function provides terminal printing support.

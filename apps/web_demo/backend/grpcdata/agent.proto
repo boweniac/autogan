@@ -4,7 +4,7 @@ syntax = "proto3";
 package Agent;
 
 service Agent {
-  rpc RpcAgentStream (AgentRequest) returns (stream AgentResponse) {}
+  rpc RpcAgentStream (AgentRequest) returns (stream StreamResponse) {}
   rpc RpcAudioAndLip(AudioAndLipRequest) returns (AudioAndLipResponse);
   rpc RpcAddConversation(AddConversationRequest) returns (AddConversationResponse);
   rpc RpcUpdateConversationTitle(UpdateConversationTitleRequest) returns (UpdateConversationTitleResponse);
@@ -14,6 +14,8 @@ service Agent {
   rpc RpcGetMessages(GetMessagesRequest) returns (GetMessagesResponse);
   rpc RpcAliyunSts(AliyunStsRequest) returns (AliyunStsResponse);
   rpc RpcAudioToText(AudioToTextRequest) returns (AudioToTextResponse);
+  rpc RpcAddFileStream (AddFileRequest) returns (stream StreamResponse) {}
+  rpc RpcGetIntroduction(GetIntroductionRequest) returns (GetIntroductionResponse);
 }
 
 message AgentRequest {
@@ -22,7 +24,7 @@ message AgentRequest {
   string content = 3;
 }
 
-message AgentResponse {
+message StreamResponse {
   string text = 1;
 }
 
@@ -34,6 +36,12 @@ message AudioAndLipRequest {
 }
 
 message AudioAndLipResponse {
+  uint32 code = 1;
+  string msg = 2;
+  AudioAndLipResponseData data = 3;
+}
+
+message AudioAndLipResponseData {
   string audio_file = 1;
   string lips_data = 2;
 }
@@ -43,6 +51,12 @@ message AddConversationRequest {
 }
 
 message AddConversationResponse {
+  uint32 code = 1;
+  string msg = 2;
+  AddConversationResponseData data = 3;
+}
+
+message AddConversationResponseData {
   string conversation_id = 1;
 }
 
@@ -53,7 +67,8 @@ message UpdateConversationTitleRequest {
 }
 
 message UpdateConversationTitleResponse {
-  bool is_success = 1;
+  uint32 code = 1;
+  string msg = 2;
 }
 
 message GetConversationsRequest {
@@ -61,6 +76,12 @@ message GetConversationsRequest {
 }
 
 message GetConversationsResponse {
+  uint32 code = 1;
+  string msg = 2;
+  GetConversationsResponseData data = 3;
+}
+
+message GetConversationsResponseData {
   repeated string conversations = 1;
 }
 
@@ -70,7 +91,8 @@ message DeleteConversationRequest {
 }
 
 message DeleteConversationResponse {
-  bool is_success = 1;
+  uint32 code = 1;
+  string msg = 2;
 }
 
 message GetLastMsgIdRequest {
@@ -79,6 +101,12 @@ message GetLastMsgIdRequest {
 }
 
 message GetLastMsgIdResponse {
+  uint32 code = 1;
+  string msg = 2;
+  GetLastMsgIdResponseData data = 3;
+}
+
+message GetLastMsgIdResponseData {
   string msg_id = 1;
 }
 
@@ -88,6 +116,12 @@ message GetMessagesRequest {
 }
 
 message GetMessagesResponse {
+  uint32 code = 1;
+  string msg = 2;
+  GetMessagesResponseData data = 3;
+}
+
+message GetMessagesResponseData {
   repeated string messages = 1;
 }
 
@@ -96,6 +130,12 @@ message AliyunStsRequest {
 }
 
 message AliyunStsResponse {
+  uint32 code = 1;
+  string msg = 2;
+  AliyunStsResponseData data = 3;
+}
+
+message AliyunStsResponseData {
   string access_key_id = 1;
   string access_key_secret = 2;
   string expiration = 3;
@@ -108,6 +148,42 @@ message AudioToTextRequest {
 }
 
 message AudioToTextResponse {
+  uint32 code = 1;
+  string msg = 2;
+  AudioToTextResponseData data = 3;
+}
+
+message AudioToTextResponseData {
   string text = 1;
 }
 
+message AddFileRequest {
+  string api_type = 1;
+  uint64 user_id = 2;
+  uint64 base_id = 3;
+  uint64 conversation_id = 4;
+  string file_name = 5;
+  bytes file = 6;
+}
+
+message GetIntroductionRequest {
+  string case_id = 1;
+}
+
+message GetIntroductionResponse {
+  uint32 code = 1;
+  string msg = 2;
+  repeated GetIntroductionResponseData data = 3;
+}
+
+message GetIntroductionResponseData {
+  string agent_name = 1;
+  repeated GetIntroductionResponseMessageBlockData message_blocks = 2;
+}
+
+message GetIntroductionResponseMessageBlockData {
+  string content_type = 1;
+  string content_tag = 2;
+  string content = 3;
+  AudioAndLipResponseData audio_and_lip = 4;
+}

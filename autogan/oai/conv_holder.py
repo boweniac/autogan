@@ -65,21 +65,26 @@ class ConvHolder:
         else:
             self.responder_name = None
 
-    @property
-    def message(self):
+    def message(self, content_type: str, content_tag: Optional[str] = None):
         data = {
-            "id": self.msg_id,
+            "msg_id": self.msg_id,
             "task_id": self.task_id,
+            "content_type": content_type,
+            "content_tag": content_tag if content_tag else "",
             "agent_name": self.requester_name,
             "content": self.content,
             "tokens": self.completion_tokens
         }
         return data
 
-    def response(self, index: int, content_type: str, content: str, completion_tokens: int, response: any):
-        self.response_proxy.send(self.msg_id, self.task_id, self.requester_name, index, content_type, content,
+    def response(self, index: int, content_type: str, content_tag: str, content: str, completion_tokens: int,
+                 response: any):
+        self.response_proxy.send(self.msg_id, self.task_id, self.requester_name, index, content_type, content_tag,
+                                 content,
                                  completion_tokens, response)
 
-    async def a_response(self, index: int, content_type: str, content: str, completion_tokens: int, response: any):
-        await self.response_proxy.a_send(self.msg_id, self.task_id, self.requester_name, index, content_type, content,
-                                 completion_tokens, response)
+    async def a_response(self, index: int, content_type: str, content_tag: str, content: str, completion_tokens: int,
+                         response: any):
+        await self.response_proxy.a_send(self.msg_id, self.task_id, self.requester_name, index, content_type,
+                                         content_tag, content,
+                                         completion_tokens, response)

@@ -44,5 +44,6 @@ Your code
             "hello",
             super_rich,
             stream_mode,
-            storage
+            storage,
+            cust_manager
         )

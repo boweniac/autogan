@@ -58,7 +58,7 @@ export function LeftTableOfContents(props: LeftTableOfContentsProps) {
         }}
         // key={item.id}
         // className={cx(classes.link, { [classes.linkActive]: props.conversationID === item.id })}
-        style={{ paddingLeft: "var(--mantine-spacing-md)", flexGrow: 1 }}
+        style={{ paddingLeft: "var(--mantine-spacing-md)", flexGrow: 1, cursor: 'pointer' }}
       >
         {item.title ? item.title : "New Chat"}
       </Box>

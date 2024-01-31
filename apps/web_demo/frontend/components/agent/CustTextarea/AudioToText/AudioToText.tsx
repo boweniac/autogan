@@ -1,9 +1,17 @@
 import { useRef, useState } from 'react';
-import { Button } from '@mantine/core';
+import { ActionIcon, Button, Loader, MantineProvider } from '@mantine/core';
 import { audioToTextAPI } from '@/api/audio_to_text';
+import { IconMicrophone, IconPlayerStop } from '@tabler/icons-react';
+import { useDisclosure } from '@mantine/hooks';
+// import { RingLoader } from './RingLoader';
 
-const RecordButton = () => {
-    const [isRecording, setIsRecording] = useState(false);
+type AppProps = {
+  callback: (value: string) => void;
+}
+
+const RecordButton = (props: AppProps) => {
+    const [isRecording, { open: recordStart, close: recordEnd }] = useDisclosure(false);
+    const [isLoading, { open: loadingStart, close: loadingEnd }] = useDisclosure(false);
     const mediaRecorder = useRef<MediaRecorder | null>(null);
     const audioChunks = useRef<Blob[]>([]);
     const streamRef = useRef<MediaStream | null>(null);
@@ -27,16 +35,19 @@ const RecordButton = () => {
         // 发送音频到后端
         const formData = new FormData();
         formData.append('file', audioBlob);
-  
-        audioToTextAPI(formData)
+        audioToTextAPI(formData).then((value)=>{
+          loadingEnd()
+          props.callback(value)
+        })
       };
       mediaRecorder.current.start();
-      setIsRecording(true);
+      recordStart();
     };
   
     const stopRecording = () => {
       mediaRecorder.current?.stop();
-      setIsRecording(false);
+      recordEnd();
+      loadingStart()
 
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop()); // 关闭所有轨道
@@ -46,12 +57,16 @@ const RecordButton = () => {
   
 
   return (
-    <Button 
-      onClick={isRecording ? stopRecording : startRecording} 
-      color={isRecording ? 'red' : 'blue'}
-    >
-      {isRecording ? 'Stop Recording' : 'Start Recording'}
-    </Button>
+    // <Button 
+    //   onClick={isRecording ? stopRecording : startRecording} 
+    //   color={isRecording ? 'red' : 'blue'}
+    // >
+    //   {isRecording ? 'Stop Recording' : 'Start Recording'}
+    // </Button>
+    <ActionIcon variant="subtle" radius="xl" aria-label="Record" onClick={isRecording ? stopRecording : startRecording} loading={isLoading}>
+    {isRecording ? <Loader size="xs" type="bars"/> : <IconMicrophone style={{ width: '70%', height: '70%' }} stroke={1.5} />}
+    {/* {isRecording ? <Loader size="xs" type="bars"/> : <IconMicrophone style={{ width: '70%', height: '70%' }} stroke={1.5} />} */}
+  </ActionIcon>
   );
 };
 
