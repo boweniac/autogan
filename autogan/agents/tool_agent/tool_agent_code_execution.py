@@ -1,5 +1,5 @@
 from typing import Optional
-from autogan.agents.universal_agent import UniversalAgent, AgentType
+from autogan.agents.universal_agent import UniversalAgent
 from autogan.tools.code_execution_tool import CodeExecution
 
 
@@ -7,7 +7,8 @@ class ToolAgentCodeExecution(UniversalAgent):
     def __init__(
             self,
             name: Optional[str] = "CodeExecSpec",
-            duty: Optional[str] = "Submit your Python code to me and I can tell you the execution result. But I can't write code or talk to you. So please just submit the completed code to me encapsulated with ``` symbols. And you should always use the 'print' function for the output",
+            duty: Optional[str] | Optional[dict] = None,
+            # duty: Optional[str] = "Submit your Python code to me and I can tell you the execution result. But I can't write code or talk to you. So please just submit the completed code to me encapsulated with ``` symbols. And you should always use the 'print' function for the output",
             # duty: Optional[str] = "我不会写代码，但可以执行你提交给我的代码，并返回执行结果。",
             work_dir: Optional[str] = "extensions"
     ):
@@ -27,6 +28,20 @@ class ToolAgentCodeExecution(UniversalAgent):
         :param duty: Used to explain one's job responsibilities to other agents.
         :param work_dir: The relative path of the executing code, default is extensions
         """
+        duty = duty if duty else {
+            "EN": """Submit your Python code to me, and I can tell you the execution result, but I will not write code or talk to you. So please package your written code and give it to me, for example:
+```python
+Your python code
+```
+
+Note: You should always use the 'print' function for output.""",
+            "CN": """把你的Python代码提交给我，我可以告诉你执行结果，但我不会写代码，也不会和你说话。所以请将写好的代码封装好后给我，例如：
+```python
+Your python code
+```
+
+注意：你应该总是使用'print'函数输出"""
+        }
         super().__init__(
             name,
             duty=duty,
@@ -34,7 +49,7 @@ class ToolAgentCodeExecution(UniversalAgent):
         )
         self._code_execution = CodeExecution(work_dir)
 
-    def tool_function(self, task_id: int, lang: Optional[str] = None, code: Optional[str] = None,
+    def tool_function(self, conversation_id: int, task_id: int, lang: Optional[str] = None, code: Optional[str] = None,
                       tokens: Optional[int] = None) -> tuple[str, int]:
         try:
             execution_result, tokens = self._code_execution.code_execution_reply(code)

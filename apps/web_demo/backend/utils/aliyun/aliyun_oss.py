@@ -62,7 +62,6 @@ class Sample:
         try:
             # 复制代码运行请自行打印 API 的返回值
             assumeRoleResponse = client.assume_role_with_options(assume_role_request, runtime)
-            # print(f"assumeRoleResponse: {assumeRoleResponse.body.credentials}")
             return assumeRoleResponse.body.credentials
         except Exception as error:
             # 错误 message

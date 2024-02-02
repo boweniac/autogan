@@ -104,14 +104,16 @@ class GetConversationsResponse(_message.Message):
     DATA_FIELD_NUMBER: _ClassVar[int]
     code: int
     msg: str
-    data: GetConversationsResponseData
-    def __init__(self, code: _Optional[int] = ..., msg: _Optional[str] = ..., data: _Optional[_Union[GetConversationsResponseData, _Mapping]] = ...) -> None: ...
+    data: _containers.RepeatedCompositeFieldContainer[GetConversationsResponseData]
+    def __init__(self, code: _Optional[int] = ..., msg: _Optional[str] = ..., data: _Optional[_Iterable[_Union[GetConversationsResponseData, _Mapping]]] = ...) -> None: ...
 
 class GetConversationsResponseData(_message.Message):
-    __slots__ = ("conversations",)
-    CONVERSATIONS_FIELD_NUMBER: _ClassVar[int]
-    conversations: _containers.RepeatedScalarFieldContainer[str]
-    def __init__(self, conversations: _Optional[_Iterable[str]] = ...) -> None: ...
+    __slots__ = ("id", "title")
+    ID_FIELD_NUMBER: _ClassVar[int]
+    TITLE_FIELD_NUMBER: _ClassVar[int]
+    id: int
+    title: str
+    def __init__(self, id: _Optional[int] = ..., title: _Optional[str] = ...) -> None: ...
 
 class DeleteConversationRequest(_message.Message):
     __slots__ = ("user_id", "conversation_id")

@@ -61,7 +61,6 @@ class StreamResponse(ResponseProtocol):
         while True:
             if not self._data_queue.empty():
                 data = await self._data_queue.get()
-                print(data)
                 yield data
             else:
                 await asyncio.sleep(0.1)  # 简短休眠以避免 CPU 过载

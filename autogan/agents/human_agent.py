@@ -3,7 +3,7 @@ from typing import Optional
 
 from autogan.oai.count_tokens_utils import count_text_tokens
 
-from autogan.agents.universal_agent import UniversalAgent, AgentType
+from autogan.agents.universal_agent import UniversalAgent
 from enum import Enum
 
 from autogan.oai.conv_holder import ConvHolder
@@ -51,7 +51,7 @@ class HumanAgent(UniversalAgent):
         if self._model == InputModel.TERMINAL:
             await super().a_receive(conv_info)
 
-    def tool_function(self, task_id: int, lang: Optional[str] = None, code: Optional[str] = None,
+    def tool_function(self, conversation_id: int, task_id: int, lang: Optional[str] = None, code: Optional[str] = None,
                       tokens: Optional[int] = None) -> tuple[str, int, str, str]:
         if self._model == InputModel.TERMINAL:
             try:

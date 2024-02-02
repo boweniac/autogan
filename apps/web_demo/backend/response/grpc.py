@@ -39,7 +39,6 @@ class GrpcResponse(ResponseProtocol):
         :param response: Respond to raw data
         :return:
         """
-        # print(content)
         data = {
             "agent_name": requester_name,
             "content_type": content_type,

@@ -8,7 +8,7 @@ from autogan.tools.wolfram_alpha_tool import WolframAlphaAPIWrapper
 
 from autogan.oai.count_tokens_utils import count_text_tokens
 
-from autogan.agents.universal_agent import UniversalAgent, AgentType
+from autogan.agents.universal_agent import UniversalAgent
 from autogan.utils.compressed_text_utils import compressed_text_universal
 from autogan.tools.web_search_tool import WebSearch
 
@@ -20,22 +20,10 @@ class ToolAgentSearch(UniversalAgent):
             agent_config: Optional[Dict] = None,
             retry_times: Optional[int] = 10,
             name: Optional[str] = "WebSearchExp",
-            duty: Optional[str] = 'Not only can I search for information on the internet, '
-                                  'but I can also answer questions using the Wolfram engine.',
-            work_flow: Optional[str] = """I hope you are an internet search expert. When you receive a search request, you have the following two tools to choose from:
-
-1. web: You can search for information on the internet. When using it, please enclose the search keywords in your output with the ```web\n ``` symbol, for example:
-```web
-Your search keywords
-```
-
-2. wolfram: You can use the Wolfram engine to help you calculate or query data related to Mathematics, finance, unit conversion, data analysis, science, geography, history, culture, movies, music, etc. 
-When using it, please enclose the English question that Wolfram can understand in your output with the ```wolfram\n ``` symbol, for example:
-```wolfram
-one wolfram query
-```
-
-Note: When you decide to use a tool, please do not @ anyone.""",
+            duty: Optional[str] | Optional[dict] = None,
+            work_flow: Optional[str] | Optional[dict] = None,
+            # duty: Optional[str] = 'Not only can I search for information on the internet, '
+            #                       'but I can also answer questions using the Wolfram engine.',
             # duty: Optional[str] = '我不但可以从网络上搜索资料，还可以通过 wolfram 引擎来回答问题。',
             #             work_flow: Optional[str] = """我希望你是一个网络搜索专家，当你收到搜索请求时，你有一下两种工具可供选择：
             #
@@ -84,6 +72,39 @@ Note: When you decide to use a tool, please do not @ anyone.""",
         :param work_flow: Defines the workflow of the agent.
             定义 agent 的工作流程。
         """
+        duty = duty if duty else {
+            "EN": """Not only can I search for information on the internet, but I can also answer questions using the Wolfram engine.""",
+            "CN": """我不但可以在网络上搜索信息，还可以利用 Wolfram engine 来回答问题"""
+        }
+        work_flow = work_flow if work_flow else {
+            "EN": """I hope you are an internet search expert. When you receive a search request, you have the following two tools to choose from:
+
+1. web: You can search for information on the internet. When using it, please enclose the search keywords in your output with the ```web\n ``` symbol, for example:
+```web
+Your search keywords
+```
+
+2. wolfram: You can use the Wolfram engine to help you calculate or query data related to Mathematics, finance, unit conversion, data analysis, science, geography, history, culture, movies, music, etc. 
+When using it, please enclose the English question that Wolfram can understand in your output with the ```wolfram\n ``` symbol, for example:
+```wolfram
+one wolfram query
+```
+
+Note: When you decide to use a tool, please do not @ anyone.""",
+            "CN": """我希望你是一个互联网搜索专家。当您收到搜索请求时，您有以下两个工具可供选择:
+1. web:你可以在互联网上搜索信息。使用时，请在输出的搜索关键字中加上 web 符号，例如:
+```web
+你的搜索关键词
+```
+2. wolfram:您可以使用 wolfram 引擎来帮助您计算或查询与数学、金融、单位转换、数据分析、科学、地理、历史、文化、电影、音乐等相关的数据。
+使用时，请在输出中附上 Wolfram 能理解的英文问题，并加上 Wolfram 符号，例如:
+```wolfram
+one wolfram query
+```
+
+注意:当您决定使用某个工具时，请不要@任何人。
+"""
+        }
         super().__init__(
             name,
             agent_config=agent_config,
@@ -106,7 +127,7 @@ Note: When you decide to use a tool, please do not @ anyone.""",
         else:
             return "", "", "Searching", "Search results"
 
-    def tool_function(self, task_id: int, lang: Optional[str] = None, code: Optional[str] = None,
+    def tool_function(self, conversation_id: int, task_id: int, lang: Optional[str] = None, code: Optional[str] = None,
                       tokens: Optional[int] = None) -> tuple[str, int]:
         if lang == "web" and code:
             if self._web_search:
@@ -134,14 +155,13 @@ one wolfram query
             # Accumulate the search offset of the same task and the same keyword.
             self._conversation_search_index[task_id] += 1
             start = self._conversation_search_index[task_id]
-            print(f"start: {start}")
             # Get webpage content.
             detail = self._web_search.get_search_detail(param, start)
 
             if detail:
                 # Extract content related to the user's question from the webpage content.
                 compressed_text, total_tokens = compressed_text_universal(
-                    detail, self.get_agent_config.summary_model_config, self._conversation_focus[task_id]['task_content'],
+                    detail, self.get_agent_config.summary_model_config, self._conversation_focus[task_id]['content'],
                     self.get_agent_config.summary_model_config.request_config.max_messages_tokens)
                 if compressed_text:
                     return compressed_text, total_tokens

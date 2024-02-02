@@ -14,7 +14,7 @@ export const getConversationsAPI = async () => {
       if (Object.keys(res).length === 0) {
         return []
       } else {
-        const conversations: AgentConversation[] = res.conversations.map((jsonString: string) => JSON.parse(jsonString) as AgentConversation);
-        return conversations
+        // const conversations: AgentConversation[] = res.conversations.map((jsonString: string) => JSON.parse(jsonString) as AgentConversation);
+        return res as AgentConversation[]
       }
   };

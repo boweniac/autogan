@@ -4,6 +4,7 @@ import autogan
 
 from apps.web_demo.backend.service.service import UniversalService
 from autogan.protocol.storage_protocol import StorageProtocol
+from autogan.utils.es_utils import ESSearch
 
 
 class TestService(UniversalService):
@@ -12,7 +13,8 @@ class TestService(UniversalService):
             default_agent_config: str,
             super_rich: Optional[str] = None,
             stream_mode: Optional[bool] = None,
-            storage: Optional[StorageProtocol] = None
+            storage: Optional[StorageProtocol] = None,
+            es: Optional[ESSearch] = None
     ):
         llm_config_dict = autogan.dict_from_json(default_agent_config)
         human = autogan.HumanAgent("Customer", "请帮助我完成业务", autogan.InputModel.API)
@@ -25,7 +27,7 @@ class TestService(UniversalService):
         search_exp = autogan.ToolAgentSearch(search_config_dict, name="SearchExpert")
         mail_config_dict = autogan.dict_from_json("MAIL_CONFIG")
         secretary = autogan.ToolAgentMail(mail_config_dict, "Secretary")
-        file_exp = autogan.ToolAgentFile(name="FileAssistant")
+        file_exp = autogan.ToolAgentDocument()
         coder = autogan.UniversalAgent("Coder", duty="我可以编写 python 代码并执行", work_flow="""
 1. 我希望你是一个有经验的Python程序员，将接收到的需求用代码来实现。不用管你自己是否有能力执行代码，因为 测试员 可以帮你执行。
 
@@ -45,5 +47,6 @@ Your code
             super_rich,
             stream_mode,
             storage,
+            es,
             cust_manager
         )

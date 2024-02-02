@@ -24,7 +24,7 @@ class ConvHolder:
         self.completion_tokens: Optional[int] = None
         self.responder_name: Optional[str] = None
 
-    def init_message(self, requester_name: str, requester_type: Optional[str] = None):
+    def init_message(self, requester_name: str, requester_type: str):
         self.msg_id = self.snowflake_id_generator.next_id()
         self.requester_name = requester_name
         self.requester_type = requester_type

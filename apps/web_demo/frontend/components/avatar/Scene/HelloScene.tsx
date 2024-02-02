@@ -82,11 +82,11 @@ const HelloScene: React.FC<HelloSceneProps> = ({ avatarName, test }) => {
   const [positionY, setPositionY] = useState<string | number>(0);
   const [positionZ, setPositionZ] = useState<string | number>(0);
   const [positionRotation, setPositionRotation] = useState<string | number>(0);
-  const [ambientLightIntensity, setAmbientLightIntensity] = useState<string | number>(8);
+  const [ambientLightIntensity, setAmbientLightIntensity] = useState<string | number>(5);
   const [pointLightX, setPointLightX] = useState<string | number>(0);
-  const [pointLightY, setPointLightY] = useState<string | number>(0);
-  const [pointLightZ, setPointLightZ] = useState<string | number>(0);
-  const [pointLightIntensity, setPointLightIntensity] = useState<string | number>(0);
+  const [pointLightY, setPointLightY] = useState<string | number>(1);
+  const [pointLightZ, setPointLightZ] = useState<string | number>(1);
+  const [pointLightIntensity, setPointLightIntensity] = useState<string | number>(4);
   const [fov, setFov] = useState<string | number>(0);
   const [cameraPositionX, setCameraPositionX] = useState<string | number>(0);
   const [cameraPositionY, setCameraPositionY] = useState<string | number>(1.5);

@@ -1,6 +1,7 @@
 import json
 import threading
 
+from apps.web_demo.backend.db.db_storage import DBStorage
 from apps.web_demo.backend.introduction_data import introduction_data
 from autogan.oai.conv_holder import ConvHolder
 from autogan.tools.file_tool import File
@@ -33,10 +34,10 @@ from grpcdata.grpc_py import health_pb2
 from grpcdata.grpc_py import health_pb2_grpc
 
 app = FastAPI()
-storage = RedisStorage("172.17.0.1", 60101, 0)
+storage = DBStorage()
 snowflake_id = SnowflakeIdGenerator(datacenter_id=1, worker_id=1)
-test_service = TestService("LLM_CONFIG", "on", True, storage)
 es = ESSearch("nas.boweniac.top", 44502, 512)
+test_service = TestService("LLM_CONFIG", "off", True, storage, es)
 
 
 # aliyun_access = AliyunAccess()
@@ -100,10 +101,8 @@ class Agent(agent_pb2_grpc.AgentServicer):
 
         conversation_id = snowflake_id.next_id()
 
-        if storage.add_conversation(user_id, conversation_id):
-            return agent_pb2.AddConversationResponse(code=200, data={"conversation_id": ""})
-        else:
-            return agent_pb2.AddConversationResponse(code=200, data={"conversation_id": str(conversation_id)})
+        storage.add_conversation(user_id, conversation_id)
+        return agent_pb2.AddConversationResponse(code=200, data={"conversation_id": str(conversation_id)})
 
     def RpcUpdateConversationTitle(self, request, context):
         user_id = request.user_id
@@ -117,7 +116,9 @@ class Agent(agent_pb2_grpc.AgentServicer):
         user_id = request.user_id
 
         conversations = storage.get_conversations(user_id)
-        return agent_pb2.GetConversationsResponse(code=200, data={"conversations": conversations})
+        if conversations is None:
+            conversations = []
+        return agent_pb2.GetConversationsResponse(code=200, data=conversations)
 
     def RpcDeleteConversation(self, request, context):
         user_id = request.user_id
@@ -215,11 +216,11 @@ class Agent(agent_pb2_grpc.AgentServicer):
                     "content_type": "file",
                     "content_tag": file_name,
                     "agent_name": "Customer",
-                    "content": "",
+                    "content": f"Upload file: {file_name}",
                     "tokens": 0
                 }
                 storage.add_message(conversation_id, msg)
-
+                test_service.add_file_message(conversation_id, "Customer", file_name)
                 data = {
                     "msg_id": msg_id,
                     "agent_name": "Customer",

@@ -26,11 +26,8 @@ async def add_conversation(user_id: int = Query(None), conversation_id: int = Qu
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                                 detail="User ID and Conversation ID must not be empty")
 
-        err = storage.add_conversation(user_id, conversation_id)
-        if err:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=err)
-        else:
-            return {"code": status.HTTP_200_OK, "data": "Conversation added successfully"}
+        storage.add_conversation(user_id, conversation_id)
+        return {"code": status.HTTP_200_OK, "data": "Conversation added successfully"}
     except HTTPException as e:
         return e
     except Exception as e:
@@ -90,13 +87,11 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         await websocket.accept()
         while True:
-            print("1")
             data = await websocket.receive_text()
             params = json.loads(data)  # 解析JSON格式的参数
             user_id = params.get('user_id')
             conversation_id = params.get('conversation_id')
             content = params.get('content')
-            print(f"content: {content}")
             if not user_id or not conversation_id or not content:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                                     detail="User ID, Conversation ID and Content must not be empty")

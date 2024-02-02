@@ -37,7 +37,6 @@ class WebsocketResponse(ResponseProtocol):
         :param response: Respond to raw data
         :return:
         """
-        print(content)
         if content:
             try:
                 if content_type == "main":

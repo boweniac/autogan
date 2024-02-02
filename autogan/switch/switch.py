@@ -8,6 +8,7 @@ from autogan.protocol.storage_protocol import StorageProtocol
 from autogan.oai.conv_holder import ConvHolder
 from autogan.switch.default_response import DefaultResponse
 from autogan.protocol.switch_protocol import SwitchProtocol
+from autogan.utils.es_utils import ESSearch
 from autogan.utils.uuid_utils import SnowflakeIdGenerator
 
 
@@ -21,6 +22,7 @@ class Switch(SwitchProtocol):
             consider_mode: Optional[str] = None,
             stream_mode: Optional[bool] = None,
             storage: Optional[StorageProtocol] = None,
+            es: Optional[ESSearch] = None,
             default_language: Optional[str] = None,
             default_agent: Optional[UniversalAgent] = None,
     ):
@@ -87,6 +89,7 @@ class Switch(SwitchProtocol):
         self.default_consider_mode = consider_mode if consider_mode else "auto"
         self.default_stream_mode = stream_mode if stream_mode else True
         self.storage = storage
+        self.es = es
         self.default_agent = default_agent
 
     @property
@@ -147,6 +150,7 @@ class Switch(SwitchProtocol):
                     # If the next element is a list
                     name = agent.name
                     duty = agent.duty
+                    # print(f"{name}: {duty}")
                     workmates = f"""
 {name} : {duty}"""
 
@@ -208,6 +212,7 @@ class Switch(SwitchProtocol):
 
                     name = agent.name
                     duty = agent.duty
+                    # print(f"{name}: {duty}")
                     workmates += f"""
 {name} : {duty}"""
                 main_agent.workmates += workmates
@@ -293,7 +298,7 @@ class Switch(SwitchProtocol):
 
         responder_name = conv_info.responder_name
         print(f"responder_name: {responder_name}")
-        if responder_name is None and self.default_agent and requester.agent_type and requester.agent_type.HUMAN.value == "HUMAN":
+        if responder_name is None and self.default_agent and requester.agent_type == "HUMAN":
             responder_name = self.default_agent.name
         print(f"responder_name: {responder_name}")
         content = conv_info.content
@@ -317,35 +322,42 @@ class Switch(SwitchProtocol):
                 sender_name = conv_info.requester_name
 
                 # Establish a relationship between the push task and the receiver task.
-                requester.save_sub_to_main_task_id(switch_task_id, conv_info.task_id)
-                receiver.save_main_to_sub_task_id(conv_info.conversation_id, conv_info.task_id, switch_task_id)
+                receiver.add_task(conv_info.conversation_id,
+                                  conv_info.task_id, requester.name, requester.agent_type,
+                                  switch_task_id, content)
+                # requester.save_sub_to_main_task_id(switch_task_id, conv_info.task_id)
+                # receiver.save_main_to_sub_task_id(conv_info.conversation_id, conv_info.task_id, switch_task_id)
             else:
                 receiver = self._agents[responder_name]
                 sender_name = conv_info.requester_name
                 current_task_id = conv_info.task_id
                 switch_task_id = conv_info.task_id
-                sub_task_id = receiver.convert_main_to_sub_task_id(conv_info.task_id)
+
+                main_task_id, sub_task_id = receiver.convert_main_or_sub_task_id(conv_info.task_id)
                 if sub_task_id:
                     # Translate the session ID of the requester into the sub-session ID of the receiver.
                     switch_task_id = sub_task_id
-                main_task_id = receiver.convert_sub_to_main_task_id(conv_info.task_id)
                 if main_task_id:
                     # Translate the session id of the sender into the superior session id of the receiver.
                     switch_task_id = main_task_id
                 if switch_task_id == conv_info.task_id:
                     latest_task_id = receiver.get_conversation_latest_task(conv_info.conversation_id)
-                    if requester.agent_type and requester.agent_type.HUMAN.value == "HUMAN" and latest_task_id:
+                    if requester.agent_type == "HUMAN" and latest_task_id:
                         response_type = "general"
                         switch_task_id = latest_task_id
-                        receiver.save_main_to_sub_task_id(conv_info.conversation_id, conv_info.task_id, switch_task_id)
+                        # receiver.save_main_to_sub_task_id(conv_info.conversation_id, conv_info.task_id, switch_task_id)
                     else:
                         # If no subtasks of the task from the requester are found, a prompt is needed to create the task first.
                         response_type = "new_task"
                         switch_task_id = conv_info.snowflake_id_generator.next_id()
 
                         # Establish a relationship between the push task and the receiver task.
-                        requester.save_sub_to_main_task_id(switch_task_id, conv_info.task_id)
-                        receiver.save_main_to_sub_task_id(conv_info.conversation_id, conv_info.task_id, switch_task_id)
+                        self.storage.add_task(conv_info.conversation_id,
+                                              conv_info.task_id, requester.name, requester.agent_type,
+                                              switch_task_id, receiver.name, receiver.agent_type,
+                                              content)
+                        # requester.save_sub_to_main_task_id(switch_task_id, conv_info.task_id)
+                        # receiver.save_main_to_sub_task_id(conv_info.conversation_id, conv_info.task_id, switch_task_id)
                         # Create a new task.
                         content = content.replace(f"@{responder_name} ", f"@{responder_name} {self.task_tag} ")
                 else:

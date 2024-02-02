@@ -15,10 +15,10 @@ class RedisStorage(StorageProtocol):
     ):
         self._redis = redis.Redis(host=host, port=port, db=db, decode_responses=True)
 
-    def add_conversation(self, user_id: int, conversation_id: int) -> Optional[str]:
+    def add_conversation(self, user_id: int, conversation_id: int):
         is_existing = self._redis.hexists(f'user_convs_{user_id}', str(conversation_id))
         if is_existing:
-            return "The conversation already exists."
+            return None
         else:
             self._redis.hset(f'user_convs_{user_id}', str(conversation_id), json.dumps({"id": conversation_id}))
             return None
@@ -43,7 +43,7 @@ class RedisStorage(StorageProtocol):
         else:
             return False
 
-    def save_task_info(self, task_id: int, task_info: dict) -> None:
+    def save_task_info(self, task_id: int, task_info: dict):
         self._redis.hset('task_info', str(task_id), json.dumps(task_info))
 
     def get_task_info(self, task_id: int) -> Optional[dict]:

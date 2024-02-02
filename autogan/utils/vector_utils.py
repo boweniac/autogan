@@ -67,5 +67,6 @@ class VectorTool:
                 "length": length,
             }
             text = f'data: {json.dumps(data, ensure_ascii=False)}\n\n'
-            response.put(text)
+            if response:
+                response.put(text)
         return values

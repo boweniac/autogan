@@ -4,6 +4,7 @@ from typing import Protocol, Optional
 from autogan.oai.chat_config_utils import AgentConfig
 from autogan.protocol.storage_protocol import StorageProtocol
 from autogan.oai.conv_holder import ConvHolder
+from autogan.utils.es_utils import ESSearch
 
 
 # class Language(Enum):
@@ -17,6 +18,7 @@ class SwitchProtocol(Protocol):
     default_consider_mode: Optional[str]
     default_stream_mode: Optional[bool]
     storage: Optional[StorageProtocol]
+    es: Optional[ESSearch]
     default_language: str
     # default_agent_name: str
 

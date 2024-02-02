@@ -4,7 +4,7 @@ from autogan.tools.code_execution_tool import CodeExecution
 
 from autogan.utils.json_utils import text_to_json
 
-from autogan.agents.universal_agent import UniversalAgent, AgentType
+from autogan.agents.universal_agent import UniversalAgent
 from autogan.oai.count_tokens_utils import count_text_tokens
 from autogan.tools.file_tool import File
 
@@ -88,7 +88,7 @@ Note: When you decide to use a tool, please do not @ anyone.""",
         else:
             return "", "", "Opening", "File content"
 
-    def tool_function(self, task_id: int, lang: Optional[str] = None, code: Optional[str] = None,
+    def tool_function(self, conversation_id: int, task_id: int, lang: Optional[str] = None, code: Optional[str] = None,
                       tokens: Optional[int] = None) -> tuple[str, int]:
         if lang == "reader" and code:
             return self._reader_function(code)

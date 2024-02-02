@@ -78,11 +78,12 @@ message GetConversationsRequest {
 message GetConversationsResponse {
   uint32 code = 1;
   string msg = 2;
-  GetConversationsResponseData data = 3;
+  repeated GetConversationsResponseData data = 3;
 }
 
 message GetConversationsResponseData {
-  repeated string conversations = 1;
+  uint64 id = 1;
+  string title = 2;
 }
 
 message DeleteConversationRequest {
