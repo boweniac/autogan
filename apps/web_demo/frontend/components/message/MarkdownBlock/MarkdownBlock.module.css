@@ -8,3 +8,14 @@
   font-size: rem(14px);
   content: "copied!";
 }
+
+.message {
+  & pre {
+    max-width: 100%;
+    overflow-x: "scroll";
+  }
+  & code {
+    max-width: 100%;
+    overflow-x: "scroll";
+  }
+}

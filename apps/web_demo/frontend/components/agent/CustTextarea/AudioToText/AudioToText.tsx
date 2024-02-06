@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { ActionIcon, Button, Loader, MantineProvider } from '@mantine/core';
-import { audioToTextAPI } from '@/api/audio_to_text';
+import { audioToTextAPI } from '@/api/audio/audio_to_text';
 import { IconMicrophone, IconPlayerStop } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
 // import { RingLoader } from './RingLoader';

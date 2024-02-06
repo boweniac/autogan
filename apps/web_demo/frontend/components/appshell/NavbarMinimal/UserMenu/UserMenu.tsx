@@ -4,11 +4,11 @@ import { useDisclosure } from "@mantine/hooks";
 import { IconClockRecord, IconCoinYen, IconCrown, IconDeviceMobile, IconKey, IconLogin, IconLogout, IconTrash, IconUser, IconUserPlus } from "@tabler/icons-react";
 import { useRef, useState } from "react";
 import { LoginModal } from "../../Modals/LoginModal/LoginModal";
-import { resetAgentConversationsState, updateUserPhoneState, updateUserStateState, updateUserTokenState } from "@/stores/LocalStoreActions";
+import { resetAgentConversationListState, resetAgentConversationMessageState, updateUserPhoneState, updateUserStateState, updateUserTokenState } from "@/stores/LocalStoreActions";
 import { notifications } from "@mantine/notifications";
 import { useRouter } from "next/router";
-import { getUserInfoAPI } from "@/api/user_get_user_info";
-import { subscribeListAPI } from "@/api/user_subscribe_list";
+import { getUserInfoAPI } from "@/api/user/user_get_user_info";
+import { subscribeListAPI } from "@/api/user/user_subscribe_list";
 import { unixTimestamp } from "./UserMenuUtil";
 import { ChangePhoneModal } from "../../Modals/ChangePhoneModal/ChangePhoneModal";
 import { ChangePasswordModal } from "../../Modals/ChangePasswordModal/ChangePasswordModal";
@@ -83,7 +83,8 @@ export default function UserMenu() {
               updateUserTokenState("")
               updateUserPhoneState("")
               updateUserStateState(0)
-              resetAgentConversationsState()
+              resetAgentConversationListState()
+              resetAgentConversationMessageState()
               router.push(activePage).then(()=>{
                 notifications.show({
                   message: "已成功退出登录",

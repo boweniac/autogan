@@ -5,14 +5,14 @@ import classes from './MessagesDisplay.module.css';
 import { LocalState, localStore } from "@/stores/LocalStore";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
-import { burnAfterGetInitConversationRequestState, resetIntroductionConversationsState, updateActivePageState } from "@/stores/LocalStoreActions";
+import { resetIntroductionConversationsState } from "@/stores/LocalStoreActions";
 import { helloAudioAndLip, helloTextString } from "../HelloUtil";
-import { AudioAndLip, LipsData } from "@/stores/TypeAudioAndLip";
+import { AudioAndLip, AudioAndLipDemo, LipsData } from "@/stores/TypeAudioAndLip";
 import { SelectCard } from "../select_card/SelectCard";
 
 type MessagesDisplayProps = {
     startSayHello: boolean;
-    playAudio: (audioAndLip: AudioAndLip)=>void
+    playAudio: (audioAndLip: AudioAndLipDemo)=>void
     selectCallback: (value: string)=>void
   }
 
@@ -23,6 +23,17 @@ export default function MessagesDisplay(props: MessagesDisplayProps) {
     const [helloSelect, setHelloSelect] = useState<boolean>(false);
     const agentConversation = localStore((state: LocalState) => state.introductionConversations);
     const selectCaseID = useRef("");
+
+    const viewport = useRef<HTMLDivElement>(null);
+
+    const scrollToBottom = () =>
+      viewport.current!.scrollTo({ top: viewport.current!.scrollHeight, behavior: 'smooth' });
+
+    useEffect(() => {
+        if (agentConversation) {
+            scrollToBottom()
+        }
+    }, [agentConversation]);
 
     useEffect(() => {
         if (router.isReady) {
@@ -52,7 +63,7 @@ export default function MessagesDisplay(props: MessagesDisplayProps) {
 
 
     return (
-        <ScrollArea className={classes.scrollArea} type="never" >
+        <ScrollArea className={classes.scrollArea} type="never" viewportRef={viewport}>
              <Transition
                 mounted={hello}
                 transition="fade"
@@ -72,6 +83,7 @@ export default function MessagesDisplay(props: MessagesDisplayProps) {
                 transition="fade"
                 duration={1000}
                 timingFunction="ease"
+                onEntered={()=>{scrollToBottom()}}
                 onExited={()=>{
                     resetIntroductionConversationsState()
                     props.selectCallback(selectCaseID.current)

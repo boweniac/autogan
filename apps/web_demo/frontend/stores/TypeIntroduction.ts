@@ -1,4 +1,4 @@
-import { AudioAndLip } from "./TypeAudioAndLip";
+import { AudioAndLip, AudioAndLipDemo } from "./TypeAudioAndLip";
 
 export interface IntroductionMessage {
     agentName: string;
@@ -9,5 +9,5 @@ export interface IntroductionMessageBlock {
     contentType?: string | undefined;
     contentTag?: string | undefined;
     content?: string | undefined;
-    audioAndLip?: AudioAndLip | undefined
+    audioAndLip?: AudioAndLipDemo | undefined
 }

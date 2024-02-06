@@ -24,12 +24,13 @@ export default function MessageBlocks(props: UserMessageBlockProps) {
                 <Card
                     padding="sm"
                     radius="md"
+                    // maw={`calc(100vw - ${rem(400)} - ${rem(364)})`}
                     className={ `${classes.messageBlock} ${props.name == props.mainAgent ? classes.messageRight : classes.messageLeft}` }
                 >
                     {
                         props.message_blocks.map((mb) => 
                             {
-                                return mb.content_type == "file" ? <FileBlock content_tag={mb.content_type} text_to_vectors_progress={mb.text_to_vectors_progress} add_document_progress={mb.add_document_progress}></FileBlock> : <MarkdownBlock key={mb.localID} content_type={mb.content_type} content_tag={mb.content_tag} content={mb.content!}></MarkdownBlock>
+                                return mb.contentType == "file" ? <FileBlock content_tag={mb.contentTag}></FileBlock> : <MarkdownBlock key={mb.localID} content_type={mb.contentType} content_tag={mb.contentTag} content={mb.content!}></MarkdownBlock>
                             }
                             // <MarkdownBlock key={mb.localID} content_type={mb.content_type} content_tag={mb.content_tag} content={mb.content!}></MarkdownBlock>
                         )

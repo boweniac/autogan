@@ -1,56 +1,56 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from 'next/router';
-import { Box, Button, ScrollArea, SegmentedControl, Stack, rem } from "@mantine/core";
+import { Box, Stack, rem } from "@mantine/core";
 import CustTextarea from "@/components/agent/CustTextarea/CustTextarea";
 import { HeaderMegaMenu } from "@/components/agent/HeaderMegaMenu/HeaderMegaMenu";
 import { LeftTableOfContents } from "@/components/agent/LeftTableOfContents/LeftTableOfContents";
 import RoleDisplay from "@/components/agent/RoleDisplay/RoleDisplay";
 import MessagesDisplay from "@/components/agent/messages_display/MessagesDisplay";
-import { addAgentConversationState, burnAfterGetInitConversationRequestState, getAgentConversationState, updateActivePageState } from "@/stores/LocalStoreActions";
+import { burnAfterGetInitConversationRequestState, getAgentConversationMessageState, updateActivePageState } from "@/stores/LocalStoreActions";
 import classes from './AgentFrame.module.css';
 import { useDisclosure } from "@mantine/hooks";
-import { addAgentConversationAPI } from "@/api/add_conversation";
-import { streamTestAPI } from "@/api/request_open";
-import { AgentConversationSend, addAgentConversation, syncConversations, syncMessages } from "./AgentFrameUtil";
-import { Message } from "@/stores/TypeAgentChat";
-import { v4 as uuidv4 } from "uuid";
-import MessageFrame from "../message/MessageFrame";
+import { AgentConversationSend, addAgentConversation } from "./AgentFrameUtil";
 import {LocalState, localStore} from "@/stores/LocalStore";
-import { audioAndLipAPI } from "@/api/audio_and_lip";
-import { AudioAndLip, MouthCues } from "@/stores/TypeAudioAndLip";
-import { notifications } from "@mantine/notifications";
+import { audioAndLipAPI } from "@/api/audio/audio_and_lip";
+import { AudioAndLip } from "@/stores/TypeAudioAndLip";
 import { avatarConfig } from "../avatar/Avatar/AvatarConfig";
+import { getConversationsAPI } from "@/api/conversation/get_conversations";
+import { getMessagesWhenChangedAPI } from "@/api/message/get_messages";
 
 
 export default function AgentFrame() {
+    const roleWidth = rem(400)
     const router = useRouter();
     const queryConversationID = router.query.conversation_id as string | undefined;
-    // getConversations()
-    const roleWidth = rem(400)
-    const [isLoading, { open: loadingStart, close: loadingEnd }] = useDisclosure(false);
-    // const [test, setTest] = useState<string>("");
-    const [message, setMessage] = useState<Message | undefined>(undefined);
-    const [messages, setMessages] = useState<Message[]>([]);
-    const [speakText, setSpeakText] = useState<string>("");
-    const [audioAndLip, setAudioAndLip] = useState<AudioAndLip>();
-    // const [lipValue, setLipValue] = useState<string>();
     const agentAvatarMapping = localStore((state: LocalState) => state.agentAvatarMapping);
+    const [isLoading, { open: loadingStart, close: loadingEnd }] = useDisclosure(false);
+
+    const [audioAndLip, setAudioAndLip] = useState<AudioAndLip>();
     const [agentRole, setAgentRole] = useState<string>("CustomerManager");
-    const avatarName = useRef("boy");
-    const avatarVoice = useRef("");
-    // const agentConversations = localStore((state: LocalState) => state.agentConversations);
-    // const agentConversation = agentConversations.find((agentConversations) => agentConversations.id == queryConversationID);
-    const [morphTargetName, setMorphTargetName] = useState<string>("viseme_O");
+    const [avatarName, setAvatarName] = useState<string>(agentAvatarMapping["CustomerManager"]);
     const [textStack, setTextStack] = useState<string[]>([]);
     const [audioStack, setAudioStack] = useState<AudioAndLip[]>([]);
+
     const isGeting = useRef(false);
     const isPlaying = useRef(false);
+    // const avatarName = useRef(agentAvatarMapping["CustomerManager"]);
+    const avatarVoice = useRef("");
+    const lastMsgId = useRef("");
     const abortControllerRef = useRef<AbortController | null>(null);
-    // const [currentMorphTargetHolder, setSpeakText] = useState<string>("");
-    // new Audio()
-    // const currentAbortController = new AbortController();
-    // updateCurrentAbortController(currentAbortController)
 
+    // const messages = getAgentConversationMessageState(queryConversationID)
+
+    useEffect(() => {
+        if (agentRole == "CustomerManager") {
+            setAvatarName(agentAvatarMapping["CustomerManager"]);
+        }
+    }, [agentAvatarMapping]);
+
+    const syncMessages = () => {
+        if (queryConversationID) {
+            getMessagesWhenChangedAPI(queryConversationID, lastMsgId.current)
+        }
+    }
 
     const getNextAudio = () => {
         setTextStack(prevTextStack => {
@@ -97,38 +97,8 @@ export default function AgentFrame() {
             }
           });
       }
-
-    // useEffect(() => {
-    //     if (router.isReady) {
-    //         if (queryConversationID != undefined && agentConversation == undefined) {
-    //             router.push("/agent").then()
-    //         } else {
-    //             updateActivePageState("/agent")
-    //             syncConversations().then((deletedConversations)=>{
-    //                 if (queryConversationID != undefined && deletedConversations.includes(queryConversationID)) {
-    //                     router.push("/agent").then()
-    //                 }
-    //             })
-    //             if (queryConversationID != undefined) {
-    //                 const initConversationRequest = burnAfterGetInitConversationRequestState()
-    //                 if (initConversationRequest != "") {
-    //                     doSubmit(initConversationRequest)
-    //                 } else {
-    //                     syncMessages(queryConversationID)
-    //                 }
-    //             }
-    //         }
-    //         // getConversations()
-    //     }
-    // }, [router.isReady]);
-
-    useEffect(() => {
-        avatarName.current = agentAvatarMapping[agentRole]
-        avatarVoice.current = avatarConfig[avatarName.current].voice
-    }, [agentRole]);
-
-
-    const doSubmit = async (value: string) => {
+    
+      const doSubmit = async (value: string) => {
         // 并非新对话
         if (queryConversationID == undefined) {
             addAgentConversation(value, router)
@@ -144,7 +114,7 @@ export default function AgentFrame() {
                         return [...prevTextStack, text]
                     })
                     if (!isGeting.current) {
-                        getNextAudio();
+                        // getNextAudio();
                     }
                 }
             }, () => loadingEnd(), () => loadingEnd())
@@ -157,6 +127,30 @@ export default function AgentFrame() {
             abortControllerRef.current.abort(); // 取消请求
         }
     };
+
+    useEffect(() => {
+        updateActivePageState("/agent")
+        getConversationsAPI().then((res: string[])=>{
+            console.log(`res:`+JSON.stringify(res));
+            if (queryConversationID && !res.includes(queryConversationID)) {
+                router.push("/agent").then()
+            }
+        })
+    }, []);
+
+    useEffect(() => {
+        if (router.isReady && queryConversationID) {
+            const initConversationRequest = burnAfterGetInitConversationRequestState()
+            if (initConversationRequest) {
+                doSubmit(initConversationRequest)
+            }
+        }
+    }, [router.isReady]);
+
+    useEffect(() => {
+        setAvatarName(agentAvatarMapping[agentRole])
+        avatarVoice.current = avatarConfig[avatarName].voice || ""
+    }, [agentRole]);
 
     return (
         <Box
@@ -171,7 +165,7 @@ export default function AgentFrame() {
                 w="100%"
                 gap={0}
             >
-                <HeaderMegaMenu></HeaderMegaMenu>
+                <HeaderMegaMenu selectAvatarCallback={(v)=>{}} muteCallback={(v)=>{}}></HeaderMegaMenu>
                 <Stack
                     // h="100%"
                     h={`calc(100vh - ${rem(50)})`}
@@ -180,15 +174,15 @@ export default function AgentFrame() {
                     className={classes.conversationFrame}
                     style={{ marginRight: roleWidth}}
                 >
-                    <MessagesDisplay queryConversationID={queryConversationID} doSubmit={doSubmit} ></MessagesDisplay>
+                    <MessagesDisplay conversationID={queryConversationID} setLastMsgIdCallback={(value)=>{lastMsgId.current = value}} syncMessagesCallback={syncMessages}></MessagesDisplay>
                     <CustTextarea conversationID={queryConversationID} isLoading={isLoading} callback={doSubmit} stopCallback={()=>{
                         loadingEnd()
                         handleCancel()
-                        }} ></CustTextarea>
+                        }} syncMessagesCallback={syncMessages}></CustTextarea>
                 </Stack>
             </Stack>
             
-            <RoleDisplay avatarName={avatarName.current} audioAndLip={audioAndLip} audioEndCallback={()=>{
+            <RoleDisplay avatarName={avatarName} audioAndLip={audioAndLip} audioEndCallback={()=>{
                 playNextAudio()
             }}/>
         </Box>

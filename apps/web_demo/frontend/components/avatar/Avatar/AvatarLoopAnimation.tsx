@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from 'react';
-import { useFrame, useLoader } from '@react-three/fiber';
+import { ObjectMap, useFrame, useLoader } from '@react-three/fiber';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js'
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { Position, animateMorphTargets } from './AvatarUtil';
 import { animationNameToPath } from './AnimationConfig';
 import { avatarConfig, corresponding, nodeKeyToIndex } from './AvatarConfig';
@@ -12,12 +12,20 @@ type GLBModelProps = {
   avatarName: string; // 模型文件的路径
   animations: string[]; // FBX 动画文件路径
   position: Position | undefined;
+  animationPlayEndCallback?: ()=>void
 };
 
 
-const GLBLoopModel: React.FC<GLBModelProps> = ({ avatarName, animations, position }) => {
-    const gltf = useLoader(GLTFLoader, avatarConfig[avatarName].modelPath);
-
+const GLBLoopModel: React.FC<GLBModelProps> = ({ avatarName, animations, position, animationPlayEndCallback }) => {
+  const gltfs:{[key: string]: GLTF & ObjectMap} = {
+    "customerManagerBoy": useLoader(GLTFLoader, avatarConfig["customerManagerBoy"]["modelPath"] || "/avatars/CustomerManagerBoy.glb"),
+    "customerManagerGirl": useLoader(GLTFLoader, avatarConfig["customerManagerGirl"]["modelPath"] || "/avatars/CustomerManagerBoy.glb"),
+    "coder": useLoader(GLTFLoader, avatarConfig["coder"]["modelPath"] || "/avatars/CustomerManagerBoy.glb"),
+    "documentExp": useLoader(GLTFLoader, avatarConfig["documentExp"]["modelPath"] || "/avatars/CustomerManagerBoy.glb"),
+    "searchExpert": useLoader(GLTFLoader, avatarConfig["searchExpert"]["modelPath"] || "/avatars/CustomerManagerBoy.glb"),
+    "secretary": useLoader(GLTFLoader, avatarConfig["secretary"]["modelPath"] || "/avatars/CustomerManagerBoy.glb"),
+    "tester": useLoader(GLTFLoader, avatarConfig["tester"]["modelPath"] || "/avatars/CustomerManagerBoy.glb"),
+  }
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const fbxs = animations.map((animation)=>useLoader(FBXLoader, animationNameToPath[animation]))
     const mixer = useRef<THREE.AnimationMixer>();
@@ -25,8 +33,8 @@ const GLBLoopModel: React.FC<GLBModelProps> = ({ avatarName, animations, positio
     
 
     const animationPlay = (index: number) => {
-      if (gltf.scene && fbxs[index].animations[0]) {
-        mixer.current = new THREE.AnimationMixer(gltf.scene);
+      if (gltfs[avatarName].scene && fbxs[index].animations[0]) {
+        mixer.current = new THREE.AnimationMixer(gltfs[avatarName].scene);
         const action = mixer.current.clipAction(fbxs[index].animations[0]);
 
         // action.setLoop(THREE.LoopOnce, 1);
@@ -36,14 +44,14 @@ const GLBLoopModel: React.FC<GLBModelProps> = ({ avatarName, animations, positio
     }
 
     useEffect(() => {
-      if (gltf.scene) {
+      if (gltfs[avatarName].scene) {
           if (position) {
-            gltf.scene.position.set(position.x, position.y, position.z);
-            gltf.scene.rotation.y = position.rotation;
+            gltfs[avatarName].scene.position.set(Number(position.x), Number(position.y), Number(position.z));
+            gltfs[avatarName].scene.rotation.y = Number(position.rotation);
           }
       }
       animationPlay(currentAnimationIndex.current)
-  }, [gltf, fbxs]);
+  }, [gltfs[avatarName], fbxs]);
 
   useFrame((state, delta) => {
     if (mixer.current) {
@@ -56,12 +64,15 @@ const GLBLoopModel: React.FC<GLBModelProps> = ({ avatarName, animations, positio
           } else {
             currentAnimationIndex.current += 1
           }
+          if (animationPlayEndCallback) {
+            animationPlayEndCallback()
+          }
           animationPlay(currentAnimationIndex.current)
         }
     }
 });
 
-    return <primitive object={gltf.scene} />;
+    return <primitive object={gltfs[avatarName].scene} />;
 };
 
 export default GLBLoopModel;

@@ -703,8 +703,8 @@ Step 4: Please follow the content of the previous step, From {self.name}'s persp
                     self.get_agent_config.main_model_config, request_data, conv_info, "main", "")
                 conv_info.content = content
                 conv_info.completion_tokens = completion_tokens
-                self.switch.storage and self.switch.storage.add_message(conv_info.conversation_id,
-                                                                        conv_info.message("main", ""))
+                # self.switch.storage and self.switch.storage.add_message(conv_info.conversation_id,
+                #                                                         conv_info.message("main", ""))
                 if not content:
                     raise ValueError("Failed to generate content.")
 
@@ -833,8 +833,8 @@ Step 4: Please follow the content of the previous step, From {self.name}'s persp
                     self.get_agent_config.main_model_config, request_data, conv_info, "main", "")
                 conv_info.content = content
                 conv_info.completion_tokens = completion_tokens
-                self.switch.storage and self.switch.storage.add_message(conv_info.conversation_id,
-                                                                        conv_info.message("main", ""))
+                # self.switch.storage and self.switch.storage.add_message(conv_info.conversation_id,
+                #                                                         conv_info.message("main", ""))
                 if not content:
                     raise ValueError("Failed to generate content.")
 

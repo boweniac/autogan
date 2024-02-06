@@ -21,7 +21,7 @@ export const animationNameToPath: { [key: string]: string } = {
 };
 
 export const animationGroup: { [key: string]: string[] } = {
-    "stay": ["standing"],
+    "stay": ["Idle"],
     "hello": ["standing", "Dwarf Idle", "Arm Stretching"],
     "Hance": ["Robot Hip Hop Dance"],
 };

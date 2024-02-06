@@ -2,13 +2,13 @@ import { upperFirst, useDisclosure, useToggle } from '@mantine/hooks';
 import { Modal, Button, Paper, Stack, TextInput, PasswordInput, Checkbox, Group, Anchor, Flex, rem, ActionIcon } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useEffect, useRef, useState } from 'react';
-import { sendSmsAPI } from '@/api/user_send_sms';
+import { sendSmsAPI } from '@/api/user/user_send_sms';
 import { IconSend } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
-import { loginAPI } from '@/api/user_login';
-import { signupAPI } from '@/api/user_signup';
-import { forgetPasswordAPI } from '@/api/user_forget_password';
-import { changePhoneAPI } from '@/api/user_change_phone';
+import { loginAPI } from '@/api/user/user_login';
+import { signupAPI } from '@/api/user/user_signup';
+import { forgetPasswordAPI } from '@/api/user/user_forget_password';
+import { changePhoneAPI } from '@/api/user/user_change_phone';
 
 type ChangePhoneModalProps = {
     opened: boolean;

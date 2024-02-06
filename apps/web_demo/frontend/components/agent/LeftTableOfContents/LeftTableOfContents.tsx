@@ -3,7 +3,7 @@ import { Box, Text, Group, rem, ScrollArea, Stack, Button, Flex, Menu, ActionIco
 import { IconDots, IconListSearch, IconPencil, IconPlus, IconTrash } from '@tabler/icons-react';
 import classes from './LeftTableOfContents.module.css';
 import { LocalState, localStore } from '@/stores/LocalStore';
-import { AgentConversation } from '@/stores/TypeAgentChat';
+import { AgentConversationMessage } from '@/stores/TypeAgentChat';
 import { useRouter } from 'next/router';
 import RenameModal from './RemoveModal/RenameModal';
 import { useDisclosure } from '@mantine/hooks';
@@ -27,7 +27,7 @@ type LeftTableOfContentsProps = {
 
 export function LeftTableOfContents(props: LeftTableOfContentsProps) {
   const router = useRouter();
-  const agentConversations = localStore((state: LocalState) => state.agentConversations);
+  const agentConversations = localStore((state: LocalState) => state.agentConversationList);
   const [openedRenameModal, { open: openRenameModal, close: closeRenameModal }] = useDisclosure(false);
   const [openedDeleteModal, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false);
   const [conversationID, setConversationID] = useState<string>("");
@@ -38,7 +38,7 @@ export function LeftTableOfContents(props: LeftTableOfContentsProps) {
     router.push(`/agent`)
   }
   
-  const items = agentConversations.map((item) => {
+  const items = agentConversations?.map((item) => {
     return (
     <Flex
       gap="0"

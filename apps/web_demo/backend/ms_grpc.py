@@ -1,4 +1,5 @@
 import json
+import os
 import threading
 
 from apps.web_demo.backend.db.db_storage import DBStorage
@@ -22,7 +23,7 @@ from fastapi import HTTPException, FastAPI
 from starlette import status
 
 from apps.web_demo.backend.service.test_service import TestService
-from apps.web_demo.backend.utils.aliyun.aliyun_oss import Sample
+from apps.web_demo.backend.utils.aliyun.aliyun_oss import Sample, bucket
 from autogan.oai.audio_api_utils import AudioSpeechRequest
 from autogan.oai.audio_generate_utils import generate_audio
 from autogan.utils.es_utils import ESSearch
@@ -114,7 +115,6 @@ class Agent(agent_pb2_grpc.AgentServicer):
 
     def RpcGetConversations(self, request, context):
         user_id = request.user_id
-
         conversations = storage.get_conversations(user_id)
         if conversations is None:
             conversations = []
@@ -143,6 +143,27 @@ class Agent(agent_pb2_grpc.AgentServicer):
         except Exception as e:
             return HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
+    def RpcGetMessagesWhenChanged(self, request, context):
+        try:
+            user_id = request.user_id
+            conversation_id = request.conversation_id
+            last_msg_id = request.last_msg_id
+
+            if not user_id or not conversation_id:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                    detail="User ID and Conversation ID must not be empty")
+
+            if storage.user_conversation_permissions(user_id, conversation_id):
+                messages = storage.get_messages_when_changed(conversation_id, last_msg_id)
+                if messages is None:
+                    messages = []
+                return agent_pb2.GetMessagesWhenChangedResponse(code=200, data=messages)
+            else:
+                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                                    detail="Conversation permissions are wrong")
+        except Exception as e:
+            return HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
     def RpcGetMessages(self, request, context):
         try:
             user_id = request.user_id
@@ -153,7 +174,7 @@ class Agent(agent_pb2_grpc.AgentServicer):
 
             if storage.user_conversation_permissions(user_id, conversation_id):
                 messages = storage.get_messages(conversation_id)
-                return agent_pb2.GetMessagesResponse(code=200, data={"messages": messages})
+                return agent_pb2.GetMessagesResponse(code=200, data=messages)
             else:
                 raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                                     detail="Conversation permissions are wrong")
@@ -195,12 +216,14 @@ class Agent(agent_pb2_grpc.AgentServicer):
             user_id = request.user_id
             base_id = request.base_id
             conversation_id = request.conversation_id
-            file_name = request.file_name
+            _, ext = os.path.splitext(request.file_name)
+            file_name = f"{snowflake_id.next_id()}.{ext}"
             file = request.file
-            with open("extensions/test.pdf", "wb") as f:
+            with open(f"extensions/{file_name}", "wb") as f:
                 f.write(file)
+            bucket.put_object_from_file(file_name, f"extensions/{file_name}")
             ft = File()
-            text = ft.read_pdf("test.pdf")
+            text = ft.read(file_name)
             if not user_id:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                                     detail="User ID must not be empty")
@@ -228,8 +251,8 @@ class Agent(agent_pb2_grpc.AgentServicer):
                     "index": 0,
                     "length": 0,
                 }
-                dataStr = f'data: {json.dumps(data, ensure_ascii=False)}\n\n'
-                data_queue.put(dataStr)
+                data_str = f'data: {json.dumps(data, ensure_ascii=False)}\n\n'
+                data_queue.put(data_str)
 
                 test_thread = threading.Thread(target=es.add_chat_file, args=(
                     user_id, conversation_id, file_name, text, data_queue))

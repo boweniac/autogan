@@ -36,9 +36,7 @@ class AudioSpeechRequest:
 
 def openai_audio_speech(api_key: Dict, request_config: AudioSpeechRequestConfig,
                         request_data: AudioSpeechRequest) -> Optional[bytes]:
-    print(api_key['api_key'])
     url = "https://api.openai.com/v1/audio/speech" if api_key["api_type"] == "openai" else api_key["url"]
-    print(url)
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {api_key['api_key']}",

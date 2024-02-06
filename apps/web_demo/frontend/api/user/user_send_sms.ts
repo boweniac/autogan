@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction } from "react";
-import { getOpenRequestAPI } from "./request_open";
+import { getOpenRequestAPI } from "../request_open";
 import { notifications } from "@mantine/notifications";
 
 export const sendSmsAPI = async (phone: string, type: number) => {

@@ -1,10 +1,10 @@
 import { Button, Group, Modal, TextInput, Text } from "@mantine/core";
 import { IconAbc } from "@tabler/icons-react";
 import {useForm} from "@mantine/form";
-import { updateConversationTitleAPI } from "@/api/update_conversation_title";
+import { updateConversationTitleAPI } from "@/api/conversation/update_conversation_title";
 import { useDisclosure } from "@mantine/hooks";
 import { deleteAgentConversationState, updateAgentConversationState } from "@/stores/LocalStoreActions";
-import { deleteConversationAPI } from "@/api/delete_conversation";
+import { deleteConversationAPI } from "@/api/conversation/delete_conversation";
 
 type DeleteModalProps = {
     conversation_id: string

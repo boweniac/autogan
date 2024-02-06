@@ -11,6 +11,7 @@ service Agent {
   rpc RpcGetConversations(GetConversationsRequest) returns (GetConversationsResponse);
   rpc RpcDeleteConversation(DeleteConversationRequest) returns (DeleteConversationResponse);
   rpc RpcGetLastMsgId(GetLastMsgIdRequest) returns (GetLastMsgIdResponse);
+  rpc RpcGetMessagesWhenChanged(GetMessagesWhenChangedRequest) returns (GetMessagesWhenChangedResponse);
   rpc RpcGetMessages(GetMessagesRequest) returns (GetMessagesResponse);
   rpc RpcAliyunSts(AliyunStsRequest) returns (AliyunStsResponse);
   rpc RpcAudioToText(AudioToTextRequest) returns (AudioToTextResponse);
@@ -19,8 +20,8 @@ service Agent {
 }
 
 message AgentRequest {
-  int64 user_id = 1;
-  int64 conversation_id = 2;
+  uint64 user_id = 1;
+  uint64 conversation_id = 2;
   string content = 3;
 }
 
@@ -47,7 +48,7 @@ message AudioAndLipResponseData {
 }
 
 message AddConversationRequest {
-  string user_id = 1;
+  uint64 user_id = 1;
 }
 
 message AddConversationResponse {
@@ -61,7 +62,7 @@ message AddConversationResponseData {
 }
 
 message UpdateConversationTitleRequest {
-  string user_id = 1;
+  uint64 user_id = 1;
   string conversation_id = 2;
   string title = 3;
 }
@@ -69,10 +70,15 @@ message UpdateConversationTitleRequest {
 message UpdateConversationTitleResponse {
   uint32 code = 1;
   string msg = 2;
+  UpdateConversationTitleResponseData data = 3;
+}
+
+message UpdateConversationTitleResponseData {
+  bool is_success = 1;
 }
 
 message GetConversationsRequest {
-  string user_id = 1;
+  uint64 user_id = 1;
 }
 
 message GetConversationsResponse {
@@ -87,17 +93,22 @@ message GetConversationsResponseData {
 }
 
 message DeleteConversationRequest {
-  string user_id = 1;
+  uint64 user_id = 1;
   string conversation_id = 2;
 }
 
 message DeleteConversationResponse {
   uint32 code = 1;
   string msg = 2;
+  repeated GetConversationsResponseData data = 3;
+}
+
+message DeleteConversationResponseData {
+  bool is_success = 1;
 }
 
 message GetLastMsgIdRequest {
-  string user_id = 1;
+  uint64 user_id = 1;
   string conversation_id = 2;
 }
 
@@ -111,23 +122,51 @@ message GetLastMsgIdResponseData {
   string msg_id = 1;
 }
 
+message GetMessagesWhenChangedRequest {
+  uint64 user_id = 1;
+  uint64 conversation_id = 2;
+  uint64 last_msg_id = 3;
+}
+
+message GetMessagesWhenChangedResponse {
+  uint32 code = 1;
+  string msg = 2;
+  repeated GetMessagesWhenChangedResponseData data = 3;
+}
+
+message GetMessagesWhenChangedResponseData {
+  uint64 msg_id = 1;
+  uint64 task_id = 2;
+  string content_type = 3;
+  string content_tag = 4;
+  string agent_name = 5;
+  string content = 6;
+  uint32 tokens = 7;
+}
+
 message GetMessagesRequest {
-  string user_id = 1;
-  string conversation_id = 2;
+  uint64 user_id = 1;
+  uint64 conversation_id = 2;
 }
 
 message GetMessagesResponse {
   uint32 code = 1;
   string msg = 2;
-  GetMessagesResponseData data = 3;
+  repeated GetMessagesResponseData data = 3;
 }
 
 message GetMessagesResponseData {
-  repeated string messages = 1;
+  uint64 msg_id = 1;
+  uint64 task_id = 2;
+  string content_type = 3;
+  string content_tag = 4;
+  string agent_name = 5;
+  string content = 6;
+  uint32 tokens = 7;
 }
 
 message AliyunStsRequest {
-  string user_id = 1;
+  uint64 user_id = 1;
 }
 
 message AliyunStsResponse {
@@ -144,7 +183,7 @@ message AliyunStsResponseData {
 }
 
 message AudioToTextRequest {
-  string user_id = 1;
+  uint64 user_id = 1;
   bytes content = 2;
 }
 
@@ -186,5 +225,20 @@ message GetIntroductionResponseMessageBlockData {
   string content_type = 1;
   string content_tag = 2;
   string content = 3;
-  AudioAndLipResponseData audio_and_lip = 4;
+  GetIntroductionResponseAudioAndLipData audio_and_lip = 4;
+}
+
+message GetIntroductionResponseAudioAndLipData {
+  GetIntroductionResponseAudioAndLipAudioFileData audio_file = 1;
+  string lips_data = 2;
+}
+
+message GetIntroductionResponseAudioAndLipAudioFileData {
+  string customer_manager_boy = 1;
+  string customer_manager_girl = 2;
+  string coder = 3;
+  string document_exp = 4;
+  string search_expert = 5;
+  string secretary = 6;
+  string tester = 7;
 }

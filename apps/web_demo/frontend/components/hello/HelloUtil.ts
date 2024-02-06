@@ -1,10 +1,11 @@
 import { getIntroductionAPI } from "@/api/get_introduction";
 import { addIntroductionConversationMessageBlockState, addIntroductionConversationMessageState, updateIntroductionConversationMessageBlockState } from "@/stores/LocalStoreActions";
-import { AudioAndLip, LipsData } from "@/stores/TypeAudioAndLip";
+import { AudioAndLip, AudioAndLipDemo, LipsData } from "@/stores/TypeAudioAndLip";
 import { IntroductionMessage } from "@/stores/TypeIntroduction";
 import { v4 as uuidv4 } from "uuid";
+import { avatarConfig } from "../avatar/Avatar/AvatarConfig";
 
-export const AgentIntroductionSend = async (caseID: string, sliceCallback: (src: AudioAndLip)=> void, endCallback?: (() => void) | undefined, errorCallback?: (() => void) | undefined ) => {
+export const AgentIntroductionSend = async (caseID: string, sliceCallback: (src: AudioAndLipDemo)=> void, endCallback?: (() => void) | undefined, errorCallback?: (() => void) | undefined ) => {
     const regex = /[.,，。；\/#!$%\^&\*;:{}=\-_`~()|\n\r]/g;
     let text = ""
     let textSlice = ""
@@ -19,6 +20,7 @@ export const AgentIntroductionSend = async (caseID: string, sliceCallback: (src:
     let task_id = ""
     getIntroductionAPI(caseID).then((messages)=>{
         if (messages) {
+            console.log(`messages:`+JSON.stringify(messages));
             messages.map((message: IntroductionMessage) => {
                 const messageLocalID = uuidv4()
                 addIntroductionConversationMessageState(messageLocalID, message.agentName)
@@ -26,8 +28,8 @@ export const AgentIntroductionSend = async (caseID: string, sliceCallback: (src:
                     const messageBlockLocalID = uuidv4()
                     addIntroductionConversationMessageBlockState(messageLocalID, {
                         localID: messageBlockLocalID,
-                        content_type: message_block.contentType,
-                        content_tag: message_block.contentTag,
+                        contentType: message_block.contentType,
+                        contentTag: message_block.contentTag,
                         content: "",
                     })
                     if (message_block.audioAndLip) {
@@ -54,10 +56,22 @@ export const AgentIntroductionSend = async (caseID: string, sliceCallback: (src:
     })
 }
 
+export const convertToAudioAndLipDemo = (audioAndLipDemo: AudioAndLipDemo, avatarName: string) => {
+    const audioFile = audioAndLipDemo.audioFile[avatarName]
+    const data = {
+        "audioFile": audioFile,
+        "lipsData": audioAndLipDemo.lipsData
+    }
+    return data
+}
+
 export const helloTextString: string = "您好，欢迎来到“爱博闻科技”！我是这里的数字员工。您可以在下面的菜单中选择想要了解的内容或是亲自体验。";
   
-export const helloAudioAndLip: AudioAndLip = {
-    audioFile: "https://aibowen-base.boweniac.top/9475afe9-49c7-533a-b7d4-7316dfe7c69f.mp3",
+export const helloAudioAndLip: AudioAndLipDemo = {
+    audioFile: {
+        "customerManagerBoy": "https://aibowen-base.boweniac.top/9475afe9-49c7-533a-b7d4-7316dfe7c69f.mp3",
+        "customerManagerGirl": "https://aibowen-base.boweniac.top/6206f179-0bbb-5265-89b8-ec742b5cfbcb.mp3"
+    },
     lipsData: [
         {
             "start": 0.00,

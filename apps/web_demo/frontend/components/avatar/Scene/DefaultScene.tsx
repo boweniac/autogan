@@ -15,49 +15,6 @@ type DefaultSceneProps = {
   isReadyCallback?: ()=>void;
 };
 
-// const CameraController = () => {
-//   const { camera, gl } = useThree();
-
-//   useEffect(() => {
-//       camera.position.set(0, 1.5, 1); // 设置摄像机的初始位置
-//       camera.near = 0.1; // 调整近裁剪面
-//       camera.far = 1; // 调整远裁剪面
-//       camera.updateProjectionMatrix(); // 更新摄像机的投影矩阵
-//       // camera.lookAt(3, 3, 3); // 设置摄像机的初始朝向
-//   }, [camera]);
-
-//   return <OrbitControls args={[camera, gl.domElement]} target={[0, 1.5, 0]} />;
-// };
-
-// const CameraController = () => {
-//   const { gl, size } = useThree();
-//   const [camera] = useState(() => new THREE.OrthographicCamera(
-//     size.width / -2, 
-//     size.width / 2, 
-//     size.height / 2, 
-//     size.height / -2, 
-//     1, 
-    
-//   ));
-
-//   useEffect(() => {
-//     // camera.position.set(50, 50, 10);
-//     // camera.lookAt(4, -3, 1);
-//     camera.updateProjectionMatrix();
-//   }, [camera, size]);
-
-//   return <OrbitControls args={[camera, gl.domElement]}/>;
-// };
-
-// const CameraController = () => {
-//   const { camera, gl } = useThree();
-
-//   useEffect(() => {
-//       camera.position.set(0, 1.5, 1); // 设置摄像机的初始位置
-//   }, [camera]);
-
-//   return <OrbitControls args={[camera, gl.domElement]} target={[0, 1.5, 0]} />;
-// };
 
 const CameraController = () => {
   const { gl, size } = useThree();

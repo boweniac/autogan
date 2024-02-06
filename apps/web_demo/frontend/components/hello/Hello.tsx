@@ -8,12 +8,12 @@ import { Message } from "@/stores/TypeAgentChat";
 import {LocalState, localStore} from "@/stores/LocalStore";
 import { AudioAndLip, MouthCues } from "@/stores/TypeAudioAndLip";
 import { avatarConfig } from "../avatar/Avatar/AvatarConfig";
-import { AgentIntroductionSend } from "./HelloUtil";
+import { AgentIntroductionSend, convertToAudioAndLipDemo } from "./HelloUtil";
 import MessagesDisplay from "./messages_display/MessagesDisplay";
 import RoleDisplayHello from "./RoleDisplay/RoleDisplayHello";
 import RoleDisplayHelloTitle from "./RoleDisplay/RoleDisplayHelloTitle";
 import RoleDisplayHelloButton from "./RoleDisplay/RoleDisplayHelloButton";
-import { resetIntroductionConversationsState, updateHelloStartState } from "@/stores/LocalStoreActions";
+import { resetIntroductionConversationsState, updateActivePageState } from "@/stores/LocalStoreActions";
 
 
 export default function Hello() {
@@ -29,7 +29,7 @@ export default function Hello() {
     const [lipValue, setLipValue] = useState<string>();
     const agentAvatarMapping = localStore((state: LocalState) => state.agentAvatarMapping);
     const [agentRole, setAgentRole] = useState<string>("CustomerManager");
-    const avatarName = useRef("boy");
+    const avatarName = useRef("customerManagerGirl");
     const avatarVoice = useRef("");
     // const agentConversation = localStore((state: LocalState) => state.introductionConversations);
     // const agentConversation = agentConversations.find((agentConversations) => agentConversations.id == queryConversationID);
@@ -104,6 +104,7 @@ export default function Hello() {
     //     }
     // }, [router.isReady]);
     useEffect(() => {
+        updateActivePageState("/")
         resetIntroductionConversationsState()
     }, []);
 
@@ -115,8 +116,7 @@ export default function Hello() {
 
     useEffect(() => {
         avatarName.current = agentAvatarMapping[agentRole]
-        avatarVoice.current = avatarConfig[avatarName.current].voice
-        // startIntroduction("introduction")
+        avatarVoice.current = avatarConfig[avatarName.current].voice || ""
     }, [agentRole]);
     
 
@@ -124,7 +124,8 @@ export default function Hello() {
     const startIntroduction = async (caseID: string) => {
         AgentIntroductionSend(caseID, (value)=>{
             if (value) {
-                setAudioStack(prevStack => [...prevStack, value]);
+                const audioAndLip = convertToAudioAndLipDemo(value, avatarName.current)
+                setAudioStack(prevStack => [...prevStack, audioAndLip]);
                 if (!isPlaying.current) {
                     playNextAudio();
                 }
@@ -151,16 +152,17 @@ export default function Hello() {
     
                 <Stack
                         w="100%"
-                        h={`calc(100vh - ${rem(50)})`}
+                        h={`calc(100vh)`}
                         justify="space-between"
                         gap={0}
                         className={classes.conversationFrame}
                         style={{ marginRight: roleWidth}}
                     >
                         <Transition mounted={introductionStart} transition="fade" duration={1000} timingFunction="ease">
-                            {(styles) => <Title style={styles} mb="lg" mt={100} size={80} order={1}> 数字员工 </Title>}
+                            {(styles) => <Title style={styles} mb="lg" mt={100} size={80} order={1}> 人人都是 CEO </Title>}
                         </Transition>
-                        <MessagesDisplay startSayHello={introductionStart} playAudio={(audioAndLip)=>{
+                        <MessagesDisplay startSayHello={introductionStart} playAudio={(value)=>{
+                            const audioAndLip = convertToAudioAndLipDemo(value, avatarName.current)
                             setAudioStack(prevStack => [...prevStack, audioAndLip]);
                             if (!isPlaying.current) {
                                 playNextAudio();
@@ -182,7 +184,7 @@ export default function Hello() {
                             {(styles) => <div style={styles}>Fade In Content</div>}
                         </Transition> */}
                 <RoleDisplayHelloTitle></RoleDisplayHelloTitle>
-                <RoleDisplayHello avatarName={avatarName.current}  />
+                <RoleDisplayHello  />
                 <RoleDisplayHelloButton clickIntroductionCallback={()=>setHelloStart(true)} clickAgentCallback={()=>{
                     router.push("/agent")
                 }}></RoleDisplayHelloButton>

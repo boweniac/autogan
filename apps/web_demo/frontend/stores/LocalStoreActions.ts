@@ -1,9 +1,10 @@
 import { localStore } from "./LocalStore";
-import { AgentConversation, Message, MessageBlock } from "./TypeAgentChat";
+import { AgentConversation, AgentConversationMessage, Message, MessageBlock } from "./TypeAgentChat";
 
 const get = localStore.getState;
 const set = localStore.setState;
 
+// user
 export const updateUserTokenState = (value: string) => {
     set(() => ({ userToken: value }));
 }
@@ -20,8 +21,23 @@ export const updateActivePageState = (page: string) => {
     set(() => ({ activePage: page }));
 }
 
-export const updateHelloStartState = (value: boolean) => {
-    set(() => ({ helloStart: value }));
+export const updateAgentAvatarMappingState = (mapping: { [key: string]: string }) => {
+    set((state) => ({
+        agentAvatarMapping: {
+            ...state.agentAvatarMapping, ...mapping
+        }
+    }));
+};
+// export const updateHelloStartState = (value: boolean) => {
+//     set(() => ({ helloStart: value }));
+// }
+
+export const updateAvatarStateState = (value: boolean) => {
+    set(() => ({ avatarState: value }));
+}
+
+export const updateMuteStateState = (value: boolean) => {
+    set(() => ({ muteState: value }));
 }
 
 export const updateInitConversationRequestState = (value: string) => {
@@ -34,30 +50,30 @@ export const burnAfterGetInitConversationRequestState = () => {
     return initConversationRequest
 }
 
-export const addAgentConversationState = (id: string, title: string | undefined) => {
+export const addAgentConversationListState = (id: string, title: string | undefined) => {
     set((state) => ({
-        agentConversations: [
-            ...state.agentConversations,
+        agentConversationList: [
             {
                 id: id,
                 title: title,
-                messages: [],
                 orgStructure: undefined,
                 model: undefined
             },
+            ...state.agentConversationList || [],
         ],
     }));
 };
 
 export const deleteAgentConversationState = (id: string) => {
     set((state) => ({
-        agentConversations: state.agentConversations.filter((c) => c.id !== id),
+        agentConversationList: state.agentConversationList?.filter((c) => c.id !== id),
+        agentConversationMessage: state.agentConversationMessage?.filter((c) => c.id !== id),
     }));
 }
 
 export const updateAgentConversationState = (id: string, conversation: Partial<AgentConversation>) => {
     set((state) => ({
-        agentConversations: state.agentConversations.map((c) => {
+        agentConversationList: state.agentConversationList?.map((c) => {
             if (c.id === id) {
                 return {...c, ...conversation}
             }
@@ -66,48 +82,98 @@ export const updateAgentConversationState = (id: string, conversation: Partial<A
     }));
 };
 
-export const getAgentConversationState = (conversationID: string) => {
-    return get().agentConversations.find(c => c.id === conversationID);
+// AgentConversationList
+export const getAgentConversationInfoState = (conversationID: string) => {
+    return get().agentConversationList?.find(c => c.id === conversationID);
 };
 
-export const resetAgentConversationsState = () => {
-    set(() => ({ agentConversations: [] }));
+export const getAgentConversationListState = () => {
+    return get().agentConversationList
 };
 
-export const clearConversationState = (conversationIDList: string[]) => {
-    let deletedConversations: string[] = []
-    set((state) => ({
-        agentConversations: state.agentConversations.filter(
-            (c) => {
-                if (conversationIDList.includes(c.id)) {
-                    return true
-                } else {
-                    deletedConversations = [...deletedConversations, c.id]
-                    return false
+export const updateAgentConversationListState = (value: AgentConversation[]) => {
+    set(() => ({ agentConversationList: value }));
+}
+
+export const resetAgentConversationListState = () => {
+    set(() => ({ agentConversationList: [] }));
+};
+
+// AgentConversationMessage
+export const getAgentConversationMessageState = (conversationID: string | undefined) => {
+    if (conversationID) {
+        const messages = get().agentConversationMessage?.find(c => c.id === conversationID)?.messages;
+        if (messages) {
+            return messages
+        }
+        set((state) => ({
+            agentConversationMessage: [
+                ...state.agentConversationMessage,
+                {
+                    id: conversationID,
+                    messages: []
                 }
-            }
-          ),
-    }));
-    return deletedConversations
+            ]
+        }));
+    }
 };
 
-export const addAgentConversationMessageState = (conversationID: string, message: Message) => {
+export const InitAgentConversationMessageState = (conversationID: string, messages: Message[]) => {
+    const conversationMessage = {
+        id: conversationID,
+        messages: messages
+    }
+    if (get().agentConversationMessage?.find(c => c.id == conversationID)) {
+        set((state) => ({
+            agentConversationMessage: state.agentConversationMessage?.map((c) => {
+                if (c.id === conversationID) {
+                    return conversationMessage
+                }
+                return c;
+            }),
+        }));
+    } else {
+        set((state) => ({
+            agentConversationMessage: [
+                ...state.agentConversationMessage,
+                conversationMessage
+            ]
+        }));
+    }
+};
+
+export const addAgentMessageState = (conversationID: string, message: Message) => {
     set((state) => ({
-        agentConversations: state.agentConversations.map((c) => {
+        agentConversationMessage: state.agentConversationMessage?.map((c) => {
             if (c.id === conversationID) {
                 c.messages = [
                     ...c.messages,
-                    message,
-                ];
+                    message
+                ]
+                return c
             }
             return c;
         }),
     }));
 };
 
+export const deleteAgentConversationMessageState = (conversationID: string) => {
+    return get().agentConversationMessage?.filter(c => c.id !== conversationID);
+};
+
+export const resetAgentConversationMessageState = () => {
+    set(() => ({ agentConversationMessage: [] }));
+};
+
+export const clearConversationMessageState = (conversationIDList: string[]) => {
+    set((state) => ({
+        agentConversationMessage: state.agentConversationMessage?.filter((c) => conversationIDList.includes(c.id)),
+    }));
+};
+
 export const updateAgentConversationMessageState = (conversationID: string, messageLocalID: string, message: Message) => {
     set((state) => ({
-        agentConversations: state.agentConversations.map((c) => {
+        agentConversationMessage: state.agentConversationMessage?.map((c) => {
             if (c.id === conversationID) {
                 c.messages = c.messages.map((m) => {
                     if (m.localID === messageLocalID) {
@@ -123,7 +189,7 @@ export const updateAgentConversationMessageState = (conversationID: string, mess
 
 export const addAgentConversationMessageBlockState = (conversationID: string, messageLocalID: string, messageBlock: MessageBlock) => {
     set((state) => ({
-        agentConversations: state.agentConversations.map((c) => {
+        agentConversationMessage: state.agentConversationMessage?.map((c) => {
             if (c.id === conversationID) {
                 c.messages.map((m)=>{
                     if (m.localID === messageLocalID) {
@@ -141,7 +207,7 @@ export const addAgentConversationMessageBlockState = (conversationID: string, me
 
 export const updateAgentConversationMessageBlockState = (conversationID: string, messageLocalID: string, messageBlockLocalID: string, messageBlock: MessageBlock) => {
     set((state) => ({
-        agentConversations: state.agentConversations.map((c) => {
+        agentConversationMessage: state.agentConversationMessage?.map((c) => {
             if (c.id === conversationID) {
                 c.messages.map((m)=>{
                     if (m.localID === messageLocalID) {
@@ -160,7 +226,7 @@ export const updateAgentConversationMessageBlockState = (conversationID: string,
 };
 
 export const getAgentConversationMessageLastRemoteIDState = (conversationID: string) => {
-    const conversation = get().agentConversations.find(c => c.id === conversationID);
+    const conversation = get().agentConversationMessage?.find(c => c.id === conversationID);
     if (conversation == undefined) {
         return undefined
     }

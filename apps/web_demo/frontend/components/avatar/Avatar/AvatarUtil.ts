@@ -16,8 +16,8 @@ export const animateMorphTargets = (startTime: number, callback: (ratio: number)
 }
 
 export interface Position {
-    x: number;
-    y: number;
-    z: number;
-    rotation: number;
+    x: string | number;
+    y: string | number;
+    z: string | number;
+    rotation: string | number;
 }

@@ -49,6 +49,11 @@ class AgentStub(object):
                 request_serializer=agent__pb2.GetLastMsgIdRequest.SerializeToString,
                 response_deserializer=agent__pb2.GetLastMsgIdResponse.FromString,
                 )
+        self.RpcGetMessagesWhenChanged = channel.unary_unary(
+                '/Agent.Agent/RpcGetMessagesWhenChanged',
+                request_serializer=agent__pb2.GetMessagesWhenChangedRequest.SerializeToString,
+                response_deserializer=agent__pb2.GetMessagesWhenChangedResponse.FromString,
+                )
         self.RpcGetMessages = channel.unary_unary(
                 '/Agent.Agent/RpcGetMessages',
                 request_serializer=agent__pb2.GetMessagesRequest.SerializeToString,
@@ -121,6 +126,12 @@ class AgentServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def RpcGetMessagesWhenChanged(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def RpcGetMessages(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -188,6 +199,11 @@ def add_AgentServicer_to_server(servicer, server):
                     servicer.RpcGetLastMsgId,
                     request_deserializer=agent__pb2.GetLastMsgIdRequest.FromString,
                     response_serializer=agent__pb2.GetLastMsgIdResponse.SerializeToString,
+            ),
+            'RpcGetMessagesWhenChanged': grpc.unary_unary_rpc_method_handler(
+                    servicer.RpcGetMessagesWhenChanged,
+                    request_deserializer=agent__pb2.GetMessagesWhenChangedRequest.FromString,
+                    response_serializer=agent__pb2.GetMessagesWhenChangedResponse.SerializeToString,
             ),
             'RpcGetMessages': grpc.unary_unary_rpc_method_handler(
                     servicer.RpcGetMessages,
@@ -340,6 +356,23 @@ class Agent(object):
         return grpc.experimental.unary_unary(request, target, '/Agent.Agent/RpcGetLastMsgId',
             agent__pb2.GetLastMsgIdRequest.SerializeToString,
             agent__pb2.GetLastMsgIdResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def RpcGetMessagesWhenChanged(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/Agent.Agent/RpcGetMessagesWhenChanged',
+            agent__pb2.GetMessagesWhenChangedRequest.SerializeToString,
+            agent__pb2.GetMessagesWhenChangedResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 

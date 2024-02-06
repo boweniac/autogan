@@ -38,25 +38,31 @@ export default function MarkdownBlock(props: MarkdownBlockProps) {
   
     return (
       props.content_type == "main" || props.content_type == "system" ?
-      <div
+      <Box
+        className={classes.message}
         style={{
           fontSize: rem(14),
-          wordBreak: 'break-all'
+          wordBreak: 'break-all',
+          overflowX: "scroll",
         }}
+        maw={`calc(100vw - ${rem(400)} - ${rem(100)} - ${rem(100)} - ${rem(220)} - ${rem(66)})`}
         dangerouslySetInnerHTML={{ __html: htmlString() }}
       >
-      </div> : 
+      </Box> : 
       <Accordion style={{marginBottom: rem(7)}} variant="separated" defaultValue="Apples">
         <Accordion.Item key="Apples" value="Apples">
           <Accordion.Control style={{height: rem(32)}} icon="🧠">{props.content_tag}</Accordion.Control>
-          <Accordion.Panel><div
+          <Accordion.Panel><Box
+            maw={`calc(100vw - ${rem(400)} - ${rem(100)} - ${rem(100)} - ${rem(220)} - ${rem(88)})`}
+            className={classes.message}
             style={{
               fontSize: rem(14),
-              wordBreak: 'break-all'
+              wordBreak: 'break-all',
+              overflowX: "scroll",
             }}
             dangerouslySetInnerHTML={{ __html: htmlString() }}
           >
-          </div></Accordion.Panel>
+          </Box></Accordion.Panel>
       </Accordion.Item>
     </Accordion>
     );

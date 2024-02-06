@@ -26,7 +26,7 @@ class TestService(UniversalService):
         search_config_dict = autogan.dict_from_json("SEARCH_CONFIG")
         search_exp = autogan.ToolAgentSearch(search_config_dict, name="SearchExpert")
         mail_config_dict = autogan.dict_from_json("MAIL_CONFIG")
-        secretary = autogan.ToolAgentMail(mail_config_dict, "Secretary")
+        secretary = autogan.ToolAgentMail(mail_config_dict, name="Secretary")
         file_exp = autogan.ToolAgentDocument()
         coder = autogan.UniversalAgent("Coder", duty="我可以编写 python 代码并执行", work_flow="""
 1. 我希望你是一个有经验的Python程序员，将接收到的需求用代码来实现。不用管你自己是否有能力执行代码，因为 测试员 可以帮你执行。

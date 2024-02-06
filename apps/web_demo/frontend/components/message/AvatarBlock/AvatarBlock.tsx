@@ -1,4 +1,4 @@
-import { Avatar } from "@mantine/core";
+import { Avatar, rem } from "@mantine/core";
 
 type AvatarBlockProps = {
     role: string | undefined;
@@ -10,7 +10,7 @@ export default function AvatarBlock(props: AvatarBlockProps) {
             src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-2.png"
             alt={props.role}
             radius="xl"
-            size="md"
+            size={rem(38)}
         />
     );
   };

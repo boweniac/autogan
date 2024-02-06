@@ -1,5 +1,5 @@
 import { updateUserPhoneState, updateUserTokenState } from "@/stores/LocalStoreActions"
-import { postOpenRequestAPI } from "./request_open"
+import { postOpenRequestAPI } from "../request_open"
 
 export const forgetPasswordAPI = async (phone: string, code: string, password: string) =>  {
     const res = await postOpenRequestAPI("/open/user/forget-password", {phone: phone, code: code, password: password})

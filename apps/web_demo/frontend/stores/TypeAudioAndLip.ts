@@ -18,3 +18,8 @@ export interface MouthCues {
     end: number;
     value: string;
   }
+
+export interface AudioAndLipDemo {
+  audioFile: { [key: string]: string };
+  lipsData: string | MouthCues[]
+}

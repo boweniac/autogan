@@ -7,7 +7,7 @@ import {localStore} from "@/stores/LocalStore";
 
 const get = localStore.getState;
 
-export async function streamTestAPI(content: string, conversationID: string, signal: AbortSignal, callback?: ((res: any) => void) | undefined, endCallback?: (() => void) | undefined, errorCallback?: (() => void) | undefined): Promise<void>{
+export async function streamAPI(content: string, conversationID: string, signal: AbortSignal, callback?: ((res: any) => void) | undefined, endCallback?: (() => void) | undefined, errorCallback?: (() => void) | undefined): Promise<void>{
     try {
         // abortController = getCurrentAbortController()
         const payload = JSON.stringify({
@@ -20,10 +20,11 @@ export async function streamTestAPI(content: string, conversationID: string, sig
             {
                 hostname: get().gateWayHost,
                 port: get().gateWayPort,
-                path: "/open/agent/test",
+                path: "/agent/test",
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    "Authorization": get().userToken,
                 },
                 signal: signal,
             },
@@ -115,8 +116,6 @@ export async function getRequestAPI(path: string) {
             if (res.data.code === 200) {
                 if (res.data.data) {
                     return res.data.data;
-                } else {
-                    return true
                 }
             } else {
                 notifications.show({
@@ -125,24 +124,17 @@ export async function getRequestAPI(path: string) {
                     color: "red",
                 });
             }
-            
         } else {
-            notifications.show({
-                title: '服务错误',
-                message: "未知错误",
-                color: "red",
-            });
+            throw new Error(`Request failed with status code ${res.status} ${res.statusText}`);
         }
     } catch (e: any) {
         if (axios.isAxiosError(e)) {
-            console.error(e.response?.data);
+            notifications.show({
+                title: '服务错误',
+                message: e.message,
+                color: "red",
+            });
         }
-        notifications.show({
-            title: '服务错误',
-            message: e,
-            color: "red",
-        });
-        throw e;
     }
 }
 
@@ -150,7 +142,6 @@ export async function postRequestAPI(path: string, payload: any) {
     try {
         const res = await axios.post(get().gateWayProtocol + get().gateWayHost + ":" + get().gateWayPort + path, payload, {
             headers: {
-                'Content-Type': 'application/json',
                 'Authorization': get().userToken
             }
         });
@@ -158,8 +149,6 @@ export async function postRequestAPI(path: string, payload: any) {
             if (res.data.code === 200) {
                 if (res.data.data) {
                     return res.data.data;
-                } else {
-                    return true
                 }
             } else {
                 notifications.show({
@@ -169,19 +158,15 @@ export async function postRequestAPI(path: string, payload: any) {
             }
             
         } else {
-            notifications.show({
-                message: "服务错误",
-                color: "red",
-            });
+            throw new Error(`Request failed with status code ${res.status} ${res.statusText}`);
         }
     } catch (e: any) {
         if (axios.isAxiosError(e)) {
-            console.error(e.response?.data);
+            notifications.show({
+                title: '服务错误',
+                message: e.message,
+                color: "red",
+            });
         }
-        notifications.show({
-            message: "服务错误：" + e,
-            color: "red",
-        });
-        throw e;
     }
 }

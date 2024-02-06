@@ -1,5 +1,5 @@
 import { updateUserPhoneState, updateUserTokenState } from "@/stores/LocalStoreActions"
-import { postOpenRequestAPI } from "./request_open"
+import { postOpenRequestAPI } from "../request_open"
 
 export const loginAPI = async (phone: string, password: string) =>  {
     const res = await postOpenRequestAPI("/open/user/login-password", {phone: phone, password: password})

@@ -40,13 +40,13 @@ class GrpcResponse(ResponseProtocol):
         :return:
         """
         data = {
-            "agent_name": requester_name,
-            "content_type": content_type,
-            "content_tag": content_tag,
+            "agentName": requester_name,
+            "contentType": content_type,
+            "contentTag": content_tag,
             "content": content,
             "tokens": completion_tokens,
-            "msg_id": msg_id,
-            "task_id": task_id,
+            "msgId": msg_id,
+            "taskId": task_id,
             "index": index
         }
         text = f'data: {json.dumps(data, ensure_ascii=False)}\n\n'

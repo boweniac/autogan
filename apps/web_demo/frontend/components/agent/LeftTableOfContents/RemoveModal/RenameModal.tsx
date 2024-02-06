@@ -1,7 +1,7 @@
 import { Button, Modal, TextInput } from "@mantine/core";
 import { IconAbc } from "@tabler/icons-react";
 import {useForm} from "@mantine/form";
-import { updateConversationTitleAPI } from "@/api/update_conversation_title";
+import { updateConversationTitleAPI } from "@/api/conversation/update_conversation_title";
 import { useDisclosure } from "@mantine/hooks";
 import { updateAgentConversationState } from "@/stores/LocalStoreActions";
 import { useEffect, useState } from "react";

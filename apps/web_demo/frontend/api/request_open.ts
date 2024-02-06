@@ -111,8 +111,6 @@ export async function getOpenRequestAPI(path: string) {
             if (res.data.code === 200) {
                 if (res.data.data) {
                     return res.data.data;
-                } else {
-                    return true
                 }
             } else {
                 notifications.show({
@@ -131,14 +129,12 @@ export async function getOpenRequestAPI(path: string) {
         }
     } catch (e: any) {
         if (axios.isAxiosError(e)) {
-            console.error(e.response?.data);
+            notifications.show({
+                title: '服务错误',
+                message: e.message,
+                color: "red",
+            });
         }
-        notifications.show({
-            title: '服务错误',
-            message: e,
-            color: "red",
-        });
-        throw e;
     }
 }
 
@@ -149,8 +145,6 @@ export async function postOpenRequestAPI(path: string, payload: any) {
             if (res.data.code === 200) {
                 if (res.data.data) {
                     return res.data.data;
-                } else {
-                    return true
                 }
             } else {
                 notifications.show({

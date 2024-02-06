@@ -1,17 +1,105 @@
 export const avatarConfig: { [key: string]: AvatarObject } = {
-    "boy": {
-        "modelPath": "/avatars/boy.glb",
+    "customerManagerBoy": {
+        "modelPath": "/avatars/CustomerManagerBoy.glb",
         "voice": "onyx",
+        "ambientLightIntensity": 4,
+        "pointLightY": 1,
+        "pointLightZ": 1,
+        "pointLightIntensity": 4,
+        "cameraPositionY": 1.5,
+        "cameraPositionZ": 0.8,
+        "targetY": 1.5,
     },
-    "girl": {
-        "modelPath": "/avatars/girl.glb",
+    "customerManagerGirl": {
+        "modelPath": "/avatars/CustomerManagerGirl.glb",
         "voice": "nova",
+        "ambientLightIntensity": 4,
+        "pointLightY": 1,
+        "pointLightZ": 1,
+        "pointLightIntensity": 4,
+        "cameraPositionY": 1.5,
+        "cameraPositionZ": 0.8,
+        "targetY": 1.4,
+    },
+    "coder": {
+        "modelPath": "/avatars/Coder.glb",
+        "voice": "onyx",
+        "ambientLightIntensity": 4,
+        "pointLightY": 1,
+        "pointLightZ": 1,
+        "pointLightIntensity": 4,
+        "cameraPositionY": 1.5,
+        "cameraPositionZ": 0.8,
+        "targetY": 1.5,
+    },
+    "documentExp": {
+        "modelPath": "/avatars/DocumentExp.glb",
+        "voice": "nova",
+        "ambientLightIntensity": 4,
+        "pointLightY": 1,
+        "pointLightZ": 1,
+        "pointLightIntensity": 4,
+        "cameraPositionY": 1.5,
+        "cameraPositionZ": 0.8,
+        "targetY": 1.4,
+    },
+    "searchExpert": {
+        "modelPath": "/avatars/SearchExpert.glb",
+        "voice": "onyx",
+        "ambientLightIntensity": 4,
+        "pointLightY": 1,
+        "pointLightZ": 1,
+        "pointLightIntensity": 4,
+        "cameraPositionY": 1.5,
+        "cameraPositionZ": 0.8,
+        "targetY": 1.5,
+    },
+    "secretary": {
+        "modelPath": "/avatars/Secretary.glb",
+        "voice": "nova",
+        "ambientLightIntensity": 4,
+        "pointLightY": 1,
+        "pointLightZ": 1,
+        "pointLightIntensity": 4,
+        "cameraPositionY": 1.5,
+        "cameraPositionZ": 0.8,
+        "targetY": 1.4,
+    },
+    "tester": {
+        "modelPath": "/avatars/Tester.glb",
+        "voice": "onyx",
+        "ambientLightIntensity": 4,
+        "pointLightY": 1,
+        "pointLightZ": 1,
+        "pointLightIntensity": 4,
+        "cameraPositionY": 1.5,
+        "cameraPositionZ": 0.8,
+        "targetY": 1.5,
     }
 };
 
 export interface AvatarObject {
-    modelPath: string;
-    voice: string;
+    modelPath?: string;
+    voice?: string;
+    positionX?: string | number;
+    positionY?: string | number;
+    positionZ?: string | number;
+    positionRotation?: string | number;
+    ambientLightIntensity?: string | number;
+    pointLightX?: string | number;
+    pointLightY?: string | number;
+    pointLightZ?: string | number;
+    pointLightIntensity?: string | number;
+    fov?: string | number;
+    cameraPositionX?: string | number;
+    cameraPositionY?: string | number;
+    cameraPositionZ?: string | number;
+    lookAtPositionX?: string | number;
+    lookAtPositionY?: string | number;
+    lookAtPositionZ?: string | number;
+    targetX?: string | number;
+    targetY?: string | number;
+    targetZ?: string | number;
 }
 
 export const corresponding: { [key: string]: string } = {

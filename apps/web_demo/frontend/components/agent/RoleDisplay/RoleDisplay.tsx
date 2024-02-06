@@ -8,6 +8,7 @@ import { FunctionComponent, useEffect, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { AudioAndLip } from "@/stores/TypeAudioAndLip";
 import DefaultScene from "../../avatar/Scene/DefaultScene";
+import HelloScene from "@/components/avatar/Scene/HelloScene";
 
 type RoleDisplayProps = {
     avatarName: string; // 模型文件的路径
@@ -33,7 +34,7 @@ export default function RoleDisplay(props: RoleDisplayProps) {
             {/* <Canvas>
                 <DefaultAvatar />
             </Canvas> */}
-            <DefaultScene avatarName={props.avatarName} audioAndLip={props.audioAndLip} audioEndCallback={props.audioEndCallback}/>
+            <HelloScene avatarName={props.avatarName} animation="stay" audioAndLip={props.audioAndLip} audioEndCallback={props.audioEndCallback}/>
         </Stack>
     );
 }

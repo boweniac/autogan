@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { AgentConversation, Message } from "./TypeAgentChat";
+import { AgentConversation, AgentConversationMessage, Message } from "./TypeAgentChat";
 
 export const excludeFromState = [
     "appName",
@@ -23,8 +23,11 @@ export interface LocalState {
 
     helloStart: boolean;
 
+    avatarState: boolean;
+    muteState: boolean;
     initConversationRequest: string;
-    agentConversations: AgentConversation[];
+    agentConversationList: AgentConversation[] | undefined;
+    agentConversationMessage: AgentConversationMessage[];
     introductionConversations: Message[];
 
     agentAvatarMapping: { [key: string]: string };
@@ -43,12 +46,20 @@ export const initialState = {
 
     helloStart: false,
     
+    avatarState: true,
+    muteState: false,
     initConversationRequest: "",
-    agentConversations: [],
+    agentConversationList: [],
+    agentConversationMessage: [],
     introductionConversations: [],
 
     agentAvatarMapping: {
-        "CustomerManager": "boy"
+        "CustomerManager": "customerManagerGirl",
+        "Coder": "coder",
+        "DocumentExp": "documentExp",
+        "SearchExpert": "searchExpert",
+        "Secretary": "secretary",
+        "Tester": "tester"
     }
 }
 

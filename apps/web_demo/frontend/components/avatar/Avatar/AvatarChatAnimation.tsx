@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from 'react';
-import { useFrame, useLoader } from '@react-three/fiber';
+import { ObjectMap, useFrame, useLoader } from '@react-three/fiber';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js'
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { AudioAndLip, MouthCues } from '@/stores/TypeAudioAndLip';
 import { Position, animateMorphTargets } from './AvatarUtil';
 import { animationNameToPath } from './AnimationConfig';
@@ -15,22 +15,31 @@ type GLBModelProps = {
   animation: string; // FBX 动画文件路径
   position: Position | undefined;
   audioAndLip: AudioAndLip | undefined;
-  audioEndCallback: ()=>void
+  audioEndCallback?: ()=>void
   isReadyCallback?: ()=>void
 };
 
 
 const GLBModel: React.FC<GLBModelProps> = ({ avatarName, animation, position, audioAndLip, audioEndCallback }) => {
+  console.log(`position:`+JSON.stringify(position));
   const router = useRouter();
-    const gltf = useLoader(GLTFLoader, avatarConfig[avatarName].modelPath);
-    const headNode = gltf.scene.getObjectByName('Wolf3D_Head');
-    const teethNode = gltf.scene.getObjectByName('Wolf3D_Teeth');
+  const gltfs:{[key: string]: GLTF & ObjectMap} = {
+    "customerManagerBoy": useLoader(GLTFLoader, avatarConfig["customerManagerBoy"]["modelPath"] || "/avatars/CustomerManagerBoy.glb"),
+    "customerManagerGirl": useLoader(GLTFLoader, avatarConfig["customerManagerGirl"]["modelPath"] || "/avatars/CustomerManagerBoy.glb"),
+    "coder": useLoader(GLTFLoader, avatarConfig["coder"]["modelPath"] || "/avatars/CustomerManagerBoy.glb"),
+    "documentExp": useLoader(GLTFLoader, avatarConfig["documentExp"]["modelPath"] || "/avatars/CustomerManagerBoy.glb"),
+    "searchExpert": useLoader(GLTFLoader, avatarConfig["searchExpert"]["modelPath"] || "/avatars/CustomerManagerBoy.glb"),
+    "secretary": useLoader(GLTFLoader, avatarConfig["secretary"]["modelPath"] || "/avatars/CustomerManagerBoy.glb"),
+    "tester": useLoader(GLTFLoader, avatarConfig["tester"]["modelPath"] || "/avatars/CustomerManagerBoy.glb"),
+  }
+    // const gltf = useLoader(GLTFLoader, avatarConfig[avatarName].modelPath);
+    const headNode = gltfs[avatarName].scene.getObjectByName('Wolf3D_Head');
+    const teethNode = gltfs[avatarName].scene.getObjectByName('Wolf3D_Teeth');
 
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const fbx = useLoader(FBXLoader, animationNameToPath[animation]);
     // const fbxs = animations.map((animation)=>useLoader(FBXLoader, animationNameToPath[animation]))
     const mixer = useRef<THREE.AnimationMixer>();
-    const oldMorphTargetIndex = useRef(0);
     const currentMorphTargetIndex = useRef(0);
     const currentAnimationIndex = useRef(0);
     new Audio(``)
@@ -57,7 +66,9 @@ const GLBModel: React.FC<GLBModelProps> = ({ avatarName, animation, position, au
         console.log(`audioAndLip.audioFile2:`+JSON.stringify(audioAndLip.audioFile));
         const audio = new Audio(`${audioAndLip.audioFile}`)
         audio.play().catch(error => {
-          audioEndCallback()
+          if (audioEndCallback) {
+            audioEndCallback()
+          }
         });
         const handleTimeUpdate = () => {
           const currentTime = audio.currentTime;
@@ -65,9 +76,11 @@ const GLBModel: React.FC<GLBModelProps> = ({ avatarName, animation, position, au
           for (let i = 0; i < audioAndLip.lipsData.length; i++) {
             const lipsData = audioAndLip.lipsData[i] as MouthCues;
             if (currentTime >= lipsData.start && currentTime <= lipsData.end) {
-              console.log(`lipsData.value:`+JSON.stringify(lipsData.value));
               currentMorphTargetIndex.current = nodeKeyToIndex[corresponding[lipsData.value]]
               animateMorphTargets(performance.now(), updateMorphTargets)
+              if (headNode instanceof THREE.Mesh && headNode.morphTargetInfluences) {
+                headNode.morphTargetInfluences[currentMorphTargetIndex.current] = 0;
+              }
               break
             }
           }
@@ -76,33 +89,38 @@ const GLBModel: React.FC<GLBModelProps> = ({ avatarName, animation, position, au
           handleTimeUpdate();
         };
         audio.addEventListener('ended', () => {
-          currentMorphTargetIndex.current = 0
-          updateMorphTargets(1)
-          audioEndCallback()
+          // currentMorphTargetIndex.current = 0
+          // updateMorphTargets(1)
+          if (audioEndCallback) {
+            audioEndCallback()
+          }
         });
       }
     }, [audioAndLip])
     
 
     const updateMorphTargets = (ratio: number) => {
+      ratio = ratio * 2
       if (headNode instanceof THREE.Mesh && headNode.morphTargetInfluences) {
-        headNode.morphTargetInfluences[oldMorphTargetIndex.current] = 1-ratio;
-        headNode.morphTargetInfluences[currentMorphTargetIndex.current] = ratio;
+        if (ratio <=1) {
+          headNode.morphTargetInfluences[currentMorphTargetIndex.current] = ratio;
+        } else {
+          headNode.morphTargetInfluences[currentMorphTargetIndex.current] = 2-ratio;
+        }
       }
       
       if (teethNode instanceof THREE.Mesh && teethNode.morphTargetInfluences) {
-        teethNode.morphTargetInfluences[oldMorphTargetIndex.current] = 1-ratio;
+        if (ratio <=1) {
           teethNode.morphTargetInfluences[currentMorphTargetIndex.current] = ratio;
-      }
-
-      if (ratio == 1) {
-        oldMorphTargetIndex.current = currentMorphTargetIndex.current
+        } else {
+          teethNode.morphTargetInfluences[currentMorphTargetIndex.current] = 2-ratio;
+        }
       }
     };
 
     const animationPlay = () => {
-      if (gltf.scene && fbx.animations[0]) {
-        mixer.current = new THREE.AnimationMixer(gltf.scene);
+      if (gltfs[avatarName].scene && fbx.animations[0]) {
+        mixer.current = new THREE.AnimationMixer(gltfs[avatarName].scene);
         const action = mixer.current.clipAction(fbx.animations[0]);
 
         // action.setLoop(THREE.LoopOnce, 1);
@@ -112,14 +130,14 @@ const GLBModel: React.FC<GLBModelProps> = ({ avatarName, animation, position, au
     }
 
     useEffect(() => {
-      if (gltf.scene) {
+      if (gltfs[avatarName].scene) {
           if (position) {
-            gltf.scene.position.set(position.x, position.y, position.z);
-            gltf.scene.rotation.y = position.rotation;
+            gltfs[avatarName].scene.position.set(Number(position.x), Number(position.y), Number(position.z));
+            gltfs[avatarName].scene.rotation.y = Number(position.rotation);
           }
       }
       animationPlay()
-  }, [gltf, fbx]);
+  }, [gltfs[avatarName], fbx]);
 
   useFrame((state, delta) => {
     mixer.current?.update(delta);
@@ -138,7 +156,7 @@ const GLBModel: React.FC<GLBModelProps> = ({ avatarName, animation, position, au
     // }
 });
 
-    return <primitive object={gltf.scene} />;
+    return <primitive object={gltfs[avatarName].scene} />;
 };
 
 export default GLBModel;

@@ -8,7 +8,6 @@ import '@mantine/core/styles.css';
 import "highlight.js/styles/stackoverflow-dark.css";
 import '@/styles/globals.css';
 import '@mantine/notifications/styles.css';
-import { syncConversations } from "@/components/agent/AgentFrameUtil";
 import { Notifications } from "@mantine/notifications";
 
 

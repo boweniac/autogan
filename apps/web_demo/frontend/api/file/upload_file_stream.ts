@@ -16,12 +16,11 @@ export async function uploadFileStreamAPI(files: any[], apiType: string, baseId:
         formData.append('base_id', baseId ? baseId : "0");
         formData.append('conversation_id', conversationId ? conversationId : "0");
         formData.append('file_name', file.name);
-
-        fetch(get().gateWayProtocol + get().gateWayHost + ":" + get().gateWayPort + "/open/agent/add_file", {
+        fetch(get().gateWayProtocol + get().gateWayHost + ":" + get().gateWayPort + "/agent/add_file", {
             method: 'POST',
-            // headers: {
-            //     'Authorization': get().userToken
-            // },
+            headers: {
+                'Authorization': get().userToken
+            },
             body: formData,
         })
             .then(response => {

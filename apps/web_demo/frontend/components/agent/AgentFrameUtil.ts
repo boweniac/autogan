@@ -1,55 +1,54 @@
-import { addAgentConversationAPI } from "@/api/add_conversation"
-import { audioAndLipAPI } from "@/api/audio_and_lip"
-import { getConversationsAPI } from "@/api/get_conversations"
-import { getLastMsgIdAPI } from "@/api/get_last_msg_id"
-import { getMessagesAPI } from "@/api/get_messages"
-import { streamTestAPI } from "@/api/request_open"
-import { addAgentConversationMessageBlockState, addAgentConversationMessageState, addAgentConversationState, clearConversationState, getAgentConversationMessageLastRemoteIDState, getAgentConversationState, updateAgentConversationMessageBlockState, updateAgentConversationMessageState, updateAgentConversationState, updateInitConversationRequestState } from "@/stores/LocalStoreActions"
-import { Message } from "@/stores/TypeAgentChat"
+import { addAgentConversationAPI } from "@/api/conversation/add_conversation"
+import { audioAndLipAPI } from "@/api/audio/audio_and_lip"
+import { getConversationsAPI } from "@/api/conversation/get_conversations"
+import { getLastMsgIdAPI } from "@/api/message/get_last_msg_id"
+import { addAgentConversationMessageBlockState, addAgentMessageState, addAgentConversationListState, getAgentConversationMessageLastRemoteIDState, updateAgentConversationMessageBlockState, updateAgentConversationMessageState, updateAgentConversationState, updateInitConversationRequestState } from "@/stores/LocalStoreActions"
+import { Message, MessageBlock } from "@/stores/TypeAgentChat"
 import { NextRouter } from "next/router"
 import { useState } from "react"
 import { v4 as uuidv4 } from "uuid";
+import { streamAPI } from "@/api/request"
 
 export const addAgentConversation = async (value: string, router: NextRouter) => {
     addAgentConversationAPI().then((conversation_id: string) => {
         if (conversation_id) {
-            addAgentConversationState(conversation_id, undefined)
+            addAgentConversationListState(conversation_id, undefined)
             updateInitConversationRequestState(value)
             router.push(`/agent/${conversation_id}`).then()
         }
     })
 }
 
-export const syncConversations = async () => {
-    let deletedConversations: string[] = []
-    const conversations = await getConversationsAPI()
-    if (conversations) {
-        let conversationIDList: string[] = []
-        conversations.map((conversation)=>{
-            conversationIDList = [...conversationIDList, conversation.id]
-            const localConversation = getAgentConversationState(conversation.id)
-            if (localConversation) {
-                if (localConversation.title != conversation.title) {
-                    updateAgentConversationState(conversation.id, conversation)
-                }
-            } else {
-                addAgentConversationState(conversation.id, conversation.title)
-            }
-        })
-        deletedConversations = clearConversationState(conversationIDList)
-    }
-    return deletedConversations
-}
+// export const syncConversations = async () => {
+//     let deletedConversations: string[] = []
+//     const conversations = await getConversationsAPI()
+//     if (conversations) {
+//         let conversationIDList: string[] = []
+//         conversations.map((conversation)=>{
+//             conversationIDList = [...conversationIDList, conversation.id]
+//             const localConversation = getAgentConversationState(conversation.id)
+//             if (localConversation) {
+//                 if (localConversation.title != conversation.title) {
+//                     updateAgentConversationState(conversation.id, conversation)
+//                 }
+//             } else {
+//                 addAgentConversationState(conversation.id, conversation.title)
+//             }
+//         })
+//         // deletedConversations = clearConversationState(conversationIDList)
+//     }
+//     return deletedConversations
+// }
 
-export const syncMessages = async (conversation_id: string) => {
-    getLastMsgIdAPI(conversation_id).then((lastMsgId)=>{
-        if (lastMsgId && lastMsgId != getAgentConversationMessageLastRemoteIDState(conversation_id)) {
-            getMessagesAPI(conversation_id).then((messages)=>{
-                updateAgentConversationState(conversation_id, {"messages": messages})
-            })
-        }
-    })
-}
+// export const syncMessages = async (conversation_id: string) => {
+//     getLastMsgIdAPI(conversation_id).then((lastMsgId)=>{
+//         if (lastMsgId && lastMsgId != getAgentConversationMessageLastRemoteIDState(conversation_id)) {
+//             getMessagesAPI(conversation_id).then((messages)=>{
+//                 updateAgentConversationState(conversation_id, {"messages": messages})
+//             })
+//         }
+//     })
+// }
 
 export const AgentConversationSend = async (conversationID: string, value: string, signal: AbortSignal, sliceCallback: (src: string)=> void, endCallback?: (() => void) | undefined, errorCallback?: (() => void) | undefined ) => {
     // const currentAbortController = new AbortController();
@@ -66,7 +65,7 @@ export const AgentConversationSend = async (conversationID: string, value: strin
     let messageBlockLocalID = ""
     let messageID = ""
     let task_id = ""
-    await streamTestAPI(
+    await streamAPI(
         value, 
         conversationID,
         signal,
@@ -89,29 +88,29 @@ export const AgentConversationSend = async (conversationID: string, value: strin
                         console.log(`第一个块`);
                         messageBlockLocalID = uuidv4()
                         text += res.content
-                        content_type = res.content_type
-                        agent_name = res.agent_name
-                        task_id = res.task_id
-                        if (messageID != res.msg_id) {
-                            messageID = res.msg_id
+                        content_type = res.contentType
+                        agent_name = res.agentName
+                        task_id = res.taskId
+                        if (messageID != res.msgId) {
+                            messageID = res.msgId
                             // 一个角色消息的开始
                             console.log(`一个角色消息的开始`);
                             console.log(`messages:`+JSON.stringify(res));
                             messageLocalID = uuidv4()
-                            addAgentConversationMessageState(conversationID, {
+                            addAgentMessageState(conversationID, {
                                 task_id: task_id,
                                 localID: messageLocalID,
-                                msg_id:res.msg_id,
+                                msg_id:res.msgId,
                                 agent_name: agent_name,
                                 message_blocks: []
                             })
                             addAgentConversationMessageBlockState(conversationID, messageLocalID, {
-                                task_id: task_id,
+                                taskId: task_id,
                                 localID: messageBlockLocalID,
-                                msg_id:res.msg_id,
-                                agent_name: agent_name,
-                                content_type: content_type,
-                                content_tag: res.content_tag,
+                                msgId:res.msgId,
+                                agentName: agent_name,
+                                contentType: content_type,
+                                contentTag: res.contentTag,
                                 content: res.content,
                                 tokens: res.tokens
                             })
@@ -120,12 +119,12 @@ export const AgentConversationSend = async (conversationID: string, value: strin
                             console.log(`同一角色新的消息块`);
                             console.log(`messages:`+JSON.stringify(res));
                             addAgentConversationMessageBlockState(conversationID, messageLocalID, {
-                                task_id: task_id,
+                                taskId: task_id,
                                 localID: messageBlockLocalID,
-                                msg_id:res.msg_id,
-                                agent_name: agent_name,
-                                content_type: content_type,
-                                content_tag: res.content_tag,
+                                msgId:res.msgId,
+                                agentName: agent_name,
+                                contentType: content_type,
+                                contentTag: res.contentTag,
                                 content: res.content,
                                 tokens: res.tokens
                             })
