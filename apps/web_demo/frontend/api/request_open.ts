@@ -41,10 +41,8 @@ export async function streamTestAPI(content: string, conversationID: string, sig
                         const allMessages = chunk.toString().split("\n\n");
                         for (const message of allMessages) {
                             buffer += message.toString();
-                            // console.log(`buffer2.toString():`+buffer.toString());
                             // 切掉响应数据前缀
                             const cleaned = buffer.match(/(?<=data:).*$/s)?.toString();
-                            // console.log(`cleaned:`+cleaned);
                             if (!cleaned || cleaned === " [DONE]") {
                                 return;
                             }
@@ -56,7 +54,6 @@ export async function streamTestAPI(content: string, conversationID: string, sig
                                 parsed = JSON.parse(cleaned);
                             } catch (e) {
                                 buffer += "\n\n\n"
-                                // console.log(`buffer1.toString():`+buffer.toString());
                                 console.error(e);
                                 continue;
                             }
@@ -65,19 +62,14 @@ export async function streamTestAPI(content: string, conversationID: string, sig
                         }
                     });
                     res.on("end", () => {
-                        console.log('请求结束');
                         endCallback?.();
                     });
                     req.on('error', (e) => {
                         if (e.name === 'AbortError') {
-                          console.log('请求被中断');
                         } else {
                           console.error(`请求出现问题: ${e.message}`);
                         }
                       });
-                    //   req.on('abort', () => {
-                    //     console.log('请求被中断事件触发');
-                    //   });
                 } else {
                     res.on("data", (chunk) => {
                         const data = JSON.parse(chunk)

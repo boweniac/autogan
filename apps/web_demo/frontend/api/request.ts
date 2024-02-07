@@ -3,24 +3,29 @@ import http from "http";
 import {notifications} from "@mantine/notifications";
 import axios, {AxiosProgressEvent, AxiosRequestConfig} from "axios";
 import {localStore} from "@/stores/LocalStore";
+import { openLogInModal } from '@/stores/LocalStoreActions';
 // import { getCurrentAbortController } from '@/stores/LocalStoreActions';
 
 const get = localStore.getState;
 
-export async function streamAPI(content: string, conversationID: string, signal: AbortSignal, callback?: ((res: any) => void) | undefined, endCallback?: (() => void) | undefined, errorCallback?: (() => void) | undefined): Promise<void>{
+export async function streamAPI(path: string, payloadData: {[key: string]: string}, signal: AbortSignal, callback?: ((res: any) => void) | undefined, endCallback?: (() => void) | undefined, errorCallback?: (() => void) | undefined): Promise<void>{
+    if (!get().userToken) {
+        openLogInModal()
+        notifications.show({
+            message: "请先完成登陆",
+            color: "red",
+        });
+        return
+    }
     try {
         // abortController = getCurrentAbortController()
-        const payload = JSON.stringify({
-            user_id: 1,
-            conversation_id: conversationID,
-            content: content,
-        });
+        const payload = JSON.stringify(payloadData);
 
         const req = http.request(
             {
                 hostname: get().gateWayHost,
                 port: get().gateWayPort,
-                path: "/agent/test",
+                path: path,
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -42,10 +47,8 @@ export async function streamAPI(content: string, conversationID: string, signal:
                         const allMessages = chunk.toString().split("\n\n");
                         for (const message of allMessages) {
                             buffer += message.toString();
-                            // console.log(`buffer2.toString():`+buffer.toString());
                             // 切掉响应数据前缀
                             const cleaned = buffer.match(/(?<=data:).*$/s)?.toString();
-                            // console.log(`cleaned:`+cleaned);
                             if (!cleaned || cleaned === " [DONE]") {
                                 return;
                             }
@@ -57,7 +60,6 @@ export async function streamAPI(content: string, conversationID: string, signal:
                                 parsed = JSON.parse(cleaned);
                             } catch (e) {
                                 buffer += "\n\n\n"
-                                // console.log(`buffer1.toString():`+buffer.toString());
                                 console.error(e);
                                 continue;
                             }
@@ -66,19 +68,14 @@ export async function streamAPI(content: string, conversationID: string, signal:
                         }
                     });
                     res.on("end", () => {
-                        console.log('请求结束');
                         endCallback?.();
                     });
                     req.on('error', (e) => {
                         if (e.name === 'AbortError') {
-                          console.log('请求被中断');
                         } else {
                           console.error(`请求出现问题: ${e.message}`);
                         }
                       });
-                    //   req.on('abort', () => {
-                    //     console.log('请求被中断事件触发');
-                    //   });
                 } else {
                     res.on("data", (chunk) => {
                         const data = JSON.parse(chunk)
@@ -106,6 +103,14 @@ export async function streamAPI(content: string, conversationID: string, signal:
 };
 
 export async function getRequestAPI(path: string) {
+    if (!get().userToken) {
+        openLogInModal()
+        notifications.show({
+            message: "请先完成登陆",
+            color: "red",
+        });
+        return
+    }
     try {
         const res = await axios.get(get().gateWayProtocol + get().gateWayHost + ":" + get().gateWayPort + path, {
             headers: {
@@ -139,6 +144,14 @@ export async function getRequestAPI(path: string) {
 }
 
 export async function postRequestAPI(path: string, payload: any) {
+    if (!get().userToken) {
+        openLogInModal()
+        notifications.show({
+            message: "请先完成登陆",
+            color: "red",
+        });
+        return
+    }
     try {
         const res = await axios.post(get().gateWayProtocol + get().gateWayHost + ":" + get().gateWayPort + path, payload, {
             headers: {

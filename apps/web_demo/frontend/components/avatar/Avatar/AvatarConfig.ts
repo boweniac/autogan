@@ -23,7 +23,7 @@ export const avatarConfig: { [key: string]: AvatarObject } = {
     },
     "coder": {
         "modelPath": "/avatars/Coder.glb",
-        "voice": "onyx",
+        "voice": "echo",
         "ambientLightIntensity": 4,
         "pointLightY": 1,
         "pointLightZ": 1,
@@ -34,7 +34,7 @@ export const avatarConfig: { [key: string]: AvatarObject } = {
     },
     "documentExp": {
         "modelPath": "/avatars/DocumentExp.glb",
-        "voice": "nova",
+        "voice": "shimmer",
         "ambientLightIntensity": 4,
         "pointLightY": 1,
         "pointLightZ": 1,
@@ -45,7 +45,7 @@ export const avatarConfig: { [key: string]: AvatarObject } = {
     },
     "searchExpert": {
         "modelPath": "/avatars/SearchExpert.glb",
-        "voice": "onyx",
+        "voice": "alloy",
         "ambientLightIntensity": 4,
         "pointLightY": 1,
         "pointLightZ": 1,
@@ -56,7 +56,7 @@ export const avatarConfig: { [key: string]: AvatarObject } = {
     },
     "secretary": {
         "modelPath": "/avatars/Secretary.glb",
-        "voice": "nova",
+        "voice": "shimmer",
         "ambientLightIntensity": 4,
         "pointLightY": 1,
         "pointLightZ": 1,
@@ -67,7 +67,7 @@ export const avatarConfig: { [key: string]: AvatarObject } = {
     },
     "tester": {
         "modelPath": "/avatars/Tester.glb",
-        "voice": "onyx",
+        "voice": "fable",
         "ambientLightIntensity": 4,
         "pointLightY": 1,
         "pointLightZ": 1,

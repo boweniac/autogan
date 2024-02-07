@@ -27,7 +27,7 @@ export default function MessagesDisplay(props: MessagesDisplayProps) {
     const viewport = useRef<HTMLDivElement>(null);
 
     const scrollToBottom = () =>
-      viewport.current!.scrollTo({ top: viewport.current!.scrollHeight, behavior: 'smooth' });
+      viewport.current!.scrollTo({ top: viewport.current!.scrollHeight});
 
     useEffect(() => {
         if (agentConversation) {

@@ -5,6 +5,7 @@ package Agent;
 
 service Agent {
   rpc RpcAgentStream (AgentRequest) returns (stream StreamResponse) {}
+  rpc RpcAutoTitleStream (AutoTitleRequest) returns (stream StreamResponse) {}
   rpc RpcAudioAndLip(AudioAndLipRequest) returns (AudioAndLipResponse);
   rpc RpcAddConversation(AddConversationRequest) returns (AddConversationResponse);
   rpc RpcUpdateConversationTitle(UpdateConversationTitleRequest) returns (UpdateConversationTitleResponse);
@@ -23,6 +24,11 @@ message AgentRequest {
   uint64 user_id = 1;
   uint64 conversation_id = 2;
   string content = 3;
+}
+
+message AutoTitleRequest {
+  uint64 user_id = 1;
+  uint64 conversation_id = 2;
 }
 
 message StreamResponse {

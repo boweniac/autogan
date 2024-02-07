@@ -8,6 +8,7 @@ import { notifications } from '@mantine/notifications';
 import { loginAPI } from '@/api/user/user_login';
 import { signupAPI } from '@/api/user/user_signup';
 import { forgetPasswordAPI } from '@/api/user/user_forget_password';
+import { getConversationsAPI } from '@/api/conversation/get_conversations';
 
 type LoginModalProps = {
     type: string;
@@ -73,6 +74,7 @@ export function LoginModal(props: LoginModalProps) {
           if (type == '登录') {
             await loginAPI(values.phone, values.password).then((r)=>{
               if (r) {
+                getConversationsAPI()
                 successClose()
               }
             })

@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { AgentConversation, AgentConversationMessage, Message } from "./TypeAgentChat";
+import { BlobOptions } from "buffer";
 
 export const excludeFromState = [
     "appName",
@@ -20,6 +21,7 @@ export interface LocalState {
     userToken:string;
     userPhone:string;
     userState:number;
+    openedLogInModal:boolean;
 
     helloStart: boolean;
 
@@ -43,6 +45,7 @@ export const initialState = {
     userToken: "",
     userPhone: "",
     userState: 0,
+    openedLogInModal: false,
 
     helloStart: false,
     

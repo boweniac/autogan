@@ -53,3 +53,9 @@ class UniversalService:
                     'name': pusher_name,
                     'tokens': 10})
         return None
+
+    async def a_auto_title(self, user_id: int, conversation_id: int, response: ResponseProtocol, snowflake_id_generator: SnowflakeIdGenerator):
+        await self._switch.a_auto_title(user_id, conversation_id, response, snowflake_id_generator)
+
+    def auto_title(self, user_id: int, conversation_id: int, response: ResponseProtocol, snowflake_id_generator: SnowflakeIdGenerator):
+        self._switch.auto_title(user_id, conversation_id, response, snowflake_id_generator)

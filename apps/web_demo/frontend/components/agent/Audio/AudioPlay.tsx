@@ -16,7 +16,7 @@ export default function AudioPlay(props: AudioPlayProps) {
       if (audio) {
         audio.play()
           .then(() => {
-            console.log("Audio is playing");
+            // console.log("Audio is playing");
           })
           .catch(error => {
             console.error("Error playing audio", error);

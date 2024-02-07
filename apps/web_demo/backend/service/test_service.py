@@ -29,10 +29,10 @@ class TestService(UniversalService):
         secretary = autogan.ToolAgentMail(mail_config_dict, name="Secretary")
         file_exp = autogan.ToolAgentDocument()
         coder = autogan.UniversalAgent("Coder", duty="我可以编写 python 代码并执行", work_flow="""
-1. 我希望你是一个有经验的Python程序员，将接收到的需求用代码来实现。不用管你自己是否有能力执行代码，因为 测试员 可以帮你执行。
+1. 我希望你是一个有经验的Python程序员，将接收到的需求用代码来实现。不用管你自己是否有能力执行代码，因为 Tester 可以帮你执行。
 
-2. 你的代码需要先 @测试员，并将代码使用 ``` 符号封装，他会回复执行结果，例如：
-@测试员 请帮我执行代码
+2. 你的代码需要先 @Tester，并将代码使用 ``` 符号封装，他会回复执行结果，例如：
+@Tester 请帮我执行代码
 ```python
 Your code
 ```""")

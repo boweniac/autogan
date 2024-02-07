@@ -4,7 +4,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { IconClockRecord, IconCoinYen, IconCrown, IconDeviceMobile, IconKey, IconLogin, IconLogout, IconTrash, IconUser, IconUserPlus } from "@tabler/icons-react";
 import { useRef, useState } from "react";
 import { LoginModal } from "../../Modals/LoginModal/LoginModal";
-import { resetAgentConversationListState, resetAgentConversationMessageState, updateUserPhoneState, updateUserStateState, updateUserTokenState } from "@/stores/LocalStoreActions";
+import { closeLogInModal, openLogInModal, resetAgentConversationListState, resetAgentConversationMessageState, updateAgentAvatarMappingState, updateAvatarStateState, updateMuteStateState, updateUserPhoneState, updateUserStateState, updateUserTokenState } from "@/stores/LocalStoreActions";
 import { notifications } from "@mantine/notifications";
 import { useRouter } from "next/router";
 import { getUserInfoAPI } from "@/api/user/user_get_user_info";
@@ -16,10 +16,11 @@ import { ChangePasswordModal } from "../../Modals/ChangePasswordModal/ChangePass
 export default function UserMenu() {
     const userToken = localStore((state: LocalState) => state.userToken);
     const userPhone = localStore((state: LocalState) => state.userPhone);
-    const [openedLogInModal, { open: openLogInModal, close: closeLogInModal }] = useDisclosure(false);
+    const openedLogInModal = localStore((state: LocalState) => state.openedLogInModal);
+    // const [openedLogInModal, { open: openLogInModal, close: closeLogInModal }] = useDisclosure(false);
     const [openedChangePhoneModal, { open: openChangePhoneModal, close: closeChangePhoneModal }] = useDisclosure(false);
     const [openedChangePasswordModal, { open: openChangePasswordModal, close: closeChangePasswordModal }] = useDisclosure(false);
-    const typeLogInModal = useRef("注册");
+    const typeLogInModal = useRef("登录");
     const router = useRouter();
     const activePage = localStore((state: LocalState) => state.activePage);
     const [subscribe, setSubscribe] = useState([]);
@@ -39,7 +40,7 @@ export default function UserMenu() {
         <ChangePhoneModal opened={openedChangePhoneModal} close={closeChangePhoneModal}></ChangePhoneModal>
         <ChangePasswordModal opened={openedChangePhoneModal} close={closeChangePhoneModal}></ChangePasswordModal>
         <Menu 
-          trigger="click-hover" 
+          trigger="click" 
           openDelay={100} 
           closeDelay={400} 
           position="right-end"
@@ -61,11 +62,11 @@ export default function UserMenu() {
         
         {userToken ? <Menu.Dropdown>
           <Menu.Label>{userPhone}</Menu.Label>
-          {sub}
+          {/* {sub}
           <Menu.Item leftSection={<IconClockRecord style={{ width: rem(14), height: rem(14) }} />}>
             历史订单
           </Menu.Item>
-          <Menu.Label>账户</Menu.Label>
+          <Menu.Label>账户</Menu.Label> */}
           <Menu.Item leftSection={<IconDeviceMobile style={{ width: rem(14), height: rem(14) }} />} onClick={()=>{
             openChangePhoneModal()
           }}>
@@ -83,6 +84,9 @@ export default function UserMenu() {
               updateUserTokenState("")
               updateUserPhoneState("")
               updateUserStateState(0)
+              updateAvatarStateState(true)
+              updateMuteStateState(false)
+              updateAgentAvatarMappingState({"CustomerManager": "customerManagerGirl"})
               resetAgentConversationListState()
               resetAgentConversationMessageState()
               router.push(activePage).then(()=>{

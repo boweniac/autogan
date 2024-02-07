@@ -3,11 +3,20 @@ import http from "http";
 import {notifications} from "@mantine/notifications";
 import axios, {AxiosProgressEvent, AxiosRequestConfig} from "axios";
 import {localStore} from "@/stores/LocalStore";
+import { openLogInModal } from '@/stores/LocalStoreActions';
 // import { getCurrentAbortController } from '@/stores/LocalStoreActions';
 
 const get = localStore.getState;
 
 export async function uploadFileStreamAPI(files: any[], apiType: string, baseId: string | undefined, conversationId: string | undefined, callback?: ((res: any) => void) | undefined, endCallback?: (() => void) | undefined, errorCallback?: (() => void) | undefined): Promise<void>{
+    if (!get().userToken) {
+        openLogInModal()
+        notifications.show({
+            message: "请先完成登陆",
+            color: "red",
+        });
+        return
+    }
     const uploaders = files.map((file) => {
         // abortController = getCurrentAbortController()
         let formData = new FormData();
@@ -40,15 +49,12 @@ export async function uploadFileStreamAPI(files: any[], apiType: string, baseId:
                     let buffer = '';
                     const allMessages = str.split("\n\n");
                     for (const message of allMessages) {
-                        // console.log(`message.toString():`+message.toString());
                         buffer += message.toString();
-                        // console.log(`buffer2.toString():`+buffer.toString());
                         // 切掉响应数据前缀
                         const cleaned = buffer.match(/(?<=data:).*$/s)?.toString();
                         // 序列化
                         let parsed;
                         try {
-                            console.log(`cleaned:`+cleaned);
                             // const cleanedString = cleaned.replace(/\n|\r/g, "\\n");
                             // parsed = JSON.parse(cleanedString);
                             if (cleaned != undefined) {
@@ -56,19 +62,12 @@ export async function uploadFileStreamAPI(files: any[], apiType: string, baseId:
                             }
                         } catch (e) {
                             buffer += "\n\n\n"
-                            // console.log(`buffer1.toString():`+buffer.toString());
                             console.error(e);
                             continue;
                         }
                         callback?.(parsed);
                         buffer = '';
                     }
-                    // const regex = /(\d+\.\d+)/; // 匹配浮点数的正则表达式
-                    // const match = str.match(regex); // 使用正则表达式匹配字符串中的浮点数
-                    // if (match) {
-                    //     const floatValue = parseFloat(match[0]); // 将匹配到的字符串转换为浮点数
-                    //     console.log(`floatValue:`+JSON.stringify(floatValue));
-                    // }
                     return reader.read().then(processText);
                 });
             })

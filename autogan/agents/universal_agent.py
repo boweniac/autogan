@@ -597,6 +597,7 @@ Step 4: Please follow the content of the previous step, From {self.name}'s persp
         #     index += 1
 
     def tool_filter(self, param: Optional[str] = None) -> tuple[str, str, str, str]:
+        print(f"param: {param}")
         return "", param, "", ""
 
     def tool_function(self, conversation_id: int, task_id: int, lang: Optional[str] = None, code: Optional[str] = None,
@@ -641,8 +642,10 @@ Step 4: Please follow the content of the previous step, From {self.name}'s persp
         如果 tool_function_usage 参数的值为 join，则先使用主体 LLM 生成内容，然后将生成的内容作为 tool_function 的输入参数。
         """
         requester = conv_info.requester_name
-        content = ""
+        content = conv_info.content
         completion_tokens = 0
+        content_type = "main"
+        content_tag = ""
         try:
             conv_info.init_message(self.name, self.agent_type)
             # 生成回复内容
@@ -715,12 +718,17 @@ Step 4: Please follow the content of the previous step, From {self.name}'s persp
             # 使用工具
             if (self.agent_type == "TOOL" or self.agent_type == "HUMAN") or (
                     self.agent_type == "TOOLMAN" and not content.startswith("@")):
+                if self.agent_type == "TOOLMAN":
+                    self.switch.storage and self.switch.storage.add_message(conv_info.conversation_id,
+                                                                        conv_info.message("main", ""))
                 lang, code, content_tag, content_tag_end = self.tool_filter(content)
                 conv_info.response(0, "tool", content_tag, "", 0, None)
                 content, completion_tokens = self.use_tool(conv_info.conversation_id, conv_info.task_id, requester,
                                                            lang, code, completion_tokens)
                 conv_info.response(1, "tool", content_tag, content, completion_tokens, None)
                 conv_info.response(2, "tool", content_tag_end, '[DONE]', 0, None)
+                content_type = "tool"
+                content_tag = content_tag_end
                 # conv_info.response_proxy.send(conv_info.msg_id, conv_info.task_id, conv_info.requester_name, 0, "tool", content, completion_tokens, None)
             # else:
             #     conv_info.response(1, "main", "", '[DONE]', 0, None)
@@ -728,7 +736,7 @@ Step 4: Please follow the content of the previous step, From {self.name}'s persp
                                          {'role': 'user' if self.agent_type == "HUMAN" else 'assistant',
                                           'name': self.name, 'content': content, 'tokens': completion_tokens})
             conv_info.update_message(content)
-            self.switch.handle_and_forward(conv_info)
+            self.switch.handle_and_forward(conv_info, content_type, content_tag)
         except SystemExit:
             print("The task is finished.")
         except Exception as e:
@@ -845,6 +853,9 @@ Step 4: Please follow the content of the previous step, From {self.name}'s persp
             # 使用工具
             if (self.agent_type == "TOOL" or self.agent_type == "HUMAN") or (
                     self.agent_type == "TOOLMAN" and not content.startswith("@")):
+                if self.agent_type == "TOOLMAN":
+                    self.switch.storage and self.switch.storage.add_message(conv_info.conversation_id,
+                                                                        conv_info.message("main", ""))
                 lang, code, content_tag, content_tag_end = self.tool_filter(content)
                 await conv_info.a_response(0, "tool", content_tag, "", 0, None)
                 content, completion_tokens = self.use_tool(conv_info.conversation_id, conv_info.task_id, requester,

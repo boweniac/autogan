@@ -54,3 +54,5 @@ class StorageProtocol(Protocol):
     # def save_conversation_latest_task(self, conversation_id: int, agent_name: str, task_id: int) -> None:
     #     pass
 
+    def update_conversation_title(self, user_id: int, conversation_id: int, title: str):
+        pass

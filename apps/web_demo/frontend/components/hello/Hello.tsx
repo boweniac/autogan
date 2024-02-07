@@ -14,6 +14,7 @@ import RoleDisplayHello from "./RoleDisplay/RoleDisplayHello";
 import RoleDisplayHelloTitle from "./RoleDisplay/RoleDisplayHelloTitle";
 import RoleDisplayHelloButton from "./RoleDisplay/RoleDisplayHelloButton";
 import { resetIntroductionConversationsState, updateActivePageState } from "@/stores/LocalStoreActions";
+import { HeaderMegaMenu } from "./HeaderMegaMenu/HeaderMegaMenu";
 
 
 export default function Hello() {
@@ -29,7 +30,7 @@ export default function Hello() {
     const [lipValue, setLipValue] = useState<string>();
     const agentAvatarMapping = localStore((state: LocalState) => state.agentAvatarMapping);
     const [agentRole, setAgentRole] = useState<string>("CustomerManager");
-    const avatarName = useRef("customerManagerGirl");
+    // const avatarName = useRef("customerManagerGirl");
     const avatarVoice = useRef("");
     // const agentConversation = localStore((state: LocalState) => state.introductionConversations);
     // const agentConversation = agentConversations.find((agentConversations) => agentConversations.id == queryConversationID);
@@ -42,6 +43,7 @@ export default function Hello() {
     // const helloStart = localStore((state: LocalState) => state.helloStart);
     const [helloStart, setHelloStart] = useState<boolean>(false);
     const [introductionStart, setIntroductionStart] = useState<boolean>(false);
+    const [avatarName, setAvatarName] = useState<string>(agentAvatarMapping["CustomerManager"]);
     // const [currentMorphTargetHolder, setSpeakText] = useState<string>("");
     // new Audio()
     // const currentAbortController = new AbortController();
@@ -115,8 +117,8 @@ export default function Hello() {
     }, [router.isReady, helloStart]);
 
     useEffect(() => {
-        avatarName.current = agentAvatarMapping[agentRole]
-        avatarVoice.current = avatarConfig[avatarName.current].voice || ""
+        setAvatarName(agentAvatarMapping[agentRole])
+        avatarVoice.current = avatarConfig[avatarName].voice || ""
     }, [agentRole]);
     
 
@@ -124,8 +126,8 @@ export default function Hello() {
     const startIntroduction = async (caseID: string) => {
         AgentIntroductionSend(caseID, (value)=>{
             if (value) {
-                const audioAndLip = convertToAudioAndLipDemo(value, avatarName.current)
-                setAudioStack(prevStack => [...prevStack, audioAndLip]);
+                const audioAndLip = convertToAudioAndLipDemo(value, agentAvatarMapping[value?.agentName || ""])
+                setAudioStack(prevStack => [...prevStack, {...audioAndLip, avatarName: agentAvatarMapping[audioAndLip?.agentName || ""]}]);
                 if (!isPlaying.current) {
                     playNextAudio();
                 }
@@ -134,9 +136,7 @@ export default function Hello() {
       };
 
     const handleCancel = () => {
-        console.log(`点击 1:`);
         if (abortControllerRef.current) {
-            console.log(`点击 2:`);
             abortControllerRef.current.abort(); // 取消请求
         }
     };
@@ -144,12 +144,12 @@ export default function Hello() {
     return (
         <>
             {
-                helloStart ? <Box
+                helloStart ? <Stack
                 h={`calc(100vh)`}
                 w="100%"
                 className={classes.agentFrame}
             >
-    
+                <HeaderMegaMenu selectAvatarCallback={(v)=>{}} muteCallback={(v)=>{}}></HeaderMegaMenu>
                 <Stack
                         w="100%"
                         h={`calc(100vh)`}
@@ -159,10 +159,10 @@ export default function Hello() {
                         style={{ marginRight: roleWidth}}
                     >
                         <Transition mounted={introductionStart} transition="fade" duration={1000} timingFunction="ease">
-                            {(styles) => <Title style={styles} mb="lg" mt={100} size={80} order={1}> 人人都是 CEO </Title>}
+                            {(styles) => <Title style={styles} mb="lg" mt={50} size={80} order={1}> 人人都是 CEO </Title>}
                         </Transition>
                         <MessagesDisplay startSayHello={introductionStart} playAudio={(value)=>{
-                            const audioAndLip = convertToAudioAndLipDemo(value, avatarName.current)
+                            const audioAndLip = convertToAudioAndLipDemo(value, agentAvatarMapping[value?.agentName || ""])
                             setAudioStack(prevStack => [...prevStack, audioAndLip]);
                             if (!isPlaying.current) {
                                 playNextAudio();
@@ -171,10 +171,10 @@ export default function Hello() {
                             startIntroduction(value)
                         }}></MessagesDisplay>
                     </Stack>
-                <RoleDisplay avatarName={avatarName.current} audioAndLip={audioAndLip} audioEndCallback={()=>{
+                <RoleDisplay avatarName={avatarName} audioAndLip={audioAndLip} audioEndCallback={()=>{
                     playNextAudio()
                 }}/>
-            </Box> : <Box
+            </Stack> : <Box
                 h={`calc(100vh)`}
                 w="100%"
                 className={classes.agentFrame}

@@ -21,6 +21,14 @@ export const updateActivePageState = (page: string) => {
     set(() => ({ activePage: page }));
 }
 
+export const openLogInModal = () => {
+    set(() => ({ openedLogInModal: true }));
+}
+
+export const closeLogInModal = () => {
+    set(() => ({ openedLogInModal: false }));
+}
+
 export const updateAgentAvatarMappingState = (mapping: { [key: string]: string }) => {
     set((state) => ({
         agentAvatarMapping: {
@@ -239,8 +247,6 @@ export const getAgentConversationMessageLastRemoteIDState = (conversationID: str
 };
 
 export const addIntroductionConversationMessageState = (messageLocalID: string, agent_name: string) => {
-    console.log(`messageLocalID:`+messageLocalID);
-    console.log(`agent_name:`+agent_name);
     set((state) => ({
         introductionConversations: [
             ...state.introductionConversations,

@@ -12,6 +12,7 @@ export const convertMessages = (messagesList: MessageBlock[]) => {
   messagesList.map((messageBlock) => {
     messageBlock.localID = uuidv4()
     if (messageBlock.msgId != msg_id) {
+      msg_id = messageBlock.msgId || ""
       messages = [
         ...messages,
         {
@@ -31,7 +32,6 @@ export const convertMessages = (messagesList: MessageBlock[]) => {
           }]
         }
       ]
-      console.log(`messageBlock.msg_id:`+JSON.stringify(messageBlock.msgId));
     } else {
       messages = messages.map((m) => {
         if (m.msg_id === msg_id) {

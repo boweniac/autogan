@@ -20,47 +20,71 @@ export const AgentIntroductionSend = async (caseID: string, sliceCallback: (src:
     let task_id = ""
     getIntroductionAPI(caseID).then((messages)=>{
         if (messages) {
-            console.log(`messages:`+JSON.stringify(messages));
-            messages.map((message: IntroductionMessage) => {
-                const messageLocalID = uuidv4()
-                addIntroductionConversationMessageState(messageLocalID, message.agentName)
-                message.messageBlocks.map((message_block)=>{
-                    const messageBlockLocalID = uuidv4()
-                    addIntroductionConversationMessageBlockState(messageLocalID, {
-                        localID: messageBlockLocalID,
-                        contentType: message_block.contentType,
-                        contentTag: message_block.contentTag,
-                        content: "",
-                    })
-                    if (message_block.audioAndLip) {
-                        const lipsData = JSON.parse(message_block.audioAndLip.lipsData as string) as LipsData;
-                        message_block.audioAndLip.lipsData = lipsData.mouthCues;
-                        sliceCallback(message_block.audioAndLip)
-                    }
+            const processMessage = (messageIndex: number) => {
+                if (messageIndex < messages.length) {
+                    const message = messages[messageIndex];
+                    const messageLocalID = uuidv4()
+                    addIntroductionConversationMessageState(messageLocalID, message.agentName)
 
-                    let currentChar = 0;
-                    let prevText = ""
-                    const typeWriter = setInterval(() => {
-                        if (message_block.content) {
-                            prevText += message_block.content[currentChar]
-                            updateIntroductionConversationMessageBlockState(messageLocalID, messageBlockLocalID, {content: prevText})
-                            currentChar++;
-                            if (currentChar === message_block.content.length) clearInterval(typeWriter);
+                    const processMessageBlocks = (blockIndex: number) => {
+                        if (blockIndex < message.messageBlocks.length) {
+                            const message_block = message.messageBlocks[blockIndex];
+                            const messageBlockLocalID = uuidv4()
+                            addIntroductionConversationMessageBlockState(messageLocalID, {
+                                localID: messageBlockLocalID,
+                                contentType: message_block.contentType,
+                                contentTag: message_block.contentTag,
+                                content: "",
+                            })
+                            if (message_block.audioAndLip) {
+                                const lipsData = JSON.parse(message_block.audioAndLip.lipsData as string) as LipsData;
+                                message_block.audioAndLip.lipsData = lipsData.mouthCues;
+                                const data: AudioAndLipDemo = {
+                                    audioFile: message_block.audioAndLip.audioFile,
+                                    lipsData: message_block.audioAndLip.lipsData,
+                                    text: message_block.content,
+                                    agentName: message.agentName,
+                                    messageLocalID: messageLocalID,
+                                    messageBlockLocalID: messageBlockLocalID
+                                }
+                                sliceCallback(data)
+                            }
+
+                            let currentChar = 0;
+                            let prevText = ""
+                            const typeWriter = setInterval(() => {
+                                if (message_block.content) {
+                                    prevText += message_block.content[currentChar]
+                                    updateIntroductionConversationMessageBlockState(messageLocalID, messageBlockLocalID, {content: prevText})
+                                    currentChar++;
+                                    if (currentChar === message_block.content.length) {
+                                        clearInterval(typeWriter)
+                                        processMessageBlocks(blockIndex + 1);
+                                    };
+                                }
+                            }, 100);
+
+                            // return () => clearInterval(typeWriter);
+                        } else {
+                            // 当所有消息块处理完成后，递归处理下一个消息
+                            processMessage(messageIndex + 1);
                         }
-                    }, 100);
-
-                    return () => clearInterval(typeWriter);
-                })
-            })
+                    }
+                    processMessageBlocks(0);
+                }
+            }
+            processMessage(0);
         }
     })
 }
 
 export const convertToAudioAndLipDemo = (audioAndLipDemo: AudioAndLipDemo, avatarName: string) => {
-    const audioFile = audioAndLipDemo.audioFile[avatarName]
+    const audioFile = audioAndLipDemo.audioFile ? audioAndLipDemo.audioFile[avatarName] : ""
     const data = {
         "audioFile": audioFile,
-        "lipsData": audioAndLipDemo.lipsData
+        "lipsData": audioAndLipDemo.lipsData,
+        "text": audioAndLipDemo.text,
+        "agentName": audioAndLipDemo.agentName,
     }
     return data
 }
@@ -72,6 +96,7 @@ export const helloAudioAndLip: AudioAndLipDemo = {
         "customerManagerBoy": "https://aibowen-base.boweniac.top/9475afe9-49c7-533a-b7d4-7316dfe7c69f.mp3",
         "customerManagerGirl": "https://aibowen-base.boweniac.top/6206f179-0bbb-5265-89b8-ec742b5cfbcb.mp3"
     },
+    agentName: "CustomerManager",
     lipsData: [
         {
             "start": 0.00,

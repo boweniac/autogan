@@ -15,6 +15,14 @@ class AgentRequest(_message.Message):
     content: str
     def __init__(self, user_id: _Optional[int] = ..., conversation_id: _Optional[int] = ..., content: _Optional[str] = ...) -> None: ...
 
+class AutoTitleRequest(_message.Message):
+    __slots__ = ("user_id", "conversation_id")
+    USER_ID_FIELD_NUMBER: _ClassVar[int]
+    CONVERSATION_ID_FIELD_NUMBER: _ClassVar[int]
+    user_id: int
+    conversation_id: int
+    def __init__(self, user_id: _Optional[int] = ..., conversation_id: _Optional[int] = ...) -> None: ...
+
 class StreamResponse(_message.Message):
     __slots__ = ("text",)
     TEXT_FIELD_NUMBER: _ClassVar[int]

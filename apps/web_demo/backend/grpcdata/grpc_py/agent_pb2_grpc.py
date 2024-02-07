@@ -19,6 +19,11 @@ class AgentStub(object):
                 request_serializer=agent__pb2.AgentRequest.SerializeToString,
                 response_deserializer=agent__pb2.StreamResponse.FromString,
                 )
+        self.RpcAutoTitleStream = channel.unary_stream(
+                '/Agent.Agent/RpcAutoTitleStream',
+                request_serializer=agent__pb2.AutoTitleRequest.SerializeToString,
+                response_deserializer=agent__pb2.StreamResponse.FromString,
+                )
         self.RpcAudioAndLip = channel.unary_unary(
                 '/Agent.Agent/RpcAudioAndLip',
                 request_serializer=agent__pb2.AudioAndLipRequest.SerializeToString,
@@ -85,6 +90,12 @@ class AgentServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def RpcAgentStream(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def RpcAutoTitleStream(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -170,6 +181,11 @@ def add_AgentServicer_to_server(servicer, server):
                     request_deserializer=agent__pb2.AgentRequest.FromString,
                     response_serializer=agent__pb2.StreamResponse.SerializeToString,
             ),
+            'RpcAutoTitleStream': grpc.unary_stream_rpc_method_handler(
+                    servicer.RpcAutoTitleStream,
+                    request_deserializer=agent__pb2.AutoTitleRequest.FromString,
+                    response_serializer=agent__pb2.StreamResponse.SerializeToString,
+            ),
             'RpcAudioAndLip': grpc.unary_unary_rpc_method_handler(
                     servicer.RpcAudioAndLip,
                     request_deserializer=agent__pb2.AudioAndLipRequest.FromString,
@@ -253,6 +269,23 @@ class Agent(object):
             metadata=None):
         return grpc.experimental.unary_stream(request, target, '/Agent.Agent/RpcAgentStream',
             agent__pb2.AgentRequest.SerializeToString,
+            agent__pb2.StreamResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def RpcAutoTitleStream(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(request, target, '/Agent.Agent/RpcAutoTitleStream',
+            agent__pb2.AutoTitleRequest.SerializeToString,
             agent__pb2.StreamResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

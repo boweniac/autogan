@@ -49,8 +49,16 @@ Your python code
         )
         self._code_execution = CodeExecution(work_dir)
 
+    # def tool_filter(self, param: Optional[str] = None) -> tuple[str, str, str, str]:
+    #     lang, code = CodeExecution.extract_code(param)
+    #     if lang == "mail" and code:
+    #         return lang, code, "Sending", "Sent successfully"
+    #     else:
+    #         return "", "", "Sending", "Send failure"
+
     def tool_function(self, conversation_id: int, task_id: int, lang: Optional[str] = None, code: Optional[str] = None,
                       tokens: Optional[int] = None) -> tuple[str, int]:
+        print(f"code: {code}")
         try:
             execution_result, tokens = self._code_execution.code_execution_reply(code)
             if execution_result:

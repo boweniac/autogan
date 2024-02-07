@@ -256,10 +256,10 @@ In the group chat, your name is {self._agent_name}，and you are an assistant wh
 ## 任务提交"""
             if self._pipeline and self._pipeline != "\\":
                 focus_prompt += f"""
-当你完成任务后，请将最终结果提交给 {self._pipeline}，例如: @{self._pipeline} {self._task_tag} 邮件已成功发送。"""
+当你完成任务后，请将最终结果提交给 {self._pipeline}，例如: @{self._pipeline} {self._task_tag} ...。"""
             else:
                 focus_prompt += f"""
-当你完成任务后，请将最终结果提交给 {task_publisher}, 例如: @{task_publisher} 邮件已成功发送。"""
+当你完成任务后，请将最终结果提交给 {task_publisher}, 例如: @{task_publisher} ...。"""
         else:
             focus_prompt = f"""# Current Task
 ## Task Content

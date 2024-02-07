@@ -20,7 +20,6 @@ type UploadFileProps = {
             if (res != undefined) {
               const p = res.index/res.length*100
               if (res.step == "add_chat_file") {
-                console.log(`p:`+JSON.stringify(p));
                 if (endCallback && p == 100) {
                     endCallback()
                 }

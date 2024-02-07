@@ -16,7 +16,7 @@ import HelloScene from "@/components/avatar/Scene/HelloScene";
 
 
 export default function RoleDisplayHello() {
-    const avatarList = ["customerManagerBoy", "customerManagerGirl", "coder", "documentExp", "cearchExpert", "cecretary", "tester"]
+    const avatarList = ["customerManagerBoy", "customerManagerGirl", "coder", "documentExp", "searchExpert", "secretary", "tester"]
     const [avatarName, setAvatarName] = useState<string>("customerManagerBoy");
     // console.log(`props.avatarName:`+props.avatarName);
     const currentAvatarIndex = useRef(0);
@@ -35,6 +35,7 @@ export default function RoleDisplayHello() {
             {/* <Canvas>
                 <DefaultAvatar />
             </Canvas> */}
+            
             <HelloScene avatarName={avatarName} animation="hello" test={false} animationPlayEndCallback={()=>{
                 if (currentAvatarIndex.current == avatarList.length-1) {
                     currentAvatarIndex.current = 0

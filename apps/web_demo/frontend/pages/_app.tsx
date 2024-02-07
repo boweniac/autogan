@@ -33,7 +33,7 @@ export default function App({ Component, pageProps }: AppProps) {
                 >
                     <AppShell.Navbar><NavbarMinimal/></AppShell.Navbar>
                     <AppShell.Main><Component {...pageProps} /></AppShell.Main>
-                    <AppShell.Footer><BottomNavbar /></AppShell.Footer>
+                    {/* <AppShell.Footer><BottomNavbar /></AppShell.Footer> */}
                 </AppShell>
             </MantineProvider>
         )

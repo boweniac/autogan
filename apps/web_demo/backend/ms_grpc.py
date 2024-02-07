@@ -83,6 +83,34 @@ class Agent(agent_pb2_grpc.AgentServicer):
         except Exception as e:
             return HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
+    def RpcAutoTitleStream(self, request, context):
+        try:
+            user_id = request.user_id
+            conversation_id = request.conversation_id
+            if not user_id or not conversation_id:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                    detail="User ID, Conversation ID and Content must not be empty")
+            if storage.user_conversation_permissions(user_id, conversation_id):
+                data_queue = queue.Queue()
+                stop_event = threading.Event()
+                stream_response = GrpcResponse(data_queue, stop_event)
+                test_thread = threading.Thread(target=test_service.auto_title, args=(
+                    user_id, conversation_id, stream_response, snowflake_id))
+                test_thread.start()
+                while True:
+                    while not data_queue.empty():
+                        yield agent_pb2.StreamResponse(text=data_queue.get())
+                    if not context.is_active() or not test_thread.is_alive():
+                        stop_event.set()
+                        test_thread.join()
+                        break
+            else:
+                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Conversation permissions are wrong")
+        except HTTPException as e:
+            return e
+        except Exception as e:
+            return HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
     def RpcAudioAndLip(self, request, context):
         text = request.text
         model = request.model

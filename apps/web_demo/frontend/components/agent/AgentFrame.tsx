@@ -6,10 +6,10 @@ import { HeaderMegaMenu } from "@/components/agent/HeaderMegaMenu/HeaderMegaMenu
 import { LeftTableOfContents } from "@/components/agent/LeftTableOfContents/LeftTableOfContents";
 import RoleDisplay from "@/components/agent/RoleDisplay/RoleDisplay";
 import MessagesDisplay from "@/components/agent/messages_display/MessagesDisplay";
-import { burnAfterGetInitConversationRequestState, getAgentConversationMessageState, updateActivePageState } from "@/stores/LocalStoreActions";
+import { burnAfterGetInitConversationRequestState, getAgentConversationInfoState, getAgentConversationMessageState, updateActivePageState } from "@/stores/LocalStoreActions";
 import classes from './AgentFrame.module.css';
 import { useDisclosure } from "@mantine/hooks";
-import { AgentConversationSend, addAgentConversation } from "./AgentFrameUtil";
+import { AgentConversationSend, AutoTitle, addAgentConversation } from "./AgentFrameUtil";
 import {LocalState, localStore} from "@/stores/LocalStore";
 import { audioAndLipAPI } from "@/api/audio/audio_and_lip";
 import { AudioAndLip } from "@/stores/TypeAudioAndLip";
@@ -28,8 +28,9 @@ export default function AgentFrame() {
     const [audioAndLip, setAudioAndLip] = useState<AudioAndLip>();
     const [agentRole, setAgentRole] = useState<string>("CustomerManager");
     const [avatarName, setAvatarName] = useState<string>(agentAvatarMapping["CustomerManager"]);
-    const [textStack, setTextStack] = useState<string[]>([]);
+    const [textStack, setTextStack] = useState<AudioAndLip[]>([]);
     const [audioStack, setAudioStack] = useState<AudioAndLip[]>([]);
+    const muteState = localStore((state: LocalState) => state.muteState);
 
     const isGeting = useRef(false);
     const isPlaying = useRef(false);
@@ -54,13 +55,10 @@ export default function AgentFrame() {
 
     const getNextAudio = () => {
         setTextStack(prevTextStack => {
-            // console.log(`prevTextStack2:`+JSON.stringify(prevTextStack));
             if (prevTextStack && prevTextStack.length > 0) {
                 isGeting.current = true
                 const [nextText, ...textRest] = prevTextStack;
-                // console.log(`nextText:`+JSON.stringify(nextText));
                 getAudio(nextText);
-                // console.log(`textRest:`+JSON.stringify(textRest));
                 return textRest
             } else {
                 isGeting.current = false
@@ -69,25 +67,27 @@ export default function AgentFrame() {
           });
       }
 
-      const getAudio = (audioLink: string) => {
-        audioAndLipAPI(audioLink, avatarVoice.current, 1).then((res)=>{
-            isGeting.current = false
-            getNextAudio()
-            setAudioStack(prevStack => [...prevStack, res]);
-            if (!isPlaying.current) {
-                playNextAudio();
-            }
-        })
+      const getAudio = (audioLink: AudioAndLip) => {
+        if (audioLink.text) {
+            audioAndLipAPI(audioLink.text, avatarConfig[agentAvatarMapping[audioLink.agentName || ""]].voice || "", 1).then((res)=>{
+                isGeting.current = false
+                getNextAudio()
+                setAudioStack(prevStack => [...prevStack, {...audioLink, ...res, avatarName: agentAvatarMapping[audioLink?.agentName || ""]}]);
+                if (!isPlaying.current) {
+                    playNextAudio();
+                }
+            })
+        }
       }
 
     const playNextAudio = () => {
         setAudioStack(prevStack => {
             if (prevStack && prevStack.length > 0) {
-                // console.log(`prevStack:`+JSON.stringify(prevStack));
                 const [nextAudio, ...rest] = prevStack;
-                // console.log(`nextAudio:`+JSON.stringify(nextAudio));
-                // console.log(`rest:`+JSON.stringify(rest));
                 isPlaying.current = true
+                if (nextAudio.agentName && nextAudio.agentName != "Customer") {
+                    setAgentRole(nextAudio.agentName)
+                }
                 setAudioAndLip(nextAudio)
                 // playAudio(nextAudio); // 播放下一个音频
                 return rest
@@ -97,7 +97,7 @@ export default function AgentFrame() {
             }
           });
       }
-    
+
       const doSubmit = async (value: string) => {
         // 并非新对话
         if (queryConversationID == undefined) {
@@ -107,23 +107,30 @@ export default function AgentFrame() {
             const signal = abortControllerRef.current.signal;
             loadingStart()
             AgentConversationSend(queryConversationID, value, signal, (text)=>{
+                console.log(`text:`+JSON.stringify(text.text));
+                console.log(`name:`+JSON.stringify(text.agentName));
                 if (text) {
-                    // console.log(`speakText:`+JSON.stringify(text));
                     setTextStack(prevTextStack => {
-                        // console.log(`prevTextStack:`+JSON.stringify(prevTextStack));
                         return [...prevTextStack, text]
                     })
-                    if (!isGeting.current) {
-                        // getNextAudio();
+                    if (!isGeting.current && !muteState) {
+                        getNextAudio();
                     }
                 }
-            }, () => loadingEnd(), () => loadingEnd())
+            }, () => {
+                loadingEnd()
+                console.log(`getAgentConversationInfoState(queryConversationID):`+JSON.stringify(getAgentConversationInfoState(queryConversationID)));
+                console.log(`getAgentConversationInfoState(queryConversationID)?.title:`+JSON.stringify(getAgentConversationInfoState(queryConversationID)?.title));
+                if (!getAgentConversationInfoState(queryConversationID)?.title) {
+                    console.log(`lslslslsl:`);
+                    const s = new AbortController().signal;
+                    AutoTitle(queryConversationID, s, ()=>{})
+                }
+            }, () => loadingEnd())
         }
       };
       const handleCancel = () => {
-        console.log(`点击 1:`);
         if (abortControllerRef.current) {
-            console.log(`点击 2:`);
             abortControllerRef.current.abort(); // 取消请求
         }
     };
@@ -131,12 +138,20 @@ export default function AgentFrame() {
     useEffect(() => {
         updateActivePageState("/agent")
         getConversationsAPI().then((res: string[])=>{
-            console.log(`res:`+JSON.stringify(res));
             if (queryConversationID && !res.includes(queryConversationID)) {
                 router.push("/agent").then()
             }
         })
     }, []);
+
+    useEffect(() => {
+        setTextStack(prevTextStack => {
+            return []
+        })
+        setAudioStack(prevTextStack => {
+            return []
+        })
+    }, [muteState]);
 
     useEffect(() => {
         if (router.isReady && queryConversationID) {
@@ -158,6 +173,7 @@ export default function AgentFrame() {
             w="100%"
             className={classes.agentFrame}
         >
+            
             <LeftTableOfContents conversationID={queryConversationID} ></LeftTableOfContents>
 
             <Stack

@@ -7,7 +7,7 @@ import mdCodeCopy from "./markdownCopy";
 import classes from './MarkdownBlock.module.css';
 // import './markdown.css';
 import { Stack, createTheme, Text, Box, useMantineTheme, useMantineColorScheme, rem, MantineFontSizesValues, Accordion } from "@mantine/core";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 
 type MarkdownBlockProps = {
@@ -51,7 +51,7 @@ export default function MarkdownBlock(props: MarkdownBlockProps) {
       </Box> : 
       <Accordion style={{marginBottom: rem(7)}} variant="separated" defaultValue="Apples">
         <Accordion.Item key="Apples" value="Apples">
-          <Accordion.Control style={{height: rem(32)}} icon="🧠">{props.content_tag}</Accordion.Control>
+          <Accordion.Control style={{height: rem(32)}} icon="🛠️">{props.content_tag}</Accordion.Control>
           <Accordion.Panel><Box
             maw={`calc(100vw - ${rem(400)} - ${rem(100)} - ${rem(100)} - ${rem(220)} - ${rem(88)})`}
             className={classes.message}

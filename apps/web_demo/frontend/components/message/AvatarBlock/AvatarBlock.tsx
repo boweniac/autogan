@@ -1,14 +1,18 @@
 import { Avatar, rem } from "@mantine/core";
 
 type AvatarBlockProps = {
-    role: string | undefined;
+    avatarName: string | undefined;
 }
 
 export default function AvatarBlock(props: AvatarBlockProps) {
+    let avatarName = "customer"
+    if (props.avatarName) {
+        avatarName = props.avatarName
+    }
     return (
         <Avatar
-            src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-2.png"
-            alt={props.role}
+            src={`/avatars/${avatarName}.png`}
+            alt={avatarName}
             radius="xl"
             size={rem(38)}
         />

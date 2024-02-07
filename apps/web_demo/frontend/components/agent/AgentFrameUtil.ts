@@ -8,6 +8,7 @@ import { NextRouter } from "next/router"
 import { useState } from "react"
 import { v4 as uuidv4 } from "uuid";
 import { streamAPI } from "@/api/request"
+import { AudioAndLip } from "@/stores/TypeAudioAndLip"
 
 export const addAgentConversation = async (value: string, router: NextRouter) => {
     addAgentConversationAPI().then((conversation_id: string) => {
@@ -50,7 +51,7 @@ export const addAgentConversation = async (value: string, router: NextRouter) =>
 //     })
 // }
 
-export const AgentConversationSend = async (conversationID: string, value: string, signal: AbortSignal, sliceCallback: (src: string)=> void, endCallback?: (() => void) | undefined, errorCallback?: (() => void) | undefined ) => {
+export const AgentConversationSend = async (conversationID: string, value: string, signal: AbortSignal, sliceCallback: (src: AudioAndLip)=> void, endCallback?: (() => void) | undefined, errorCallback?: (() => void) | undefined ) => {
     // const currentAbortController = new AbortController();
     // updateCurrentAbortController(currentAbortController)
     const regex = /[.,，。；\/#!$%\^&\*;:{}=\-_`~()|\n\r]/g;
@@ -66,26 +67,32 @@ export const AgentConversationSend = async (conversationID: string, value: strin
     let messageID = ""
     let task_id = ""
     await streamAPI(
-        value, 
-        conversationID,
+        "/agent/test",
+        {
+            conversation_id: conversationID,
+            content: value,
+        },
         signal,
         (res) => {
             if (res) {
                 if (res.content == "[DONE]") {
+                    if (res.contentType == "tool") {
+                        updateAgentConversationMessageBlockState(conversationID, messageLocalID, messageBlockLocalID, {contentTag: res.contentTag})
+                    }
                     // 一个消息块的结束
                     if (textSlice) {
-                        sliceCallback(textSlice)
+                        sliceCallback({"text": textSlice, "agentName": agent_name})
                     }
                     text = ""
                     // agent_name = ""
                     // messageLocalID = ""
                     hold = true
+                    coding = false
                     sliceLength = 0
                     textSlice = ""
                 } else {
                     if (res.index == 0) {
                         text = ""
-                        console.log(`第一个块`);
                         messageBlockLocalID = uuidv4()
                         text += res.content
                         content_type = res.contentType
@@ -94,8 +101,6 @@ export const AgentConversationSend = async (conversationID: string, value: strin
                         if (messageID != res.msgId) {
                             messageID = res.msgId
                             // 一个角色消息的开始
-                            console.log(`一个角色消息的开始`);
-                            console.log(`messages:`+JSON.stringify(res));
                             messageLocalID = uuidv4()
                             addAgentMessageState(conversationID, {
                                 task_id: task_id,
@@ -116,8 +121,6 @@ export const AgentConversationSend = async (conversationID: string, value: strin
                             })
                         } else {
                             // 同一角色新的消息块
-                            console.log(`同一角色新的消息块`);
-                            console.log(`messages:`+JSON.stringify(res));
                             addAgentConversationMessageBlockState(conversationID, messageLocalID, {
                                 taskId: task_id,
                                 localID: messageBlockLocalID,
@@ -129,6 +132,29 @@ export const AgentConversationSend = async (conversationID: string, value: strin
                                 tokens: res.tokens
                             })
                         }
+                        if (agent_name != "Customer") {
+                            if (res.content.includes('```')) {
+                                // 识别代码块的开始和结束
+                                coding = !coding
+                                if (coding && textSlice) {
+                                    sliceCallback({"text": textSlice, "agentName": agent_name})
+                                    hold = true
+                                    sliceLength = 0
+                                    textSlice = ""
+                                }
+                            }
+                            if (!coding) {
+                                // 跳过代码块
+                                textSlice += res.content
+                                sliceLength++
+                                if (textSlice.length > 10 && !coding) {
+                                    sliceCallback({"text": textSlice, "agentName": agent_name})
+                                    hold = true
+                                    sliceLength = 0
+                                    textSlice = ""
+                                }
+                            }
+                        }
                     } else {
                         // 角色消息接收中
                         text += res.content
@@ -136,30 +162,24 @@ export const AgentConversationSend = async (conversationID: string, value: strin
                         if (res.content.includes('```')) {
                             // 识别代码块的开始和结束
                             coding = !coding
-                            if (coding) {
-                                sliceCallback(textSlice)
+                            if (coding && textSlice) {
+                                sliceCallback({"text": textSlice, "agentName": agent_name})
                                 hold = true
                                 sliceLength = 0
                                 textSlice = ""
                             }
-                        }
-                        if (!coding) {
+                        } else if (!coding) {
                             // 跳过代码块
                             textSlice += res.content
                             sliceLength++
-                            // console.log(`textSlice:`+JSON.stringify(textSlice));
-                            // console.log(`sliceLength:`+JSON.stringify(sliceLength));
-                            // console.log(`hold:`+JSON.stringify(hold));
                             if (regex.test(res.content)) {
-                                console.log(`regex.test(res.content):`+JSON.stringify(regex.test(res.content)));
                                 if (sliceLength > 15) {
                                     hold = false
                                 }
-    
+
                             }
-                            // console.log(`hold:`+JSON.stringify(hold));
                             if (sliceLength > 15 && !hold && !coding) {
-                                sliceCallback(textSlice)
+                                sliceCallback({"text": textSlice, "agentName": agent_name})
                                 hold = true
                                 sliceLength = 0
                                 textSlice = ""
@@ -171,5 +191,24 @@ export const AgentConversationSend = async (conversationID: string, value: strin
             }
         },
         endCallback
+        ).then();
+}
+
+export const AutoTitle = async (conversationID: string, signal: AbortSignal, sliceCallback: (src: AudioAndLip)=> void) => {
+    let title = ""
+    await streamAPI(
+        "/agent/auto_title",
+        {
+            conversation_id: conversationID,
+        },
+        signal,
+        (res) => {
+            if (res) {
+                if (res.content != "[DONE]") {
+                    title += res.content
+                    updateAgentConversationState(conversationID, {title: title})
+                }
+            }
+        }
         ).then();
 }

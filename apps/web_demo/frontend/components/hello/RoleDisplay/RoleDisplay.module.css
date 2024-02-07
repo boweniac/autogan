@@ -1,6 +1,6 @@
 .roleDisplay {
     height: 100%;
-    width: calc(200vw - rem(440px));
+    width: calc(200vw - rem(540px));
     /* width: 100%; */
     flex-shrink: 0;
 }

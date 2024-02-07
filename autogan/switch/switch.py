@@ -2,6 +2,11 @@ import re
 from collections import defaultdict
 from typing import List, Optional, Dict
 
+from autogan.oai.chat_api_utils import ChatCompletionsRequest
+from autogan.oai.chat_generate_utils import generate_chat_completion_internal, generate_chat_completion, \
+    a_generate_chat_completion
+from autogan.protocol.response_protocol import ResponseProtocol
+
 from autogan import UniversalAgent
 from autogan.oai.chat_config_utils import AgentConfig
 from autogan.protocol.storage_protocol import StorageProtocol
@@ -237,8 +242,8 @@ class Switch(SwitchProtocol):
         conv_info.switch_to_agent(conversation_id, f"@{invited_speaker.name} Please enter: ")
         invited_speaker.receive(conv_info)
 
-    def handle_and_forward(self, conv_info: ConvHolder) -> None:
-        handle_dict = self.handle(conv_info)
+    def handle_and_forward(self, conv_info: ConvHolder, content_type: Optional[str] = "main", content_tag: Optional[str] = "") -> None:
+        handle_dict = self.handle(conv_info, content_type, content_tag)
         if handle_dict:
             if handle_dict["type"] == "system":
                 conv_info.to_system_alert(handle_dict["content"])
@@ -250,8 +255,8 @@ class Switch(SwitchProtocol):
                 conv_info.switch_to_agent(handle_dict["switch_task_id"], handle_dict["content"])
                 handle_dict["receiver"].receive(conv_info)
 
-    async def a_handle_and_forward(self, conv_info: ConvHolder) -> None:
-        handle_dict = self.handle(conv_info)
+    async def a_handle_and_forward(self, conv_info: ConvHolder, content_type: Optional[str] = "main", content_tag: Optional[str] = "") -> None:
+        handle_dict = self.handle(conv_info, content_type, content_tag)
         if handle_dict:
             if handle_dict["type"] == "system":
                 conv_info.to_system_alert(handle_dict["content"])
@@ -263,7 +268,7 @@ class Switch(SwitchProtocol):
                 conv_info.switch_to_agent(handle_dict["switch_task_id"], handle_dict["content"])
                 await handle_dict["receiver"].a_receive(conv_info)
 
-    def handle(self, conv_info: ConvHolder) \
+    def handle(self, conv_info: ConvHolder, content_type: Optional[str] = "main", content_tag: Optional[str] = "") \
             -> Optional[Dict]:
         """Handle messages and forward to other agent.
         处理消息并转发给其他代理
@@ -303,7 +308,7 @@ class Switch(SwitchProtocol):
         print(f"responder_name: {responder_name}")
         content = conv_info.content
 
-        self.storage and self.storage.add_message(conv_info.conversation_id, conv_info.message("main"))
+        self.storage and self.storage.add_message(conv_info.conversation_id, conv_info.message(content_type, content_tag))
 
         if responder_name:
             if responder_name not in self._agents:
@@ -395,3 +400,37 @@ class Switch(SwitchProtocol):
         await conv_info.a_response(1, "system", "", '[DONE]', 0, None)
         # await conv_info.response_proxy.a_send(conv_info.msg_id, conv_info.task_id, conv_info.requester_name, 0, "system", conv_info.content, conv_info.completion_tokens, None)
         await self._agents[conv_info.responder_name].a_receive(conv_info)
+
+    def auto_title(self, user_id: int, conversation_id: int, response: ResponseProtocol, snowflake_id_generator: SnowflakeIdGenerator) -> None:
+        db_messages = self.storage.get_messages(conversation_id)
+        messages = []
+        for message in db_messages:
+            messages.append({
+                "role": "user" if message["agent_name"] == "Customer" else "assistant",
+                "content": message["content"]
+            })
+        messages.append({
+            "role": "system",
+            "content": "请帮我根据以上对话内容生成对话标题，字数在 20因内。"
+        })
+        request_data = ChatCompletionsRequest(messages, True)
+        conv_info = ConvHolder(conversation_id, conversation_id, response, snowflake_id_generator)
+        title, token = generate_chat_completion(self.default_agent_config.summary_model_config, request_data, conv_info, "", "")
+        self.storage.update_conversation_title(user_id, conversation_id, title)
+
+    async def a_auto_title(self, user_id: int, conversation_id: int, response: ResponseProtocol, snowflake_id_generator: SnowflakeIdGenerator) -> None:
+        db_messages = self.storage.get_messages(conversation_id)
+        messages = []
+        for message in db_messages:
+            messages.append({
+                "role": "user" if message["agent_name"] == "Customer" else "assistant",
+                "content": message["content"]
+            })
+        messages.append({
+            "role": "system",
+            "content": "请帮我根据以上对话内容生成对话标题，字数在 20因内。"
+        })
+        request_data = ChatCompletionsRequest(messages, True)
+        conv_info = ConvHolder(conversation_id, conversation_id, response, snowflake_id_generator)
+        title, token = await a_generate_chat_completion(self.default_agent_config.summary_model_config, request_data, conv_info, "", "")
+        self.storage.update_conversation_title(user_id, conversation_id, title)

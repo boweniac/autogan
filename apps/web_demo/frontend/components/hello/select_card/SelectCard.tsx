@@ -36,13 +36,13 @@ const mockdata = [
       '什么是数字员工和数字部门？',
     caseId: "introduction"
   },
-  {
-    icon: IconCertificate,
-    title: '合同审核',
-    description:
-      '如何让数字员工进行合同审核。',
-    caseId: "contract_review"
-  },
+  // {
+  //   icon: IconCertificate,
+  //   title: '合同审核',
+  //   description:
+  //     '如何让数字员工进行合同审核。',
+  //   caseId: "contract_review"
+  // },
   {
     icon: IconKeyboard,
     title: '亲自体验',

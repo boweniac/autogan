@@ -140,9 +140,9 @@ class CodeExecution:
                     text=True,
                 )
             else:
-                signal.signal(signal.SIGALRM, self._timeout_handler)
+                # signal.signal(signal.SIGALRM, self._timeout_handler)
                 try:
-                    signal.alarm(timeout)
+                    # signal.alarm(timeout)
                     # run the code in a subprocess in the current docker container in the working directory
                     result = subprocess.run(
                         cmd,
@@ -150,7 +150,7 @@ class CodeExecution:
                         capture_output=True,
                         text=True,
                     )
-                    signal.alarm(0)
+                    # signal.alarm(0)
                 except TimeoutError:
                     os.remove(filepath)
                     return 1, "Timeout"

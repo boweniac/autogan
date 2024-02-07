@@ -1,6 +1,9 @@
 export interface AudioAndLip {
-    audioFile: string;
-    lipsData: string | MouthCues[]
+    audioFile?: string;
+    lipsData?: string | MouthCues[]
+    text?: string | undefined
+    agentName?: string | undefined
+    avatarName?: string | undefined
 }
 
 export interface LipsData {
@@ -20,6 +23,11 @@ export interface MouthCues {
   }
 
 export interface AudioAndLipDemo {
-  audioFile: { [key: string]: string };
-  lipsData: string | MouthCues[]
+  audioFile?: { [key: string]: string };
+  lipsData?: string | MouthCues[]
+  text?: string | undefined
+  agentName?: string | undefined
+  avatarName?: string | undefined
+  messageLocalID?: string | undefined
+  messageBlockLocalID?: string | undefined
 }

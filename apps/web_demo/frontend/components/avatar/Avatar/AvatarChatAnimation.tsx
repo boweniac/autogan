@@ -21,7 +21,6 @@ type GLBModelProps = {
 
 
 const GLBModel: React.FC<GLBModelProps> = ({ avatarName, animation, position, audioAndLip, audioEndCallback }) => {
-  console.log(`position:`+JSON.stringify(position));
   const router = useRouter();
   const gltfs:{[key: string]: GLTF & ObjectMap} = {
     "customerManagerBoy": useLoader(GLTFLoader, avatarConfig["customerManagerBoy"]["modelPath"] || "/avatars/CustomerManagerBoy.glb"),
@@ -33,8 +32,28 @@ const GLBModel: React.FC<GLBModelProps> = ({ avatarName, animation, position, au
     "tester": useLoader(GLTFLoader, avatarConfig["tester"]["modelPath"] || "/avatars/CustomerManagerBoy.glb"),
   }
     // const gltf = useLoader(GLTFLoader, avatarConfig[avatarName].modelPath);
-    const headNode = gltfs[avatarName].scene.getObjectByName('Wolf3D_Head');
-    const teethNode = gltfs[avatarName].scene.getObjectByName('Wolf3D_Teeth');
+    // const headNode = gltfs[avatarName].scene.getObjectByName('Wolf3D_Head');
+    // const teethNode = gltfs[avatarName].scene.getObjectByName('Wolf3D_Teeth');
+
+    const headNodes:{[key: string]: THREE.Object3D<THREE.Object3DEventMap> | THREE.Mesh<any, any, any> | undefined} = {
+      "customerManagerBoy": gltfs["customerManagerBoy"].scene.getObjectByName('Wolf3D_Head'),
+      "customerManagerGirl": gltfs["customerManagerGirl"].scene.getObjectByName('Wolf3D_Head'),
+      "coder": gltfs["coder"].scene.getObjectByName('Wolf3D_Head'),
+      "documentExp": gltfs["documentExp"].scene.getObjectByName('Wolf3D_Head'),
+      "searchExpert": gltfs["searchExpert"].scene.getObjectByName('Wolf3D_Head'),
+      "secretary": gltfs["secretary"].scene.getObjectByName('Wolf3D_Head'),
+      "tester": gltfs["tester"].scene.getObjectByName('Wolf3D_Head'),
+    }
+
+    const teethNodes:{[key: string]: THREE.Object3D<THREE.Object3DEventMap> | THREE.Mesh<any, any, any> | undefined} = {
+      "customerManagerBoy": gltfs["customerManagerBoy"].scene.getObjectByName('Wolf3D_Teeth'),
+      "customerManagerGirl": gltfs["customerManagerGirl"].scene.getObjectByName('Wolf3D_Teeth'),
+      "coder": gltfs["coder"].scene.getObjectByName('Wolf3D_Teeth'),
+      "documentExp": gltfs["documentExp"].scene.getObjectByName('Wolf3D_Teeth'),
+      "searchExpert": gltfs["searchExpert"].scene.getObjectByName('Wolf3D_Teeth'),
+      "secretary": gltfs["secretary"].scene.getObjectByName('Wolf3D_Teeth'),
+      "tester": gltfs["tester"].scene.getObjectByName('Wolf3D_Teeth'),
+    }
 
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const fbx = useLoader(FBXLoader, animationNameToPath[animation]);
@@ -47,7 +66,6 @@ const GLBModel: React.FC<GLBModelProps> = ({ avatarName, animation, position, au
     useEffect(() => {
       const handleLoad = () => {
           if (typeof window !== 'undefined') {
-            console.log(`1234567890987654321234567890`);
           }
       };
   
@@ -61,9 +79,7 @@ const GLBModel: React.FC<GLBModelProps> = ({ avatarName, animation, position, au
   }, [router.isReady]);
 
     useEffect(()=>{
-      console.log(`audioAndLip.audioFile1:`+JSON.stringify(audioAndLip?.audioFile));
       if (audioAndLip) {
-        console.log(`audioAndLip.audioFile2:`+JSON.stringify(audioAndLip.audioFile));
         const audio = new Audio(`${audioAndLip.audioFile}`)
         audio.play().catch(error => {
           if (audioEndCallback) {
@@ -72,16 +88,30 @@ const GLBModel: React.FC<GLBModelProps> = ({ avatarName, animation, position, au
         });
         const handleTimeUpdate = () => {
           const currentTime = audio.currentTime;
-          console.log(`currentTime:`+JSON.stringify(currentTime));
-          for (let i = 0; i < audioAndLip.lipsData.length; i++) {
-            const lipsData = audioAndLip.lipsData[i] as MouthCues;
-            if (currentTime >= lipsData.start && currentTime <= lipsData.end) {
-              currentMorphTargetIndex.current = nodeKeyToIndex[corresponding[lipsData.value]]
-              animateMorphTargets(performance.now(), updateMorphTargets)
+          if (audioAndLip.lipsData) {
+            for (let i = 0; i < audioAndLip.lipsData.length; i++) {
+              const lipsData = audioAndLip.lipsData[i] as MouthCues;
+              if (currentTime >= lipsData.start && currentTime <= lipsData.end) {
+                currentMorphTargetIndex.current = nodeKeyToIndex[corresponding[lipsData.value]]
+                animateMorphTargets(performance.now(), updateMorphTargets)
+                const headNode = headNodes[audioAndLip.avatarName || avatarName]
+                if (headNode instanceof THREE.Mesh && headNode.morphTargetInfluences) {
+                  headNode.morphTargetInfluences[currentMorphTargetIndex.current] = 0;
+                }
+                const teethNode = teethNodes[audioAndLip?.avatarName || avatarName]
+                if (teethNode instanceof THREE.Mesh && teethNode.morphTargetInfluences) {
+                  teethNode.morphTargetInfluences[currentMorphTargetIndex.current] = 0;
+                }
+                break
+              }
+              const headNode = headNodes[audioAndLip.avatarName || avatarName]
               if (headNode instanceof THREE.Mesh && headNode.morphTargetInfluences) {
                 headNode.morphTargetInfluences[currentMorphTargetIndex.current] = 0;
               }
-              break
+              const teethNode = teethNodes[audioAndLip?.avatarName || avatarName]
+              if (teethNode instanceof THREE.Mesh && teethNode.morphTargetInfluences) {
+                teethNode.morphTargetInfluences[currentMorphTargetIndex.current] = 0;
+              }
             }
           }
         };
@@ -101,6 +131,7 @@ const GLBModel: React.FC<GLBModelProps> = ({ avatarName, animation, position, au
 
     const updateMorphTargets = (ratio: number) => {
       ratio = ratio * 2
+      const headNode = headNodes[audioAndLip?.avatarName || avatarName]
       if (headNode instanceof THREE.Mesh && headNode.morphTargetInfluences) {
         if (ratio <=1) {
           headNode.morphTargetInfluences[currentMorphTargetIndex.current] = ratio;
@@ -109,6 +140,7 @@ const GLBModel: React.FC<GLBModelProps> = ({ avatarName, animation, position, au
         }
       }
       
+      const teethNode = teethNodes[audioAndLip?.avatarName || avatarName]
       if (teethNode instanceof THREE.Mesh && teethNode.morphTargetInfluences) {
         if (ratio <=1) {
           teethNode.morphTargetInfluences[currentMorphTargetIndex.current] = ratio;
@@ -119,8 +151,8 @@ const GLBModel: React.FC<GLBModelProps> = ({ avatarName, animation, position, au
     };
 
     const animationPlay = () => {
-      if (gltfs[avatarName].scene && fbx.animations[0]) {
-        mixer.current = new THREE.AnimationMixer(gltfs[avatarName].scene);
+      if (gltfs[audioAndLip?.avatarName || avatarName].scene && fbx.animations[0]) {
+        mixer.current = new THREE.AnimationMixer(gltfs[audioAndLip?.avatarName || avatarName].scene);
         const action = mixer.current.clipAction(fbx.animations[0]);
 
         // action.setLoop(THREE.LoopOnce, 1);
@@ -130,14 +162,14 @@ const GLBModel: React.FC<GLBModelProps> = ({ avatarName, animation, position, au
     }
 
     useEffect(() => {
-      if (gltfs[avatarName].scene) {
+      if (gltfs[audioAndLip?.avatarName || avatarName].scene) {
           if (position) {
-            gltfs[avatarName].scene.position.set(Number(position.x), Number(position.y), Number(position.z));
-            gltfs[avatarName].scene.rotation.y = Number(position.rotation);
+            gltfs[audioAndLip?.avatarName || avatarName].scene.position.set(Number(position.x), Number(position.y), Number(position.z));
+            gltfs[audioAndLip?.avatarName || avatarName].scene.rotation.y = Number(position.rotation);
           }
       }
       animationPlay()
-  }, [gltfs[avatarName], fbx]);
+  }, [gltfs[audioAndLip?.avatarName || avatarName], fbx]);
 
   useFrame((state, delta) => {
     mixer.current?.update(delta);
@@ -156,7 +188,7 @@ const GLBModel: React.FC<GLBModelProps> = ({ avatarName, animation, position, au
     // }
 });
 
-    return <primitive object={gltfs[avatarName].scene} />;
+    return <primitive object={gltfs[audioAndLip?.avatarName || avatarName].scene} />;
 };
 
 export default GLBModel;

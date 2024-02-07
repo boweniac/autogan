@@ -14,15 +14,17 @@ export default function MessagesDisplay(props: MessagesDisplayProps) {
     const agentConversationMessage = localStore((state: LocalState) => state.agentConversationMessage);
     const agentConversation = agentConversationMessage?.find((message) => message.id == props.conversationID);
     const viewport = useRef<HTMLDivElement>(null);
+    const lastMessage = agentConversation?.messages[agentConversation?.messages.length - 1];
+    const lastMessageBlock = lastMessage?.message_blocks[lastMessage.message_blocks.length - 1];
 
     const scrollToBottom = () =>
-      viewport.current!.scrollTo({ top: viewport.current!.scrollHeight, behavior: 'smooth' });
+      viewport.current!.scrollTo({ top: viewport.current!.scrollHeight});
 
     useEffect(() => {
-        if (agentConversation) {
+        if (lastMessageBlock?.content) {
             scrollToBottom()
         }
-    }, [agentConversation]);
+    }, [lastMessageBlock?.content]);
 
     useEffect(() => {
         if (props.conversationID) {

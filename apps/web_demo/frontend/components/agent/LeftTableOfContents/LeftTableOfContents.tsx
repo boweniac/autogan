@@ -41,7 +41,7 @@ export function LeftTableOfContents(props: LeftTableOfContentsProps) {
   const items = agentConversations?.map((item) => {
     return (
     <Flex
-      gap="0"
+      // gap="0"
       justify="space-between"
       align="center"
       direction="row"
@@ -60,7 +60,12 @@ export function LeftTableOfContents(props: LeftTableOfContentsProps) {
         // className={cx(classes.link, { [classes.linkActive]: props.conversationID === item.id })}
         style={{ paddingLeft: "var(--mantine-spacing-md)", flexGrow: 1, cursor: 'pointer' }}
       >
+        <Text 
+        style={{ maxWidth: rem(150), overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+        size={rem(14)}
+        >
         {item.title ? item.title : "New Chat"}
+      </Text>
       </Box>
       {
         props.conversationID == item.id ? <Menu shadow="md" width={200}>
@@ -103,7 +108,7 @@ export function LeftTableOfContents(props: LeftTableOfContentsProps) {
             <Stack
                 h="100%"
                 w={`${rem(220)})`}
-                gap={0}
+                // gap={0}
             >
                 <Button
                   variant="gradient"
@@ -114,7 +119,7 @@ export function LeftTableOfContents(props: LeftTableOfContentsProps) {
                 >
                   New Chat
                 </Button>
-                <ScrollArea className={classes.scrollArea} type="never" >
+                <ScrollArea className={classes.scrollArea} w={rem(200)} type="never" scrollbars="y">
                 {items}
               </ScrollArea>
               <RenameModal conversation_id={conversationID} title={title} opened={openedRenameModal} onClose={closeRenameModal}></RenameModal>
