@@ -37,8 +37,11 @@ import classes from './HeaderMegaMenu.module.css';
 import AvatarMenu from './AvatarMenu/AvatarMenu';
 import { LocalState, localStore } from '@/stores/LocalStore';
 import { updateMuteStateState } from '@/stores/LocalStoreActions';
+import { LeftTableOfContents } from '../LeftTableOfContents/LeftTableOfContents';
+import { NavbarMinimal } from '@/components/appshell/NavbarMinimal/NavbarMinimal';
 
 type HeaderMegaMenuProps = {
+    conversationID?: string;
     muteCallback: (value: boolean) => void;
     selectAvatarCallback: (value: string) => void;
   }
@@ -51,18 +54,35 @@ export function HeaderMegaMenu(props: HeaderMegaMenuProps) {
 
     return (
         <Box>
+            <Drawer size={rem(270)} opened={drawerOpened} onClose={()=>{
+                closeDrawer()
+                }} withCloseButton={false} padding={0}>
+                    <Box 
+                    h={`calc(100vh - 50px)`}
+                    // className={classes.mainNav}
+                    style={{
+                        display: "flex",
+                        flexWrap: "nowrap"}}>
+                        <NavbarMinimal/>
+                        <LeftTableOfContents conversationID={props.conversationID} ></LeftTableOfContents>
+                    </Box>
+            </Drawer>
             <header className={classes.header}>
-                <Group justify="flex-end" h="100%">
-                    <Switch size="lg" checked={muteState} onChange={(v)=>{updateMuteStateState(v.currentTarget.checked)}} style={{marginRight: rem(32)}} color="dark.4" onLabel={<IconVolume
-                        style={{ width: rem(16), height: rem(16) }}
-                        stroke={2.5}
-                        />} offLabel={<IconVolume3
+                <Group justify="space-between" h="100%">
+                    <Group>
+                        <Burger opened={drawerOpened} onClick={toggleDrawer} hiddenFrom="md" />
+                    </Group>
+
+                    <Group>
+                        <Switch size="lg" checked={muteState} onChange={(v)=>{updateMuteStateState(v.currentTarget.checked)}} style={{marginRight: rem(32)}} color="dark.4" onLabel={<IconVolume
                             style={{ width: rem(16), height: rem(16) }}
                             stroke={2.5}
-                        />} />
-                    <AvatarMenu ></AvatarMenu>
-
-                    <Burger opened={drawerOpened} onClick={toggleDrawer} hiddenFrom="sm" />
+                            />} offLabel={<IconVolume3
+                                style={{ width: rem(16), height: rem(16) }}
+                                stroke={2.5}
+                            />} />
+                        <AvatarMenu ></AvatarMenu>
+                    </Group>
                 </Group>
             </header>
         </Box>

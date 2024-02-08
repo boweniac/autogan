@@ -9,6 +9,7 @@ import { Canvas } from "@react-three/fiber";
 import { AudioAndLip } from "@/stores/TypeAudioAndLip";
 import DefaultScene from "../../avatar/Scene/DefaultScene";
 import HelloScene from "@/components/avatar/Scene/HelloScene";
+import { LocalState, localStore } from "@/stores/LocalStore";
 
 type RoleDisplayProps = {
     avatarName: string; // 模型文件的路径
@@ -18,10 +19,11 @@ type RoleDisplayProps = {
 
 
 export default function RoleDisplay(props: RoleDisplayProps) {
-
+    const avatarState = localStore((state: LocalState) => state.avatarState);
+    const classRoleDisplay = avatarState ? classes.roleDisplayAvatarOn : classes.roleDisplayAvatarOff;
     return (
         <Stack
-            className={classes.roleDisplay}
+            className={classRoleDisplay}
             // bg="var(--mantine-color-body)"
             justify="space-between"
             style={{

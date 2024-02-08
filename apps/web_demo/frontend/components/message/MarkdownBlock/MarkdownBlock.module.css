@@ -10,6 +10,15 @@
 }
 
 .message {
+  max-width: calc(100vw - rem(400) - rem(100) - rem(100) - rem(220) - rem(66));
+
+  @media (max-width: $mantine-breakpoint-md) {
+    max-width: calc(100vw - rem(400) - rem(100) - rem(100) - rem(16));
+  }
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    max-width: calc(100vw - rem(100) - rem(100) - rem(16));
+  }
   & pre {
     max-width: 100%;
     overflow-x: "scroll";

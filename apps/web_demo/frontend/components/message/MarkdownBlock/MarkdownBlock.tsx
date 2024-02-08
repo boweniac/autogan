@@ -45,7 +45,7 @@ export default function MarkdownBlock(props: MarkdownBlockProps) {
           wordBreak: 'break-all',
           overflowX: "scroll",
         }}
-        maw={`calc(100vw - ${rem(400)} - ${rem(100)} - ${rem(100)} - ${rem(220)} - ${rem(66)})`}
+        // maw={`calc(100vw - ${rem(400)} - ${rem(100)} - ${rem(100)} - ${rem(220)} - ${rem(66)})`}
         dangerouslySetInnerHTML={{ __html: htmlString() }}
       >
       </Box> : 
@@ -53,7 +53,7 @@ export default function MarkdownBlock(props: MarkdownBlockProps) {
         <Accordion.Item key="Apples" value="Apples">
           <Accordion.Control style={{height: rem(32)}} icon="🛠️">{props.content_tag}</Accordion.Control>
           <Accordion.Panel><Box
-            maw={`calc(100vw - ${rem(400)} - ${rem(100)} - ${rem(100)} - ${rem(220)} - ${rem(88)})`}
+            // maw={`calc(100vw - ${rem(400)} - ${rem(100)} - ${rem(100)} - ${rem(220)} - ${rem(88)})`}
             className={classes.message}
             style={{
               fontSize: rem(14),

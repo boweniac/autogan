@@ -3,4 +3,9 @@
     width: calc(200vw - rem(540px));
     /* width: 100%; */
     flex-shrink: 0;
+    position: 'fixed';
+    z-index: -1;
+    @media (max-width: $mantine-breakpoint-sm) {
+        width: calc(100vw);
+      }
 }

@@ -1,8 +1,9 @@
 .navbar {
   width: rem(50px);
   height: 100%;
+  /* height: calc(100vh-rem(100px)); */
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   flex-direction: column;
   border-right: rem(1px) solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
   margin-bottom: rem(50px);

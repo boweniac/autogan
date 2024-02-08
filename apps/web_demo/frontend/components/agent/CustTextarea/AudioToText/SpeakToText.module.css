@@ -1,0 +1,10 @@
+.speakButtonAvatarOn {
+    display: none;
+    /* @media (min-width: $mantine-breakpoint-sm) {
+        display: none;
+      } */
+}
+
+.speakButtonAvatarOff {
+    display: none;
+}

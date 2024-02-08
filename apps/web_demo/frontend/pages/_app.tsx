@@ -27,7 +27,7 @@ export default function App({ Component, pageProps }: AppProps) {
                 <AppShell
                     navbar={{
                             width: rem(50),
-                            breakpoint: 'xs',
+                            breakpoint: 'md',
                             collapsed: { mobile: true },
                         }}
                 >

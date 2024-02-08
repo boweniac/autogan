@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Center, Tooltip, UnstyledButton, Stack, rem, Divider, Space } from '@mantine/core';
+import { Center, Tooltip, UnstyledButton, Stack, rem, Divider, Space, Box } from '@mantine/core';
 import {
   IconHome2,
   IconRobot,
@@ -10,6 +10,7 @@ import {
   IconSettings,
   IconLogout,
   IconSwitchHorizontal,
+  IconBurger,
 } from '@tabler/icons-react';
 import { MantineLogo } from '@mantinex/mantine-logo';
 import classes from './NavbarMinimal.module.css';
@@ -69,9 +70,10 @@ export function NavbarMinimal() {
 
   return (
     <nav className={classes.navbar}>
+      <Box>
       <Space h="xs" />
       <Center>
-        <MantineLogo type="mark" size={30} />
+        <IconBurger type="mark" size={30} />
       </Center>
       <Space h="xs" />
       <Divider />
@@ -80,6 +82,7 @@ export function NavbarMinimal() {
           {links}
         </Stack>
       </div>
+      </Box>
 
       <Stack align="center" justify="center" gap={0}>
         <UserMenu></UserMenu>

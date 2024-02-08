@@ -9,6 +9,8 @@ import { IconFile, IconMicrophone, IconPlayerStop } from "@tabler/icons-react";
 import { uploadFileStreamAPI } from "@/api/file/upload_file_stream";
 import { v4 as uuidv4 } from "uuid";
 import UploadFile from "./UploadFile/UploadFile";
+import classes from './CustTextarea.module.css';
+import { LocalState, localStore } from "@/stores/LocalStore";
 
 type CustTextareaProps = {
     conversationID: string | undefined;
@@ -26,6 +28,9 @@ export default function CustTextarea(props: CustTextareaProps) {
     // const [uploadPopoverOpened, { openUploadPopoverOpened, closeUploadPopoverOpened }] = useDisclosure(false);
     const [analyticalProgress, setAnalyticalProgress] = useState(0);
     const [storageProgress, setStorageProgress] = useState(0);
+
+    const avatarState = localStore((state: LocalState) => state.avatarState);
+    const classTextarea = avatarState ? classes.textareaAvatarOn : "";
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
         event.stopPropagation();
@@ -52,6 +57,7 @@ export default function CustTextarea(props: CustTextareaProps) {
 
     return (
       <div
+            className={classTextarea}
             onFocusCapture={() => setPopoverOpened(true)}
             onBlurCapture={() => setPopoverOpened(false)}
         >

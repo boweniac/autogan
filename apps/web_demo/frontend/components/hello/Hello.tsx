@@ -15,6 +15,7 @@ import RoleDisplayHelloTitle from "./RoleDisplay/RoleDisplayHelloTitle";
 import RoleDisplayHelloButton from "./RoleDisplay/RoleDisplayHelloButton";
 import { resetIntroductionConversationsState, updateActivePageState } from "@/stores/LocalStoreActions";
 import { HeaderMegaMenu } from "./HeaderMegaMenu/HeaderMegaMenu";
+import MessagesDisplaySm from "./messages_display_sm/MessagesDisplaySm";
 
 
 export default function Hello() {
@@ -117,6 +118,12 @@ export default function Hello() {
     }, [router.isReady, helloStart]);
 
     useEffect(() => {
+        if (agentRole == "CustomerManager") {
+            setAvatarName(agentAvatarMapping["CustomerManager"]);
+        }
+    }, [agentAvatarMapping]);
+
+    useEffect(() => {
         setAvatarName(agentAvatarMapping[agentRole])
         avatarVoice.current = avatarConfig[avatarName].voice || ""
     }, [agentRole]);
@@ -152,14 +159,14 @@ export default function Hello() {
                 <HeaderMegaMenu selectAvatarCallback={(v)=>{}} muteCallback={(v)=>{}}></HeaderMegaMenu>
                 <Stack
                         w="100%"
-                        h={`calc(100vh)`}
+                        h={`calc(100vh - ${rem(100)})`}
                         justify="space-between"
                         gap={0}
                         className={classes.conversationFrame}
                         style={{ marginRight: roleWidth}}
                     >
                         <Transition mounted={introductionStart} transition="fade" duration={1000} timingFunction="ease">
-                            {(styles) => <Title style={styles} mb="lg" mt={50} size={80} order={1}> 人人都是 CEO </Title>}
+                            {(styles) => <Title className={classes.title} style={styles} mb="lg" size={80} order={1}> 人人都是 CEO </Title>}
                         </Transition>
                         <MessagesDisplay startSayHello={introductionStart} playAudio={(value)=>{
                             const audioAndLip = convertToAudioAndLipDemo(value, agentAvatarMapping[value?.agentName || ""])

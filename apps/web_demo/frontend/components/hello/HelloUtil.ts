@@ -36,7 +36,7 @@ export const AgentIntroductionSend = async (caseID: string, sliceCallback: (src:
                                 contentTag: message_block.contentTag,
                                 content: "",
                             })
-                            if (message_block.audioAndLip) {
+                            if (message_block.audioAndLip?.lipsData) {
                                 const lipsData = JSON.parse(message_block.audioAndLip.lipsData as string) as LipsData;
                                 message_block.audioAndLip.lipsData = lipsData.mouthCues;
                                 const data: AudioAndLipDemo = {

@@ -1,6 +1,13 @@
-.roleDisplay {
+.roleDisplayAvatarOn {
     height: 100%;
     width: calc(200vw - rem(440px));
     /* width: 100%; */
     flex-shrink: 0;
+    @media (max-width: $mantine-breakpoint-sm) {
+        width: calc(100vw);
+      }
+}
+
+.roleDisplayAvatarOff {
+    display: none;
 }

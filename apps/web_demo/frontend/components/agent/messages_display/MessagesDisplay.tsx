@@ -17,6 +17,9 @@ export default function MessagesDisplay(props: MessagesDisplayProps) {
     const lastMessage = agentConversation?.messages[agentConversation?.messages.length - 1];
     const lastMessageBlock = lastMessage?.message_blocks[lastMessage.message_blocks.length - 1];
 
+    const avatarState = localStore((state: LocalState) => state.avatarState);
+    const classScrollArea = avatarState ? classes.scrollAreaAvatarOn : classes.scrollAreaAvatarOff;
+
     const scrollToBottom = () =>
       viewport.current!.scrollTo({ top: viewport.current!.scrollHeight});
 
@@ -38,7 +41,7 @@ export default function MessagesDisplay(props: MessagesDisplayProps) {
     }, [props.conversationID]);
     
     return (
-        <ScrollArea className={classes.scrollArea} type="never" viewportRef={viewport}>
+        <ScrollArea className={classScrollArea} type="never" viewportRef={viewport}>
             {agentConversation?.messages?.map((message) => (
                 <MessageFrame mainAgent="Customer" key={message.localID} message={message} />
             ))}

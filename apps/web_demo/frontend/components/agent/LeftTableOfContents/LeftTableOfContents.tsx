@@ -61,7 +61,7 @@ export function LeftTableOfContents(props: LeftTableOfContentsProps) {
         style={{ paddingLeft: "var(--mantine-spacing-md)", flexGrow: 1, cursor: 'pointer' }}
       >
         <Text 
-        style={{ maxWidth: rem(150), overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+        style={{ maxWidth: rem(170), overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
         size={rem(14)}
         >
         {item.title ? item.title : "New Chat"}
@@ -106,7 +106,7 @@ export function LeftTableOfContents(props: LeftTableOfContentsProps) {
 
   return (
             <Stack
-                h="100%"
+                h={`calc(100vh)`}
                 w={`${rem(220)})`}
                 // gap={0}
             >
@@ -119,7 +119,7 @@ export function LeftTableOfContents(props: LeftTableOfContentsProps) {
                 >
                   New Chat
                 </Button>
-                <ScrollArea className={classes.scrollArea} w={rem(200)} type="never" scrollbars="y">
+                <ScrollArea className={classes.scrollArea} w={rem(220)} type="never" scrollbars="y">
                 {items}
               </ScrollArea>
               <RenameModal conversation_id={conversationID} title={title} opened={openedRenameModal} onClose={closeRenameModal}></RenameModal>

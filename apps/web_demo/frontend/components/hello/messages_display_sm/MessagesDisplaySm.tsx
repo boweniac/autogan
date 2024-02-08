@@ -1,7 +1,7 @@
 import { Message } from "@/stores/TypeAgentChat";
-import { Blockquote, Container, ScrollArea, Text, Title, Transition, rem } from "@mantine/core";
+import { Blockquote, Container, ScrollArea, Stack, Text, Title, Transition, rem } from "@mantine/core";
 import MessageFrame from "../../message/MessageFrame";
-import classes from './MessagesDisplay.module.css';
+import classes from './MessagesDisplaySm.module.css';
 import { LocalState, localStore } from "@/stores/LocalStore";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
@@ -10,13 +10,13 @@ import { helloAudioAndLip, helloTextString } from "../HelloUtil";
 import { AudioAndLip, AudioAndLipDemo, LipsData } from "@/stores/TypeAudioAndLip";
 import { SelectCard } from "../select_card/SelectCard";
 
-type MessagesDisplayProps = {
+type MessagesDisplaySmProps = {
     startSayHello: boolean;
     playAudio: (audioAndLip: AudioAndLipDemo)=>void
     selectCallback: (value: string)=>void
   }
 
-export default function MessagesDisplay(props: MessagesDisplayProps) {
+export default function MessagesDisplaySm(props: MessagesDisplaySmProps) {
     const router = useRouter();
     const [hello, setHello] = useState<boolean>(false);
     const [helloText, setHelloText] = useState<string>("");
@@ -58,7 +58,7 @@ export default function MessagesDisplay(props: MessagesDisplayProps) {
     
         // 如果 yourVariable 在1秒内再次变化，清除上一个定时器
         return () => clearTimeout(timer);
-      }, [agentConversation, helloText]); // 依赖列表中包含 yourVariable
+      }, [agentConversation]); // 依赖列表中包含 yourVariable
 
 
 
@@ -71,7 +71,7 @@ export default function MessagesDisplay(props: MessagesDisplayProps) {
                 timingFunction="ease"
                 // onEntered={()=>{setHelloSelect(true)}}
                 >
-                {(styles) => <Blockquote className={classes.blockquote} style={styles} cite="– 客户经理">
+                {(styles) => <Blockquote style={styles} cite="– 客户经理">
                         {helloText}
                     </Blockquote>}
             </Transition>
@@ -79,11 +79,11 @@ export default function MessagesDisplay(props: MessagesDisplayProps) {
                 <MessageFrame mainAgent="Customer" key={message.localID} message={message} />
             ))}
             <Transition
-                mounted={helloSelect}
+                mounted={hello}
                 transition="fade"
                 duration={1000}
                 timingFunction="ease"
-                onEntered={()=>{scrollToBottom()}}
+                // onEntered={()=>{scrollToBottom()}}
                 onExited={()=>{
                     resetIntroductionConversationsState()
                     props.selectCallback(selectCaseID.current)
@@ -97,7 +97,7 @@ export default function MessagesDisplay(props: MessagesDisplayProps) {
                                 selectCaseID.current = value
                                 setHello(false)
                                 setHelloSelect(false)
-                                // props.selectCallback(value)
+                                props.selectCallback(value)
                             }
                         }}></SelectCard>
                     </Container>}

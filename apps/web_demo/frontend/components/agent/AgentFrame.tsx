@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from 'next/router';
-import { Box, Stack, rem } from "@mantine/core";
+import { Box, Card, Drawer, Stack, rem } from "@mantine/core";
 import CustTextarea from "@/components/agent/CustTextarea/CustTextarea";
 import { HeaderMegaMenu } from "@/components/agent/HeaderMegaMenu/HeaderMegaMenu";
 import { LeftTableOfContents } from "@/components/agent/LeftTableOfContents/LeftTableOfContents";
@@ -16,10 +16,12 @@ import { AudioAndLip } from "@/stores/TypeAudioAndLip";
 import { avatarConfig } from "../avatar/Avatar/AvatarConfig";
 import { getConversationsAPI } from "@/api/conversation/get_conversations";
 import { getMessagesWhenChangedAPI } from "@/api/message/get_messages";
+import SpeakButton from "./CustTextarea/AudioToText/SpeakToText";
+import MarkdownBlock from "../message/MarkdownBlock/MarkdownBlock";
 
 
 export default function AgentFrame() {
-    const roleWidth = rem(400)
+    // const roleWidth = rem(400)
     const router = useRouter();
     const queryConversationID = router.query.conversation_id as string | undefined;
     const agentAvatarMapping = localStore((state: LocalState) => state.agentAvatarMapping);
@@ -30,6 +32,7 @@ export default function AgentFrame() {
     const [avatarName, setAvatarName] = useState<string>(agentAvatarMapping["CustomerManager"]);
     const [textStack, setTextStack] = useState<AudioAndLip[]>([]);
     const [audioStack, setAudioStack] = useState<AudioAndLip[]>([]);
+    const [speakText, setSpeakText] = useState<string>("");
     const muteState = localStore((state: LocalState) => state.muteState);
 
     const isGeting = useRef(false);
@@ -38,8 +41,18 @@ export default function AgentFrame() {
     const avatarVoice = useRef("");
     const lastMsgId = useRef("");
     const abortControllerRef = useRef<AbortController | null>(null);
+    const avatarState = localStore((state: LocalState) => state.avatarState);
 
     // const messages = getAgentConversationMessageState(queryConversationID)
+
+    const classConversationFrame = avatarState ? classes.conversationFrameAvatarOn : classes.conversationFrameAvatarOff;
+    const classSpeakButton = avatarState ? classes.speakButtonAvatarOn : classes.speakButtonAvatarOff;
+
+    // useEffect(() => {
+    //     if (agentRole == "CustomerManager") {
+    //         setAvatarName(agentAvatarMapping["CustomerManager"]);
+    //     }
+    // }, [avatarState]);
 
     useEffect(() => {
         if (agentRole == "CustomerManager") {
@@ -88,6 +101,7 @@ export default function AgentFrame() {
                 if (nextAudio.agentName && nextAudio.agentName != "Customer") {
                     setAgentRole(nextAudio.agentName)
                 }
+                setSpeakText(nextAudio.text || "")
                 setAudioAndLip(nextAudio)
                 // playAudio(nextAudio); // 播放下一个音频
                 return rest
@@ -173,28 +187,50 @@ export default function AgentFrame() {
             w="100%"
             className={classes.agentFrame}
         >
-            
+            <Box
+            className={classes.breakpointMd}
+            >
             <LeftTableOfContents conversationID={queryConversationID} ></LeftTableOfContents>
+            </Box>
 
             <Stack
                 h="100%"
                 w="100%"
                 gap={0}
             >
-                <HeaderMegaMenu selectAvatarCallback={(v)=>{}} muteCallback={(v)=>{}}></HeaderMegaMenu>
+                <HeaderMegaMenu conversationID={queryConversationID} selectAvatarCallback={(v)=>{}} muteCallback={(v)=>{}}></HeaderMegaMenu>
                 <Stack
                     // h="100%"
                     h={`calc(100vh - ${rem(50)})`}
-                    justify="space-between"
+                    justify="flex-end"
                     gap={0}
-                    className={classes.conversationFrame}
-                    style={{ marginRight: roleWidth}}
+                    className={classConversationFrame}
                 >
                     <MessagesDisplay conversationID={queryConversationID} setLastMsgIdCallback={(value)=>{lastMsgId.current = value}} syncMessagesCallback={syncMessages}></MessagesDisplay>
                     <CustTextarea conversationID={queryConversationID} isLoading={isLoading} callback={doSubmit} stopCallback={()=>{
                         loadingEnd()
                         handleCancel()
                         }} syncMessagesCallback={syncMessages}></CustTextarea>
+                    <SpeakButton callback={doSubmit}></SpeakButton>
+                </Stack>
+                <Stack
+                    h={`calc(100vh - ${rem(50)})`}
+                    w="100%"
+                    align="center"
+                    justify="flex-end"
+                    // className={classSpeakButton}
+                >
+                    {/* {
+                        speakText && <Card
+                        padding="sm"
+                        radius="md"
+                        // maw={`calc(100vw - ${rem(400)} - ${rem(364)})`}
+                        className={ `${classes.messageBlock} ${classes.messageLeft}` }
+                        >
+                            <MarkdownBlock content_type="main" content_tag="" content={speakText}></MarkdownBlock>
+                        </Card>
+                    } */}
+                    {/* <SpeakButton callback={doSubmit}></SpeakButton> */}
                 </Stack>
             </Stack>
             

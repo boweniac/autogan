@@ -84,19 +84,24 @@ const CameraController = (props: CameraControllerProps) => {
 // };
 
 const HelloScene: React.FC<HelloSceneProps> = ({ avatarName, animation, test, audioAndLip,  audioEndCallback, animationPlayEndCallback}) => {
-  const avatarObject = avatarConfig[avatarName]
+  console.log(`audioAndLip?.avatarName:`+JSON.stringify(audioAndLip?.avatarName));
+  console.log(`audioAndLip?.avatarName || avatarName:`+JSON.stringify(audioAndLip?.avatarName || avatarName));
+  const avatarObject = avatarConfig[audioAndLip?.avatarName || avatarName]
   const [avatar, setAvatar] = useState<AvatarObject>(avatarObject);
-  const [name, setName] = useState<string>(avatarName);
+  const [name, setName] = useState<string>(audioAndLip?.avatarName || avatarName);
   const animations = animationGroup[animation]
 
   useEffect(() => {
-    setName(avatarName)
-}, [avatarName]);
+    setName(audioAndLip?.avatarName || avatarName)
+}, [avatarName, audioAndLip]);
 
 useEffect(() => {
   setAvatar(avatarConfig[name])
 }, [name]);
-
+console.log(`name:`+JSON.stringify(name));
+console.log(`cameraPositionY:`+JSON.stringify(avatar.cameraPositionY));
+console.log(`cameraPositionZ:`+JSON.stringify(avatar.cameraPositionZ));
+console.log(`targetY:`+JSON.stringify(avatar.targetY));
   return (
     <div style={{height: "100%", width: "100%"}}>
       {test && <HelloSceneConfig avatarName={name} setAvatarNamecallback={(v)=>{setName(v)}} setAvatarcallback={setAvatar}></HelloSceneConfig>}

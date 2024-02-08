@@ -3,9 +3,50 @@
     flex-wrap: nowrap;
 }
 
-.conversationFrame {
-    flex-grow: flex;
+.conversationFrameAvatarOn {
+    /* flex-grow: flex; */
     padding-left: rem(50px);
     padding-right: rem(50px);
     padding-bottom: rem(50px);
+    margin-right: rem(400);
+    @media (max-width: $mantine-breakpoint-sm) {
+      margin-right: 0;
+    }
+}
+
+.conversationFrameAvatarOff {
+  /* flex-grow: flex; */
+  padding-left: rem(50px);
+  padding-right: rem(50px);
+  padding-bottom: rem(50px);
+}
+
+.speakButtonAvatarOn {
+  position: fixed;
+  z-index: 3;
+  @media (min-width: $mantine-breakpoint-sm) {
+    display: none;
+  }
+}
+
+.speakButtonAvatarOff {
+  display: none;
+}
+
+.breakpointMd {
+    @media (max-width: $mantine-breakpoint-md) {
+      display: none;
+    }
+  }
+
+  .messageBlock {
+    & p {
+        margin: 0;
+    }
+}
+
+.messageLeft {
+    background-color: light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-6));
+    margin-left: rem(4px);
+    margin-right: rem(32px);
 }
