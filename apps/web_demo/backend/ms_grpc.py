@@ -327,15 +327,13 @@ class Agent(agent_pb2_grpc.AgentServicer):
 
 def serve():
     try:
-        http_port = consul_config_dict["http"]
-        app.run(host='0.0.0.0', port=http_port)
-
         server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
         helloworld_pb2_grpc.add_HelloWorldServicer_to_server(HelloWorld(), server)
         health_pb2_grpc.add_HealthServicer_to_server(Health(), server)
         agent_pb2_grpc.add_AgentServicer_to_server(Agent(), server)
 
         grpc_port = consul_config_dict["grpc"]
+        http_port = consul_config_dict["http"]
         consul_host = consul_config_dict["host"]
         server.add_insecure_port(f'0.0.0.0:{grpc_port}')
         server.start()

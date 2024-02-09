@@ -19,6 +19,10 @@ snowflake_id = SnowflakeIdGenerator(datacenter_id=1, worker_id=1)
 test_service = TestService("LLM_CONFIG", "auto", True, storage)
 
 
+@app.get("/health")
+async def health():
+    return {"code": status.HTTP_200_OK, "data": {"status": "healthy"}}
+
 @app.get("/add_conversation")
 async def add_conversation(user_id: int = Query(None), conversation_id: int = Query(None)):
     try:
