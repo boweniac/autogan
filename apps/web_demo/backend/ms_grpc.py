@@ -321,9 +321,10 @@ def serve():
         health_pb2_grpc.add_HealthServicer_to_server(Health(), server)
         agent_pb2_grpc.add_AgentServicer_to_server(Agent(), server)
 
-        server.add_insecure_port(f'[::]:{consul_config_dict["grpc"]}')
+        grpc_port = consul_config_dict["grpc"]
+        server.add_insecure_port(f'[::]:{grpc_port}')
         server.start()
-        print(f"gRPC server started on port {consul_config_dict["grpc"]}.")
+        print(f"gRPC server started on port {grpc_port}.")
 
         c = consul.Consul(host=consul_config_dict["host"], port=consul_config_dict["port"])
 
@@ -332,9 +333,9 @@ def serve():
             "agent",
             service_id="agent-1",
             address="172.17.0.1",
-            port=consul_config_dict["grpc"],
+            port=grpc_port,
             tags=["grpc"],
-            check=consul.Check().grpc(f"172.17.0.1:{consul_config_dict["grpc"]}", interval="10s")  # 定义gRPC健康检查
+            check=consul.Check().grpc(f"172.17.0.1:{grpc_port}", interval="10s")  # 定义gRPC健康检查
         )
         print("Service registered with Consul.")
 

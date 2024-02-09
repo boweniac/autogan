@@ -19,6 +19,7 @@ class DBStorage(StorageProtocol):
         self._redis = redis.Redis(
             host=redis_config_dict["host"],
             port=redis_config_dict["port"],
+            password=redis_config_dict["password"],
             db=0,
             decode_responses=True)
         self._mysql = PooledDB(
