@@ -328,7 +328,10 @@ def serve():
         print(f"gRPC server started on port {grpc_port}.")
 
         c = consul.Consul(host=consul_host, port=consul_config_dict["port"])
-
+        print(f"consul_host: {consul_host}")
+        print(f"port: {grpc_port}")
+        print(f'consul_config_dict["port"]: {consul_config_dict["port"]}')
+        print(f'consul.Consul: {c}')
         # 尝试注册服务到Consul
         c.agent.service.register(
             "agent",
