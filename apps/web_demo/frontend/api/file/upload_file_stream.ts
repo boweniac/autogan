@@ -7,6 +7,9 @@ import { openLogInModal } from '@/stores/LocalStoreActions';
 // import { getCurrentAbortController } from '@/stores/LocalStoreActions';
 
 const get = localStore.getState;
+const gateWayProtocol = "https://"
+const gateWayHost = "nas.boweniac.top"
+const gateWayPort = "44403"
 
 export async function uploadFileStreamAPI(files: any[], apiType: string, baseId: string | undefined, conversationId: string | undefined, callback?: ((res: any) => void) | undefined, endCallback?: (() => void) | undefined, errorCallback?: (() => void) | undefined): Promise<void>{
     if (!get().userToken) {
@@ -25,7 +28,7 @@ export async function uploadFileStreamAPI(files: any[], apiType: string, baseId:
         formData.append('base_id', baseId ? baseId : "0");
         formData.append('conversation_id', conversationId ? conversationId : "0");
         formData.append('file_name', file.name);
-        fetch(get().gateWayProtocol + get().gateWayHost + ":" + get().gateWayPort + "/agent/add_file", {
+        fetch(gateWayProtocol + gateWayHost + ":" + gateWayPort + "/agent/add_file", {
             method: 'POST',
             headers: {
                 'Authorization': get().userToken

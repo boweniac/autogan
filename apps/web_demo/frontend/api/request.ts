@@ -7,6 +7,9 @@ import { openLogInModal } from '@/stores/LocalStoreActions';
 // import { getCurrentAbortController } from '@/stores/LocalStoreActions';
 
 const get = localStore.getState;
+const gateWayProtocol = "https://"
+const gateWayHost = "nas.boweniac.top"
+const gateWayPort = "44403"
 
 export async function streamAPI(path: string, payloadData: {[key: string]: string}, signal: AbortSignal, callback?: ((res: any) => void) | undefined, endCallback?: (() => void) | undefined, errorCallback?: (() => void) | undefined): Promise<void>{
     if (!get().userToken) {
@@ -23,8 +26,8 @@ export async function streamAPI(path: string, payloadData: {[key: string]: strin
 
         const req = http.request(
             {
-                hostname: get().gateWayHost,
-                port: get().gateWayPort,
+                hostname: gateWayHost,
+                port: gateWayPort,
                 path: path,
                 method: "POST",
                 headers: {
@@ -112,7 +115,7 @@ export async function getRequestAPI(path: string) {
         return
     }
     try {
-        const res = await axios.get(get().gateWayProtocol + get().gateWayHost + ":" + get().gateWayPort + path, {
+        const res = await axios.get(gateWayProtocol + gateWayHost + ":" + gateWayPort + path, {
             headers: {
                 "Authorization": get().userToken,
             }
@@ -153,7 +156,7 @@ export async function postRequestAPI(path: string, payload: any) {
         return
     }
     try {
-        const res = await axios.post(get().gateWayProtocol + get().gateWayHost + ":" + get().gateWayPort + path, payload, {
+        const res = await axios.post(gateWayProtocol + gateWayHost + ":" + gateWayPort + path, payload, {
             headers: {
                 'Authorization': get().userToken
             }

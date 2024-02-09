@@ -7,6 +7,10 @@ import {localStore} from "@/stores/LocalStore";
 
 const get = localStore.getState;
 
+const gateWayProtocol = "https://"
+const gateWayHost = "nas.boweniac.top"
+const gateWayPort = "44403"
+
 export async function streamTestAPI(content: string, conversationID: string, signal: AbortSignal, callback?: ((res: any) => void) | undefined, endCallback?: (() => void) | undefined, errorCallback?: (() => void) | undefined): Promise<void>{
     try {
         // abortController = getCurrentAbortController()
@@ -18,8 +22,8 @@ export async function streamTestAPI(content: string, conversationID: string, sig
 
         const req = http.request(
             {
-                hostname: get().gateWayHost,
-                port: get().gateWayPort,
+                hostname: gateWayHost,
+                port: gateWayPort,
                 path: "/open/agent/test",
                 method: "POST",
                 headers: {
@@ -98,7 +102,7 @@ export async function streamTestAPI(content: string, conversationID: string, sig
 
 export async function getOpenRequestAPI(path: string) {
     try {
-        const res = await axios.get(get().gateWayProtocol + get().gateWayHost + ":" + get().gateWayPort + path);
+        const res = await axios.get(gateWayProtocol + gateWayHost + ":" + gateWayPort + path);
         if (res.status === 200) {
             if (res.data.code === 200) {
                 if (res.data.data) {
@@ -132,7 +136,7 @@ export async function getOpenRequestAPI(path: string) {
 
 export async function postOpenRequestAPI(path: string, payload: any) {
     try {
-        const res = await axios.post(get().gateWayProtocol + get().gateWayHost + ":" + get().gateWayPort + path, payload);
+        const res = await axios.post(gateWayProtocol + gateWayHost + ":" + gateWayPort + path, payload);
         if (res.status === 200) {
             if (res.data.code === 200) {
                 if (res.data.data) {
