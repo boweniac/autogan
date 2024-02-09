@@ -2,6 +2,8 @@ import json
 import os
 import threading
 
+import autogan
+
 from apps.web_demo.backend.db.db_storage import DBStorage
 from apps.web_demo.backend.introduction_data import introduction_data
 from autogan.oai.conv_holder import ConvHolder
@@ -37,8 +39,10 @@ from grpcdata.grpc_py import health_pb2_grpc
 app = FastAPI()
 storage = DBStorage()
 snowflake_id = SnowflakeIdGenerator(datacenter_id=1, worker_id=1)
-es = ESSearch("nas.boweniac.top", 44502, 512)
+es_config_dict = autogan.dict_from_json("ES_SEARCH")
+es = ESSearch(es_config_dict["host"], es_config_dict["port"], es_config_dict["dims"])
 test_service = TestService("LLM_CONFIG", "off", True, storage, es)
+consul_config_dict = autogan.dict_from_json("CONSUL_CONFIG")
 
 
 # aliyun_access = AliyunAccess()
@@ -317,20 +321,20 @@ def serve():
         health_pb2_grpc.add_HealthServicer_to_server(Health(), server)
         agent_pb2_grpc.add_AgentServicer_to_server(Agent(), server)
 
-        server.add_insecure_port('[::]:60208')
+        server.add_insecure_port(f'[::]:{consul_config_dict["grpc"]}')
         server.start()
-        print("gRPC server started on port 60208.")
+        print(f"gRPC server started on port {consul_config_dict["grpc"]}.")
 
-        c = consul.Consul(host="172.17.0.1", port=60401)
+        c = consul.Consul(host=consul_config_dict["host"], port=consul_config_dict["port"])
 
         # 尝试注册服务到Consul
         c.agent.service.register(
             "agent",
             service_id="agent-1",
             address="172.17.0.1",
-            port=60208,
+            port=consul_config_dict["grpc"],
             tags=["grpc"],
-            check=consul.Check().grpc("172.17.0.1:60208", interval="10s")  # 定义gRPC健康检查
+            check=consul.Check().grpc(f"172.17.0.1:{consul_config_dict["grpc"]}", interval="10s")  # 定义gRPC健康检查
         )
         print("Service registered with Consul.")
 

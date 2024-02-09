@@ -62,7 +62,7 @@ export const AgentIntroductionSend = async (caseID: string, sliceCallback: (src:
                                         processMessageBlocks(blockIndex + 1);
                                     };
                                 }
-                            }, 100);
+                            }, 200);
 
                             // return () => clearInterval(typeWriter);
                         } else {
