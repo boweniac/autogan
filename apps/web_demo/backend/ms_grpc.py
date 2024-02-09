@@ -323,7 +323,7 @@ def serve():
 
         grpc_port = consul_config_dict["grpc"]
         consul_host = consul_config_dict["host"]
-        server.add_insecure_port(f'[::]:{grpc_port}')
+        server.add_insecure_port(f'0.0.0.0:{grpc_port}')
         server.start()
         print(f"gRPC server started on port {grpc_port}.")
 
@@ -332,11 +332,12 @@ def serve():
         # 尝试注册服务到Consul
         c.agent.service.register(
             "agent",
-            service_id="agent-1",
+            service_id="agent-2",
             address=consul_host,
             port=grpc_port,
             tags=["grpc"],
-            check=consul.Check().grpc(f"{consul_host}:{grpc_port}", interval="10s")  # 定义gRPC健康检查
+
+            check=consul.Check().grpc(f"{consul_host}:{grpc_port}", interval="20s")  # 定义gRPC健康检查
         )
         print("Service registered with Consul.")
 
