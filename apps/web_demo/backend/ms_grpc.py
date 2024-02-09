@@ -36,6 +36,17 @@ from grpcdata.grpc_py import helloworld_pb2_grpc
 from grpcdata.grpc_py import health_pb2
 from grpcdata.grpc_py import health_pb2_grpc
 
+from flask import Flask, jsonify
+
+app = Flask(__name__)
+
+@app.route('/health', methods=['GET'])
+def health_check():
+    # 在这里执行必要的健康检查
+    # 例如: 检查数据库连接等
+    # 如果一切正常，返回200
+    return jsonify({"status": "healthy"}), 200
+
 app = FastAPI()
 storage = DBStorage()
 snowflake_id = SnowflakeIdGenerator(datacenter_id=1, worker_id=1)
@@ -316,13 +327,15 @@ class Agent(agent_pb2_grpc.AgentServicer):
 
 def serve():
     try:
+        http_port = consul_config_dict["http"]
+        app.run(host='0.0.0.0', port=http_port)
+
         server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
         helloworld_pb2_grpc.add_HelloWorldServicer_to_server(HelloWorld(), server)
         health_pb2_grpc.add_HealthServicer_to_server(Health(), server)
         agent_pb2_grpc.add_AgentServicer_to_server(Agent(), server)
 
         grpc_port = consul_config_dict["grpc"]
-        http_port = consul_config_dict["http"]
         consul_host = consul_config_dict["host"]
         server.add_insecure_port(f'0.0.0.0:{grpc_port}')
         server.start()
