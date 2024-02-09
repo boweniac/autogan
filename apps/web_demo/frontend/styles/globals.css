@@ -12,3 +12,7 @@ html {
       height: -webkit-fill-available; /* 针对 Safari 的特定修复 */
     }
   }
+
+  .my-page {
+    height: 100dvh
+}
