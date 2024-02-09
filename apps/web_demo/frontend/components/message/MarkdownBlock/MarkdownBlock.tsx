@@ -3,7 +3,7 @@ import MarkdownIt from "markdown-it";
 // yarn add --dev @types/markdown-it
 import mdHighlight from "markdown-it-highlightjs";
 // @ts-ignore
-import mdCodeCopy from "./markdownCopy";
+import mdCodeCopy from "./MarkdownCopy";
 import classes from './MarkdownBlock.module.css';
 // import './markdown.css';
 import { Stack, createTheme, Text, Box, useMantineTheme, useMantineColorScheme, rem, MantineFontSizesValues, Accordion } from "@mantine/core";
