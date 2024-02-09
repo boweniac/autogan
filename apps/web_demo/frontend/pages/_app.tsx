@@ -17,17 +17,6 @@ export default function App({ Component, pageProps }: AppProps) {
 
     const loginFrameworkPagesList = ["login", "signup"]
 
-    let lastWidth = document.documentElement.clientWidth;
-
-    window.addEventListener('resize', () => {
-    const widthChange = document.documentElement.clientWidth / lastWidth;
-    if (widthChange !== 1) {
-        // 尝试重置缩放级别
-        document.body.style.zoom = 1 / widthChange;
-    }
-    lastWidth = document.documentElement.clientWidth;
-    }, false);
-
     if (loginFrameworkPagesList.includes(activePage)) {
         return <p>login</p>
     } else {

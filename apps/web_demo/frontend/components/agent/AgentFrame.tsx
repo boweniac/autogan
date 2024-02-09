@@ -47,7 +47,7 @@ export default function AgentFrame() {
 
     const classConversationFrame = avatarState ? classes.conversationFrameAvatarOn : classes.conversationFrameAvatarOff;
     const classSpeakButton = avatarState ? classes.speakButtonAvatarOn : classes.speakButtonAvatarOff;
-
+    const [height, setHeight] = useState(window.innerHeight + 'px');
     // useEffect(() => {
     //     if (agentRole == "CustomerManager") {
     //         setAvatarName(agentAvatarMapping["CustomerManager"]);
@@ -121,8 +121,6 @@ export default function AgentFrame() {
             const signal = abortControllerRef.current.signal;
             loadingStart()
             AgentConversationSend(queryConversationID, value, signal, (text)=>{
-                console.log(`text:`+JSON.stringify(text.text));
-                console.log(`name:`+JSON.stringify(text.agentName));
                 if (text) {
                     setTextStack(prevTextStack => {
                         return [...prevTextStack, text]
@@ -156,6 +154,20 @@ export default function AgentFrame() {
                 router.push("/agent").then()
             }
         })
+
+        // 定义一个函数来更新高度
+        const updateHeight = () => {
+            setHeight(window.innerHeight + 'px');
+        };
+    
+        // 在组件挂载时设置高度
+        updateHeight();
+    
+        // 监听窗口大小变化事件，以便更新高度
+        window.addEventListener('resize', updateHeight);
+    
+        // 组件卸载时移除事件监听器
+        return () => window.removeEventListener('resize', updateHeight);
     }, []);
 
     useEffect(() => {
@@ -201,7 +213,7 @@ export default function AgentFrame() {
                 <HeaderMegaMenu conversationID={queryConversationID} selectAvatarCallback={(v)=>{}} muteCallback={(v)=>{}}></HeaderMegaMenu>
                 <Stack
                     // h="100%"
-                    h={`calc(100vh - ${rem(50)})`}
+                    h={`calc(${height} - ${rem(50)})`}
                     justify="flex-end"
                     gap={0}
                     className={classConversationFrame}
@@ -213,14 +225,14 @@ export default function AgentFrame() {
                         }} syncMessagesCallback={syncMessages}></CustTextarea>
                     <SpeakButton callback={doSubmit}></SpeakButton>
                 </Stack>
-                <Stack
+                {/* <Stack
                     h={`calc(100vh - ${rem(50)})`}
                     w="100%"
                     align="center"
                     justify="flex-end"
                     // className={classSpeakButton}
                 >
-                    {/* {
+                    {
                         speakText && <Card
                         padding="sm"
                         radius="md"
@@ -229,9 +241,9 @@ export default function AgentFrame() {
                         >
                             <MarkdownBlock content_type="main" content_tag="" content={speakText}></MarkdownBlock>
                         </Card>
-                    } */}
-                    {/* <SpeakButton callback={doSubmit}></SpeakButton> */}
-                </Stack>
+                    }
+                    <SpeakButton callback={doSubmit}></SpeakButton>
+                </Stack> */}
             </Stack>
             
             <RoleDisplay avatarName={avatarName} audioAndLip={audioAndLip} audioEndCallback={()=>{
