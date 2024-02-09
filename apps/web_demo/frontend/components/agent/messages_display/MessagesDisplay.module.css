@@ -1,7 +1,7 @@
 .scrollAreaAvatarOn {
     height: 100%;
     @media (max-width: $mantine-breakpoint-sm) {
-        height: calc(50vh);
+        height: calc(45vh);
       }
 }
 
