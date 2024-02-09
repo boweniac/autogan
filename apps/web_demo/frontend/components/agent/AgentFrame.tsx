@@ -181,7 +181,7 @@ export default function AgentFrame() {
 
     return (
         <Box
-            h={`calc(100vh)`}
+            // h={`calc(100vh)`}
             w="100%"
             className={classes.agentFrame}
         >
@@ -199,7 +199,7 @@ export default function AgentFrame() {
                 <HeaderMegaMenu conversationID={queryConversationID} selectAvatarCallback={(v)=>{}} muteCallback={(v)=>{}}></HeaderMegaMenu>
                 <Stack
                     // h="100%"
-                    h={`calc(100vh - ${rem(50)})`}
+                    // h={`calc(100vh - ${rem(50)})`}
                     justify="flex-end"
                     gap={0}
                     className={classConversationFrame}
