@@ -38,9 +38,9 @@ export interface LocalState {
 export const initialState = {
     appName: "AI 博闻",
     activePage: "/",
-    gateWayProtocol: "http://",
-    gateWayHost: "localhost",
-    gateWayPort: "60607",
+    gateWayProtocol: "https://",
+    gateWayHost: "nas.boweniac.top",
+    gateWayPort: "44403",
 
     userToken: "",
     userPhone: "",
