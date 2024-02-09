@@ -14,7 +14,7 @@ def audio_to_lip(work_dir: str, file_name: str, response_format: Optional[str] =
             return None
         audio.export(f"{work_dir}{file_name}.wav", format="wav")
 
-        result = subprocess.run(f"/root/agent/Rhubarb-Lip-Sync-1.13.0-Linux/rhubarb -o {work_dir}{file_name}.txt {work_dir}{file_name}.wav -f json -r phonetic", shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        result = subprocess.run(f"/root/autogan/Rhubarb-Lip-Sync-1.13.0-Linux/rhubarb -o {work_dir}{file_name}.txt {work_dir}{file_name}.wav -f json -r phonetic", shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                 text=True)
         returncode = result.returncode
 
