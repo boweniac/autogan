@@ -2,3 +2,13 @@ html {
     font-size: 14px;
     touch-action: manipulation;
   }
+
+  body {
+    height: 100vh; /* 默认高度设置 */
+  }
+  
+  @supports (-webkit-touch-callout: none) {
+    body {
+      height: -webkit-fill-available; /* 针对 Safari 的特定修复 */
+    }
+  }
