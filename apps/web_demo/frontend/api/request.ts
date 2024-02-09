@@ -118,7 +118,8 @@ export async function getRequestAPI(path: string) {
         const res = await axios.get(gateWayProtocol + gateWayHost + ":" + gateWayPort + path, {
             headers: {
                 "Authorization": get().userToken,
-            }
+            },
+            timeout: 60000
         });
         if (res.status === 200) {
             if (res.data.code === 200) {
@@ -159,7 +160,8 @@ export async function postRequestAPI(path: string, payload: any) {
         const res = await axios.post(gateWayProtocol + gateWayHost + ":" + gateWayPort + path, payload, {
             headers: {
                 'Authorization': get().userToken
-            }
+            },
+            timeout: 60000
         });
         if (res.status === 200) {
             if (res.data.code === 200) {
