@@ -1,6 +1,5 @@
 import json
 from typing import Optional
-from sqlalchemy import create_engine, text
 import redis
 
 import autogan
