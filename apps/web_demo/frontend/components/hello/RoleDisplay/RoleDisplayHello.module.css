@@ -28,7 +28,7 @@
 
     @media (max-width: $mantine-breakpoint-sm) {
       line-height: 0.5;
-      font-size: rem(110);
+      font-size: calc(100vw/6);;
     }
   
     /* @media (max-width: $mantine-breakpoint-sm) {
