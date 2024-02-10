@@ -61,7 +61,7 @@ const GLBModel: React.FC<GLBModelProps> = ({ avatarName, animation, position, au
     const mixer = useRef<THREE.AnimationMixer>();
     const currentMorphTargetIndex = useRef(0);
     const currentAnimationIndex = useRef(0);
-    // new Audio(``)
+    new Audio(``)
 
     useEffect(() => {
       const handleLoad = () => {
@@ -121,8 +121,6 @@ const GLBModel: React.FC<GLBModelProps> = ({ avatarName, animation, position, au
           handleTimeUpdate();
         };
         audio.addEventListener('ended', () => {
-          // currentMorphTargetIndex.current = 0
-          // updateMorphTargets(1)
           if (audioEndCallback) {
             audioEndCallback()
           }
