@@ -81,7 +81,9 @@ const GLBModel: React.FC<GLBModelProps> = ({ avatarName, animation, position, au
     useEffect(()=>{
       if (audioAndLip) {
         const audio = new Audio(`${audioAndLip.audioFile}`)
+        console.log(`audioAndLip.audioFile:`+JSON.stringify(audioAndLip.audioFile));
         audio.play().catch(error => {
+          console.log(`audio.play.error:`+JSON.stringify(error));
           if (audioEndCallback) {
             audioEndCallback()
           }
