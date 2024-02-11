@@ -77,11 +77,14 @@ class WebSearch:
             'cx': self._cx,
             'key': self._key,
         }
+        proxies = {
+            'http': 'http://192.168.50.91:41703',
+        }
 
         loop = 3
         for i in range(loop):
             try:
-                response = requests.get(url, params=params)
+                response = requests.get(url, params=params, proxies=proxies)
                 response.raise_for_status()  # If the response status is not 200, throw an exception
                 data = response.json()  # Parse the returned json data
 
