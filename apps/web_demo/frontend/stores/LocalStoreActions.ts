@@ -21,6 +21,14 @@ export const updateActivePageState = (page: string) => {
     set(() => ({ activePage: page }));
 }
 
+export const updateAudioState = (audio: HTMLAudioElement) => {
+    set(() => ({ audio: audio }));
+}
+
+export const getAudioState = () => {
+    return get().audio
+}
+
 export const openLogInModal = () => {
     set(() => ({ openedLogInModal: true }));
 }

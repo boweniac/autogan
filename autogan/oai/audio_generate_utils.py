@@ -30,6 +30,7 @@ def generate_audio(request: AudioSpeechRequest) \
                 response_format = request.response_format
                 with open(f"{absolute_work_dir}{file_name}.{response_format}", 'wb') as f:
                     f.write(content)
+                print(f"file_name: {file_name}")
                 with concurrent.futures.ThreadPoolExecutor() as executor:
                     future_put_object_from_file = executor.submit(bucket.put_object_from_file,
                                                                   f"{file_name}.{response_format}",

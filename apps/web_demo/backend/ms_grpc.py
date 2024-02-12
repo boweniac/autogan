@@ -54,7 +54,7 @@ es_config_dict = autogan.dict_from_json("ES_SEARCH")
 es = ESSearch(es_config_dict["host"], es_config_dict["port"], es_config_dict["dims"])
 test_service = TestService("LLM_CONFIG", "off", True, storage, es)
 consul_config_dict = autogan.dict_from_json("CONSUL_CONFIG")
-
+service_config_dict = autogan.dict_from_json("SERVICE_CONFIG")
 
 # aliyun_access = AliyunAccess()
 
@@ -332,8 +332,8 @@ def serve():
         health_pb2_grpc.add_HealthServicer_to_server(Health(), server)
         agent_pb2_grpc.add_AgentServicer_to_server(Agent(), server)
 
-        grpc_port = consul_config_dict["grpc"]
-        http_port = consul_config_dict["http"]
+        grpc_port = service_config_dict["grpc"]
+        http_port = service_config_dict["http"]
         consul_host = consul_config_dict["host"]
         server.add_insecure_port(f'0.0.0.0:{grpc_port}')
         server.start()
@@ -346,7 +346,7 @@ def serve():
             service_id="agent-2",
             address=consul_host,
             port=grpc_port,
-            tags=["grpc"],
+            tags=[consul_config_dict["tags"]],
             check=consul.Check().http(
                 url=f"http://{consul_host}:{http_port}/health",  # 指向您的服务的健康检查端点
                 interval="20s"  # 健康检查的间隔时间

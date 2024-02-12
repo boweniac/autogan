@@ -7,9 +7,9 @@ import { openLogInModal } from '@/stores/LocalStoreActions';
 // import { getCurrentAbortController } from '@/stores/LocalStoreActions';
 
 const get = localStore.getState;
-const gateWayProtocol = "https://"
-const gateWayHost = "nas.boweniac.top"
-const gateWayPort = "44403"
+const gateWayProtocol = process.env.GATE_WAY_PROTOCOL || ""
+const gateWayHost = process.env.GATE_WAY_HOST || ""
+const gateWayPort = process.env.GATE_WAY_PORT || ""
 
 export async function streamAPI(path: string, payloadData: {[key: string]: string}, signal: AbortSignal, callback?: ((res: any) => void) | undefined, endCallback?: (() => void) | undefined, errorCallback?: (() => void) | undefined): Promise<void>{
     if (!get().userToken) {

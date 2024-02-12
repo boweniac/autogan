@@ -12,7 +12,7 @@ import { Notifications } from "@mantine/notifications";
 
 
 export default function App({ Component, pageProps }: AppProps) {
-    const appName = localStore((state: LocalState) => state.appName);
+    // const appName = localStore((state: LocalState) => state.appName);
     const activePage = localStore((state: LocalState) => state.activePage);
 
     const loginFrameworkPagesList = ["login", "signup"]
@@ -23,7 +23,7 @@ export default function App({ Component, pageProps }: AppProps) {
         return (
             <MantineProvider>
                 <Notifications />
-                <CustHeader appName={appName}></CustHeader>
+                <CustHeader appName={process.env.APP_NAME || ""}></CustHeader>
                 <AppShell
                     navbar={{
                             width: rem(50),

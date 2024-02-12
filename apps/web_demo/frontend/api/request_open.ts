@@ -7,9 +7,9 @@ import {localStore} from "@/stores/LocalStore";
 
 const get = localStore.getState;
 
-const gateWayProtocol = "https://"
-const gateWayHost = "nas.boweniac.top"
-const gateWayPort = "44403"
+const gateWayProtocol = process.env.GATE_WAY_PROTOCOL || ""
+const gateWayHost = process.env.GATE_WAY_HOST || ""
+const gateWayPort = process.env.GATE_WAY_PORT || ""
 
 export async function streamTestAPI(content: string, conversationID: string, signal: AbortSignal, callback?: ((res: any) => void) | undefined, endCallback?: (() => void) | undefined, errorCallback?: (() => void) | undefined): Promise<void>{
     try {

@@ -42,7 +42,7 @@ class WebSearch:
         url = result[0]["link"]
         print(url)
         proxies = {
-            'http': 'http://192.168.50.91:41703',
+            'http': 'http://nas.boweniac.top:41703',
         }
         # Obtain the main content of the URL page
         response = requests.get(url, proxies=proxies)
@@ -81,7 +81,7 @@ class WebSearch:
             'key': self._key,
         }
         proxies = {
-            'http': 'http://192.168.50.91:41703',
+            'http': 'http://nas.boweniac.top:41703',
         }
 
         loop = 3

@@ -4,19 +4,11 @@ import { AgentConversation, AgentConversationMessage, Message } from "./TypeAgen
 import { BlobOptions } from "buffer";
 
 export const excludeFromState = [
-    "appName",
     "activePage",
-    "gateWayProtocol",
-    "gateWayHost",
-    "gateWayPort",
 ];
 
 export interface LocalState {
-    appName: string;
     activePage: string;
-    gateWayProtocol: string;
-    gateWayHost: string;
-    gateWayPort: string;
 
     userToken:string;
     userPhone:string;
@@ -32,15 +24,13 @@ export interface LocalState {
     agentConversationMessage: AgentConversationMessage[];
     introductionConversations: Message[];
 
+    audio: HTMLAudioElement | undefined
+
     agentAvatarMapping: { [key: string]: string };
 }
 
 export const initialState = {
-    appName: "AI 博闻",
     activePage: "/",
-    gateWayProtocol: "https://",
-    gateWayHost: "nas.boweniac.top",
-    gateWayPort: "44403",
 
     userToken: "",
     userPhone: "",
@@ -55,6 +45,8 @@ export const initialState = {
     agentConversationList: [],
     agentConversationMessage: [],
     introductionConversations: [],
+
+    audio: undefined,
 
     agentAvatarMapping: {
         "CustomerManager": "customerManagerGirl",

@@ -1,6 +1,6 @@
 import { addAgentConversationAPI } from "@/api/conversation/add_conversation";
-import { addAgentConversationMessageBlockState, addAgentMessageState, addAgentConversationListState, updateAgentConversationMessageBlockState } from "@/stores/LocalStoreActions";
-import { ActionIcon, Box, Center, Container, FileButton, Flex, Loader, LoadingOverlay, MantineStyleProp, Modal, Popover, Progress, rem, Space, Text, Textarea } from "@mantine/core";
+import { addAgentConversationMessageBlockState, addAgentMessageState, addAgentConversationListState, updateAgentConversationMessageBlockState, updateAudioState } from "@/stores/LocalStoreActions";
+import { ActionIcon, Box, Button, Center, Container, FileButton, Flex, Loader, LoadingOverlay, MantineStyleProp, Modal, Popover, Progress, rem, Space, Text, Textarea } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -40,6 +40,8 @@ export default function CustTextarea(props: CustTextareaProps) {
           } else {
             event.preventDefault();
             if (value) {
+              const audio = new Audio()
+              updateAudioState(audio)
               setValue("")
               props.callback(value);
             }
@@ -93,6 +95,8 @@ export default function CustTextarea(props: CustTextareaProps) {
               <IconPlayerStop style={{ width: '70%', height: '70%' }} stroke={1.5} />
             </ActionIcon> : <RecordButton callback={(value)=>{
               if (value) {
+                const audio = new Audio()
+                updateAudioState(audio)
                 setValue("")
                 props.callback(value);
               }

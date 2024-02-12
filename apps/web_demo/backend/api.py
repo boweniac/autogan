@@ -3,6 +3,7 @@ import json
 from fastapi import HTTPException, Query
 from starlette import status
 
+import autogan
 from apps.web_demo.backend.db.redis_storage import RedisStorage
 from starlette.responses import StreamingResponse
 from fastapi import FastAPI, WebSocket, Request
@@ -18,6 +19,7 @@ storage = RedisStorage("172.17.0.1", 60101, 0)
 snowflake_id = SnowflakeIdGenerator(datacenter_id=1, worker_id=1)
 test_service = TestService("LLM_CONFIG", "auto", True, storage)
 
+service_config_dict = autogan.dict_from_json("SERVICE_CONFIG")
 
 @app.get("/health")
 async def health():
@@ -117,4 +119,4 @@ async def websocket_endpoint(websocket: WebSocket):
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=47003)
+    uvicorn.run(app, host="0.0.0.0", port=service_config_dict["http"])

@@ -8,6 +8,7 @@ import { Position, animateMorphTargets } from './AvatarUtil';
 import { animationNameToPath } from './AnimationConfig';
 import { avatarConfig, corresponding, nodeKeyToIndex } from './AvatarConfig';
 import { useRouter } from 'next/router';
+import { getAudioState } from '@/stores/LocalStoreActions';
 
 
 type GLBModelProps = {
@@ -79,8 +80,11 @@ const GLBModel: React.FC<GLBModelProps> = ({ avatarName, animation, position, au
   }, [router.isReady]);
 
     useEffect(()=>{
-      if (audioAndLip) {
-        const audio = new Audio(`${audioAndLip.audioFile}`)
+      const audio = getAudioState()
+      if (audioAndLip && audio) {
+        // const audio = new Audio()
+        // const audio = new Audio(`${audioAndLip.audioFile}`)
+        audio.src = `${audioAndLip.audioFile}`;
         console.log(`audioAndLip.audioFile:`+JSON.stringify(audioAndLip.audioFile));
         audio.play().catch(error => {
           console.log(`audio.play.error:`+JSON.stringify(error));
@@ -89,13 +93,24 @@ const GLBModel: React.FC<GLBModelProps> = ({ avatarName, animation, position, au
           }
         });
         const handleTimeUpdate = () => {
-          const currentTime = audio.currentTime;
-          if (audioAndLip.lipsData) {
-            for (let i = 0; i < audioAndLip.lipsData.length; i++) {
-              const lipsData = audioAndLip.lipsData[i] as MouthCues;
-              if (currentTime >= lipsData.start && currentTime <= lipsData.end) {
-                currentMorphTargetIndex.current = nodeKeyToIndex[corresponding[lipsData.value]]
-                animateMorphTargets(performance.now(), updateMorphTargets)
+          if (audio.readyState >= 2) {
+            const currentTime = audio.currentTime;
+            if (audioAndLip.lipsData) {
+              for (let i = 0; i < audioAndLip.lipsData.length; i++) {
+                const lipsData = audioAndLip.lipsData[i] as MouthCues;
+                if (currentTime >= lipsData.start && currentTime <= lipsData.end) {
+                  currentMorphTargetIndex.current = nodeKeyToIndex[corresponding[lipsData.value]]
+                  animateMorphTargets(performance.now(), updateMorphTargets)
+                  const headNode = headNodes[audioAndLip.avatarName || avatarName]
+                  if (headNode instanceof THREE.Mesh && headNode.morphTargetInfluences) {
+                    headNode.morphTargetInfluences[currentMorphTargetIndex.current] = 0;
+                  }
+                  const teethNode = teethNodes[audioAndLip?.avatarName || avatarName]
+                  if (teethNode instanceof THREE.Mesh && teethNode.morphTargetInfluences) {
+                    teethNode.morphTargetInfluences[currentMorphTargetIndex.current] = 0;
+                  }
+                  break
+                }
                 const headNode = headNodes[audioAndLip.avatarName || avatarName]
                 if (headNode instanceof THREE.Mesh && headNode.morphTargetInfluences) {
                   headNode.morphTargetInfluences[currentMorphTargetIndex.current] = 0;
@@ -104,15 +119,6 @@ const GLBModel: React.FC<GLBModelProps> = ({ avatarName, animation, position, au
                 if (teethNode instanceof THREE.Mesh && teethNode.morphTargetInfluences) {
                   teethNode.morphTargetInfluences[currentMorphTargetIndex.current] = 0;
                 }
-                break
-              }
-              const headNode = headNodes[audioAndLip.avatarName || avatarName]
-              if (headNode instanceof THREE.Mesh && headNode.morphTargetInfluences) {
-                headNode.morphTargetInfluences[currentMorphTargetIndex.current] = 0;
-              }
-              const teethNode = teethNodes[audioAndLip?.avatarName || avatarName]
-              if (teethNode instanceof THREE.Mesh && teethNode.morphTargetInfluences) {
-                teethNode.morphTargetInfluences[currentMorphTargetIndex.current] = 0;
               }
             }
           }
