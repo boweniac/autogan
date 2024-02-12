@@ -57,10 +57,8 @@ export default function AgentFrame() {
     useEffect(() => {
         if (agentRole == "CustomerManager") {
             setAvatarName(agentAvatarMapping["CustomerManager"]);
+            setAudioAndLip({avatarName: agentAvatarMapping["CustomerManager"]})
         }
-        // if (!isLoading && !isPlaying.current) {
-        //     setAudioAndLip({})
-        // }
     }, [agentAvatarMapping]);
 
     const syncMessages = () => {
@@ -199,7 +197,7 @@ export default function AgentFrame() {
                 w="100%"
                 gap={0}
             >
-                <HeaderMegaMenu isLoading={isPlaying.current} conversationID={queryConversationID} selectAvatarCallback={(v)=>{}} muteCallback={(v)=>{}}></HeaderMegaMenu>
+                <HeaderMegaMenu isLoading={isPlaying.current || isLoading} conversationID={queryConversationID} selectAvatarCallback={(v)=>{}} muteCallback={(v)=>{}}></HeaderMegaMenu>
                 <Stack
                     // h="100%"
                     // h={`calc(100vh - ${rem(50)})`}

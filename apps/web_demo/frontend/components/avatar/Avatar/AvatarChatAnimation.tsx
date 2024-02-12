@@ -83,7 +83,7 @@ const GLBModel: React.FC<GLBModelProps> = ({ animation, position, audioAndLip, a
 
     useEffect(()=>{
       const audio = getAudioState()
-      if (audioAndLip && audio) {
+      if (audioAndLip?.audioFile && audio) {
         // const audio = new Audio()
         // const audio = new Audio(`${audioAndLip.audioFile}`)
         audio.src = `${audioAndLip.audioFile}`;
