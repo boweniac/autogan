@@ -52,6 +52,7 @@ class WebSearch:
 
         # Remove extra line breaks
         s = re.sub('\n+', '\n', main_text)
+        print(f"main_text: {s}")
         # print(s)
         if s:
             return s
@@ -97,6 +98,7 @@ class WebSearch:
                 # Extract the title, link, and snippet fields from each object in the items field.
                 results = []
                 for item in data['items']:
+                    print(f"result: {item}")
                     result = {
                         'title': item.get('title', ''),
                         'link': item.get('link', ''),
