@@ -13,7 +13,7 @@ import MessagesDisplay from "./messages_display/MessagesDisplay";
 import RoleDisplayHello from "./RoleDisplay/RoleDisplayHello";
 import RoleDisplayHelloTitle from "./RoleDisplay/RoleDisplayHelloTitle";
 import RoleDisplayHelloButton from "./RoleDisplay/RoleDisplayHelloButton";
-import { resetIntroductionConversationsState, updateActivePageState } from "@/stores/LocalStoreActions";
+import { resetIntroductionConversationsState, updateActivePageState, updateAudioState } from "@/stores/LocalStoreActions";
 import { HeaderMegaMenu } from "./HeaderMegaMenu/HeaderMegaMenu";
 import MessagesDisplaySm from "./messages_display_sm/MessagesDisplaySm";
 
@@ -113,6 +113,8 @@ export default function Hello() {
 
     useEffect(() => {
         if (router.isReady && helloStart) {
+            const audio = new Audio()
+            updateAudioState(audio)
             setIntroductionStart(true)
         }
     }, [router.isReady, helloStart]);
@@ -175,6 +177,8 @@ export default function Hello() {
                                 playNextAudio();
                             }
                         }} selectCallback={(value)=>{
+                            const audio = new Audio()
+                            updateAudioState(audio)
                             startIntroduction(value)
                         }}></MessagesDisplay>
                     </Stack>
