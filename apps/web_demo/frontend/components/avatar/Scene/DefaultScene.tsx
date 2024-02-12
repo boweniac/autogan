@@ -9,7 +9,6 @@ import GLBModel from '../Avatar/AvatarChatAnimation';
 
 // extend({ OrbitControls });
 type DefaultSceneProps = {
-  avatarName: string; // 模型文件的路径
   audioAndLip: AudioAndLip | undefined;
   audioEndCallback: ()=>void;
   isReadyCallback?: ()=>void;
@@ -30,7 +29,7 @@ const CameraController = () => {
   return <OrbitControls args={[camera, gl.domElement]}/>;
 };
 
-const DefaultScene: React.FC<DefaultSceneProps> = ({ avatarName, audioAndLip, audioEndCallback, isReadyCallback }) => {
+const DefaultScene: React.FC<DefaultSceneProps> = ({ audioAndLip, audioEndCallback, isReadyCallback }) => {
   const [morphValue, setMorphValue] = useState<string>("");
   const position = {
     "x": 0,
@@ -43,7 +42,7 @@ const DefaultScene: React.FC<DefaultSceneProps> = ({ avatarName, audioAndLip, au
       <Canvas gl={{ alpha: true }}>
         <ambientLight  intensity={4}/>
         <pointLight position={[0, 2, 3]} intensity={20} />
-        <GLBModel avatarName={avatarName} animation="Idle" position={position} audioAndLip={audioAndLip} audioEndCallback={audioEndCallback} />
+        <GLBModel animation="Idle" position={position} audioAndLip={audioAndLip} audioEndCallback={audioEndCallback} />
         <CameraController  />
       </Canvas>
     </div>

@@ -9,10 +9,10 @@ import { animationNameToPath } from './AnimationConfig';
 import { avatarConfig, corresponding, nodeKeyToIndex } from './AvatarConfig';
 import { useRouter } from 'next/router';
 import { getAudioState } from '@/stores/LocalStoreActions';
+import { LocalState, localStore } from '@/stores/LocalStore';
 
 
 type GLBModelProps = {
-  avatarName: string; // 模型文件的路径
   animation: string; // FBX 动画文件路径
   position: Position | undefined;
   audioAndLip: AudioAndLip | undefined;
@@ -21,8 +21,10 @@ type GLBModelProps = {
 };
 
 
-const GLBModel: React.FC<GLBModelProps> = ({ avatarName, animation, position, audioAndLip, audioEndCallback }) => {
+const GLBModel: React.FC<GLBModelProps> = ({ animation, position, audioAndLip, audioEndCallback }) => {
   const router = useRouter();
+  const agentAvatarMapping = localStore((state: LocalState) => state.agentAvatarMapping);
+  const avatarName = agentAvatarMapping["CustomerManager"]
   const gltfs:{[key: string]: GLTF & ObjectMap} = {
     "customerManagerBoy": useLoader(GLTFLoader, avatarConfig["customerManagerBoy"]["modelPath"] || "/avatars/CustomerManagerBoy.glb"),
     "customerManagerGirl": useLoader(GLTFLoader, avatarConfig["customerManagerGirl"]["modelPath"] || "/avatars/CustomerManagerBoy.glb"),
@@ -115,7 +117,7 @@ const GLBModel: React.FC<GLBModelProps> = ({ avatarName, animation, position, au
                 if (headNode instanceof THREE.Mesh && headNode.morphTargetInfluences) {
                   headNode.morphTargetInfluences[currentMorphTargetIndex.current] = 0;
                 }
-                const teethNode = teethNodes[audioAndLip?.avatarName || avatarName]
+                const teethNode = teethNodes[audioAndLip?.avatarName || agentAvatarMapping["customerManagerGirl"]]
                 if (teethNode instanceof THREE.Mesh && teethNode.morphTargetInfluences) {
                   teethNode.morphTargetInfluences[currentMorphTargetIndex.current] = 0;
                 }

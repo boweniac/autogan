@@ -15,8 +15,6 @@ export interface LocalState {
     userState:number;
     openedLogInModal:boolean;
 
-    helloStart: boolean;
-
     avatarState: boolean;
     muteState: boolean;
     initConversationRequest: string;
@@ -36,8 +34,6 @@ export const initialState = {
     userPhone: "",
     userState: 0,
     openedLogInModal: false,
-
-    helloStart: false,
     
     avatarState: true,
     muteState: false,

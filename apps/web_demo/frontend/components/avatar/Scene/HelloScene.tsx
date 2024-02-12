@@ -13,7 +13,7 @@ import HelloSceneConfig from './HelloSceneConfig';
 
 // extend({ OrbitControls });
 type HelloSceneProps = {
-  avatarName: string; // 模型文件的路径
+  avatarName?: string; // 模型文件的路径
   animation: string 
   test?: boolean;
   audioAndLip?: AudioAndLip | undefined;
@@ -86,14 +86,14 @@ const CameraController = (props: CameraControllerProps) => {
 const HelloScene: React.FC<HelloSceneProps> = ({ avatarName, animation, test, audioAndLip,  audioEndCallback, animationPlayEndCallback}) => {
   console.log(`audioAndLip?.avatarName:`+JSON.stringify(audioAndLip?.avatarName));
   console.log(`audioAndLip?.avatarName || avatarName:`+JSON.stringify(audioAndLip?.avatarName || avatarName));
-  const avatarObject = avatarConfig[audioAndLip?.avatarName || avatarName]
+  const avatarObject = avatarConfig[audioAndLip?.avatarName || "customerManagerGirl"]
   const [avatar, setAvatar] = useState<AvatarObject>(avatarObject);
-  const [name, setName] = useState<string>(audioAndLip?.avatarName || avatarName);
+  const [name, setName] = useState<string>(audioAndLip?.avatarName || "customerManagerGirl");
   const animations = animationGroup[animation]
 
   useEffect(() => {
     console.log(`audioAndLip:`+JSON.stringify(audioAndLip));
-    setName(audioAndLip?.avatarName || avatarName)
+    setName(audioAndLip?.avatarName || "customerManagerGirl")
 }, [avatarName, audioAndLip]);
 
 useEffect(() => {
@@ -109,7 +109,7 @@ console.log(`targetY:`+JSON.stringify(avatar.targetY));
       <Canvas gl={{ alpha: true }}>
         <ambientLight  intensity={Number(avatar.ambientLightIntensity || 0)}/>
         <pointLight position={[Number(avatar.pointLightX || 0), Number(avatar.pointLightY || 0), Number(avatar.pointLightZ || 0)]} intensity={Number(avatar.pointLightIntensity || 0)} />
-        {animations.length > 1 ? <GLBLoopModel avatarName={name} animations={animations} position={{"x": avatar.positionX || 0, "y": avatar.positionY || 0, "z": avatar.positionZ || 0, "rotation": avatar.positionRotation || 0}} animationPlayEndCallback={animationPlayEndCallback} /> : <GLBModel avatarName={name} animation={animations[0]} position={{"x": avatar.positionX || 0, "y": avatar.positionY || 0, "z": avatar.positionZ || 0, "rotation": avatar.positionRotation || 0}} audioAndLip={audioAndLip} audioEndCallback={audioEndCallback} />}
+        {animations.length > 1 ? <GLBLoopModel avatarName={name} animations={animations} position={{"x": avatar.positionX || 0, "y": avatar.positionY || 0, "z": avatar.positionZ || 0, "rotation": avatar.positionRotation || 0}} animationPlayEndCallback={animationPlayEndCallback} /> : <GLBModel animation={animations[0]} position={{"x": avatar.positionX || 0, "y": avatar.positionY || 0, "z": avatar.positionZ || 0, "rotation": avatar.positionRotation || 0}} audioAndLip={audioAndLip} audioEndCallback={audioEndCallback} />}
         <CameraController 
             fov={Number(avatar.fov || 0)} 
             cameraPositionX={Number(avatar.cameraPositionX || 0)} 

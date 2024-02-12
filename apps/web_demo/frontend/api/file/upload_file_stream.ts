@@ -3,7 +3,7 @@ import http from "http";
 import {notifications} from "@mantine/notifications";
 import axios, {AxiosProgressEvent, AxiosRequestConfig} from "axios";
 import {localStore} from "@/stores/LocalStore";
-import { openLogInModal } from '@/stores/LocalStoreActions';
+import { openLogInModal, resetLogOutState } from '@/stores/LocalStoreActions';
 // import { getCurrentAbortController } from '@/stores/LocalStoreActions';
 
 const get = localStore.getState;
@@ -39,6 +39,8 @@ export async function uploadFileStreamAPI(files: any[], apiType: string, baseId:
                 if (response.ok) {
                     return response.body;
                 } else {
+                    resetLogOutState()
+                    openLogInModal()
                     throw new Error('Network response was not ok.');
                 }
             })
@@ -81,6 +83,8 @@ export async function uploadFileStreamAPI(files: any[], apiType: string, baseId:
     try {
         await Promise.all(uploaders);
     } catch (e: any) {
+        resetLogOutState()
+        openLogInModal()
         if (axios.isAxiosError(e)) {
             console.error(e.response?.data);
         }

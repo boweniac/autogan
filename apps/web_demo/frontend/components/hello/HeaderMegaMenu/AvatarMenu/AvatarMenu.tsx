@@ -5,14 +5,15 @@ import { useState } from "react";
 import classes from './AvatarMenu.module.css';
 import { updateAgentAvatarMappingState, updateAvatarStateState } from "@/stores/LocalStoreActions";
 
-// type AvatarMenuProps = {
-//     callback: (value: string) => void;
-//   }
+type AvatarMenuProps = {
+    isLoading: boolean;
+  }
   
-  export default function AvatarMenu() {
+  export default function AvatarMenu(props: AvatarMenuProps) {
     const avatarState = localStore((state: LocalState) => state.avatarState);
+
     return (
-        <Menu shadow="md" width={200}>
+        <Menu disabled={props.isLoading} shadow="md" width={200}>
         <Menu.Target>
             <Center style={{ marginRight: rem(50)}}>
                 <span className={classes.linkLabel}>选择客户经理</span>

@@ -52,7 +52,7 @@ def compressed_text_universal(text: str,
         else:
             content, tokens = generate_text_summary(st, summary_model_config)
 
-        if content:
+        if content != "None":
             compressed_text += content + "\n"
             total_tokens += tokens
 

@@ -4,7 +4,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { IconClockRecord, IconCoinYen, IconCrown, IconDeviceMobile, IconKey, IconLogin, IconLogout, IconTrash, IconUser, IconUserPlus } from "@tabler/icons-react";
 import { useRef, useState } from "react";
 import { LoginModal } from "../../Modals/LoginModal/LoginModal";
-import { closeLogInModal, openLogInModal, resetAgentConversationListState, resetAgentConversationMessageState, updateAgentAvatarMappingState, updateAvatarStateState, updateMuteStateState, updateUserPhoneState, updateUserStateState, updateUserTokenState } from "@/stores/LocalStoreActions";
+import { closeLogInModal, openLogInModal, resetAgentConversationListState, resetAgentConversationMessageState, resetIntroductionConversationsState, resetLogOutState, updateAgentAvatarMappingState, updateAvatarStateState, updateMuteStateState, updateUserPhoneState, updateUserStateState, updateUserTokenState } from "@/stores/LocalStoreActions";
 import { notifications } from "@mantine/notifications";
 import { useRouter } from "next/router";
 import { getUserInfoAPI } from "@/api/user/user_get_user_info";
@@ -81,14 +81,7 @@ export default function UserMenu() {
           <Menu.Item
             color="red"
             leftSection={<IconLogout style={{ width: rem(14), height: rem(14) }} />} onClick={()=>{
-              updateUserTokenState("")
-              updateUserPhoneState("")
-              updateUserStateState(0)
-              updateAvatarStateState(true)
-              updateMuteStateState(false)
-              updateAgentAvatarMappingState({"CustomerManager": "customerManagerGirl"})
-              resetAgentConversationListState()
-              resetAgentConversationMessageState()
+              resetLogOutState()
               router.push(activePage).then(()=>{
                 notifications.show({
                   message: "已成功退出登录",

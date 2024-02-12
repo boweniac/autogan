@@ -3,7 +3,7 @@ import http from "http";
 import {notifications} from "@mantine/notifications";
 import axios, {AxiosProgressEvent, AxiosRequestConfig} from "axios";
 import {localStore} from "@/stores/LocalStore";
-import { openLogInModal } from '@/stores/LocalStoreActions';
+import { openLogInModal, resetLogOutState } from '@/stores/LocalStoreActions';
 // import { getCurrentAbortController } from '@/stores/LocalStoreActions';
 
 const get = localStore.getState;
@@ -94,6 +94,8 @@ export async function streamAPI(path: string, payloadData: {[key: string]: strin
         req.write(payload);
         req.end();
     } catch (e: any) {
+        resetLogOutState()
+        openLogInModal()
         if (axios.isAxiosError(e)) {
             console.error(e.response?.data);
         }
@@ -137,6 +139,8 @@ export async function getRequestAPI(path: string) {
             throw new Error(`Request failed with status code ${res.status} ${res.statusText}`);
         }
     } catch (e: any) {
+        resetLogOutState()
+        openLogInModal()
         if (axios.isAxiosError(e)) {
             notifications.show({
                 title: '服务错误',
@@ -179,6 +183,8 @@ export async function postRequestAPI(path: string, payload: any) {
             throw new Error(`Request failed with status code ${res.status} ${res.statusText}`);
         }
     } catch (e: any) {
+        resetLogOutState()
+        openLogInModal()
         if (axios.isAxiosError(e)) {
             notifications.show({
                 title: '服务错误',

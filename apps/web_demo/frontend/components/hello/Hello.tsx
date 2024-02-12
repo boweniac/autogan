@@ -27,7 +27,7 @@ export default function Hello() {
     const [message, setMessage] = useState<Message | undefined>(undefined);
     const [messages, setMessages] = useState<Message[]>([]);
     const [speakText, setSpeakText] = useState<string>("");
-    const [audioAndLip, setAudioAndLip] = useState<AudioAndLip>();
+    const [audioAndLip, setAudioAndLip] = useState<AudioAndLip | undefined>();
     const [lipValue, setLipValue] = useState<string>();
     const agentAvatarMapping = localStore((state: LocalState) => state.agentAvatarMapping);
     const [agentRole, setAgentRole] = useState<string>("CustomerManager");
@@ -158,7 +158,7 @@ export default function Hello() {
                 w="100%"
                 className={classes.agentFrame}
             >
-                <HeaderMegaMenu selectAvatarCallback={(v)=>{}} muteCallback={(v)=>{}}></HeaderMegaMenu>
+                <HeaderMegaMenu isLoading={false} selectAvatarCallback={(v)=>{}} muteCallback={(v)=>{}}></HeaderMegaMenu>
                 <Stack
                         w="100%"
                         h={`calc(100vh - ${rem(100)})`}
@@ -183,6 +183,7 @@ export default function Hello() {
                         }}></MessagesDisplay>
                     </Stack>
                 <RoleDisplay avatarName={avatarName} audioAndLip={audioAndLip} audioEndCallback={()=>{
+                    setAudioAndLip(undefined)
                     playNextAudio()
                 }}/>
             </Stack> : <Box

@@ -27,7 +27,7 @@ export default function AgentFrame() {
     const agentAvatarMapping = localStore((state: LocalState) => state.agentAvatarMapping);
     const [isLoading, { open: loadingStart, close: loadingEnd }] = useDisclosure(false);
 
-    const [audioAndLip, setAudioAndLip] = useState<AudioAndLip>();
+    const [audioAndLip, setAudioAndLip] = useState<AudioAndLip | undefined>();
     const [agentRole, setAgentRole] = useState<string>("CustomerManager");
     const [avatarName, setAvatarName] = useState<string>(agentAvatarMapping["CustomerManager"]);
     const [textStack, setTextStack] = useState<AudioAndLip[]>([]);
@@ -58,6 +58,9 @@ export default function AgentFrame() {
         if (agentRole == "CustomerManager") {
             setAvatarName(agentAvatarMapping["CustomerManager"]);
         }
+        // if (!isLoading && !isPlaying.current) {
+        //     setAudioAndLip({})
+        // }
     }, [agentAvatarMapping]);
 
     const syncMessages = () => {
@@ -196,7 +199,7 @@ export default function AgentFrame() {
                 w="100%"
                 gap={0}
             >
-                <HeaderMegaMenu conversationID={queryConversationID} selectAvatarCallback={(v)=>{}} muteCallback={(v)=>{}}></HeaderMegaMenu>
+                <HeaderMegaMenu isLoading={isPlaying.current} conversationID={queryConversationID} selectAvatarCallback={(v)=>{}} muteCallback={(v)=>{}}></HeaderMegaMenu>
                 <Stack
                     // h="100%"
                     // h={`calc(100vh - ${rem(50)})`}
@@ -211,28 +214,9 @@ export default function AgentFrame() {
                         }} syncMessagesCallback={syncMessages}></CustTextarea>
                     <SpeakButton callback={doSubmit}></SpeakButton>
                 </Stack>
-                {/* <Stack
-                    h={`calc(100vh - ${rem(50)})`}
-                    w="100%"
-                    align="center"
-                    justify="flex-end"
-                    // className={classSpeakButton}
-                >
-                    {
-                        speakText && <Card
-                        padding="sm"
-                        radius="md"
-                        // maw={`calc(100vw - ${rem(400)} - ${rem(364)})`}
-                        className={ `${classes.messageBlock} ${classes.messageLeft}` }
-                        >
-                            <MarkdownBlock content_type="main" content_tag="" content={speakText}></MarkdownBlock>
-                        </Card>
-                    }
-                    <SpeakButton callback={doSubmit}></SpeakButton>
-                </Stack> */}
             </Stack>
             
-            <RoleDisplay avatarName={avatarName} audioAndLip={audioAndLip} audioEndCallback={()=>{
+            <RoleDisplay audioAndLip={audioAndLip} audioEndCallback={()=>{
                 playNextAudio()
             }}/>
         </Box>

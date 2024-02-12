@@ -42,6 +42,7 @@ import { NavbarMinimal } from '@/components/appshell/NavbarMinimal/NavbarMinimal
 
 type HeaderMegaMenuProps = {
     conversationID?: string;
+    isLoading: boolean;
     muteCallback: (value: boolean) => void;
     selectAvatarCallback: (value: string) => void;
   }
@@ -81,7 +82,7 @@ export function HeaderMegaMenu(props: HeaderMegaMenuProps) {
                                 style={{ width: rem(16), height: rem(16) }}
                                 stroke={2.5}
                             />} />
-                        <AvatarMenu ></AvatarMenu>
+                        <AvatarMenu isLoading={props.isLoading} ></AvatarMenu>
                     </Group>
                 </Group>
             </header>

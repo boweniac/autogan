@@ -12,7 +12,7 @@ import HelloScene from "@/components/avatar/Scene/HelloScene";
 import { LocalState, localStore } from "@/stores/LocalStore";
 
 type RoleDisplayProps = {
-    avatarName: string; // 模型文件的路径
+    avatarName?: string; // 模型文件的路径
     audioAndLip: AudioAndLip | undefined;
     audioEndCallback: ()=>void
   }

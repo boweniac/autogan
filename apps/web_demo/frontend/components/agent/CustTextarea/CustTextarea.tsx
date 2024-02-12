@@ -94,6 +94,7 @@ export default function CustTextarea(props: CustTextareaProps) {
               rightSection={props.isLoading ? <ActionIcon variant="subtle" aria-label="Settings" onClick={props.stopCallback}>
               <IconPlayerStop style={{ width: '70%', height: '70%' }} stroke={1.5} />
             </ActionIcon> : <RecordButton callback={(value)=>{
+              props.syncMessagesCallback()
               if (value) {
                 const audio = new Audio()
                 updateAudioState(audio)

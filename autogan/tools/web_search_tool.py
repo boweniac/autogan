@@ -5,8 +5,9 @@ from typing import Optional, Dict
 from urllib.parse import quote
 from bs4 import BeautifulSoup
 
+import autogan
 from autogan.protocol.response_protocol import ResponseProtocol
-
+proxy_config_dict = autogan.dict_from_json("PROXY_CONFIG")
 
 class WebSearch:
     def __init__(self, google_search_config: Dict):
@@ -42,7 +43,8 @@ class WebSearch:
         url = result[0]["link"]
         print(url)
         proxies = {
-            'http': 'http://nas.boweniac.top:41703',
+            'http': proxy_config_dict["http"],
+            'https': proxy_config_dict["https"]
         }
         # Obtain the main content of the URL page
         response = requests.get(url, proxies=proxies)
@@ -82,7 +84,8 @@ class WebSearch:
             'key': self._key,
         }
         proxies = {
-            'http': 'http://nas.boweniac.top:41703',
+            'http': proxy_config_dict["http"],
+            'https': proxy_config_dict["https"]
         }
 
         loop = 3

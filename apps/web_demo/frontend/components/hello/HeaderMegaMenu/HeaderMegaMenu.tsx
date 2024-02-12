@@ -39,6 +39,7 @@ import { LocalState, localStore } from '@/stores/LocalStore';
 import { updateMuteStateState } from '@/stores/LocalStoreActions';
 
 type HeaderMegaMenuProps = {
+    isLoading: boolean;
     muteCallback: (value: boolean) => void;
     selectAvatarCallback: (value: string) => void;
   }
@@ -53,7 +54,7 @@ export function HeaderMegaMenu(props: HeaderMegaMenuProps) {
         <Box>
             <header className={classes.header}>
                 <Group justify="flex-end" h="100%">
-                    <AvatarMenu ></AvatarMenu>
+                    <AvatarMenu isLoading={props.isLoading} ></AvatarMenu>
                 </Group>
             </header>
         </Box>

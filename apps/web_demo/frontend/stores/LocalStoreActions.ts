@@ -301,3 +301,19 @@ export const updateIntroductionConversationMessageBlockState = (messageLocalID: 
 export const resetIntroductionConversationsState = () => {
     set(() => ({ introductionConversations: [] }));
 };
+
+export const resetLogOutState = () => {
+    set((state) => ({ 
+        userToken: "",
+        userPhone: "",
+        userState: 0,
+        avatarState: true,
+        muteState: false,
+        agentAvatarMapping: {
+            ...state.agentAvatarMapping, ...{"CustomerManager": "customerManagerGirl"}
+        },
+        agentConversationList: [],
+        agentConversationMessage: [],
+        introductionConversations: []
+    }));
+};
