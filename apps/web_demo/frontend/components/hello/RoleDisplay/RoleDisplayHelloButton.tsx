@@ -19,7 +19,7 @@ export default function RoleDisplayHelloButton(props: RoleDisplayHelloButtonProp
     // console.log(`props.avatarName:`+props.avatarName);
     return (
         <Stack
-            className={classes.roleDisplay}
+            className={classes.buttonDisplay}
             align="center"
             // bg="var(--mantine-color-body)"
             justify="flex-end"

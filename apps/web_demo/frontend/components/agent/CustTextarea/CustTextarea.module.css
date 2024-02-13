@@ -10,7 +10,7 @@
   bottom: 0;
   z-index: 10;
   padding-left: rem(320px);
-  padding-right: rem(500px);
+  padding-right: rem(550px);
   padding-bottom: rem(50px);
   /* margin-right: rem(400px); */
   @media (max-width: $mantine-breakpoint-md) {

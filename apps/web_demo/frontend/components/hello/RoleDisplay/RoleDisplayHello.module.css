@@ -5,6 +5,13 @@
     flex-shrink: 0;
 }
 
+.buttonDisplay {
+  height: 100%;
+  /* width: calc(200vw - rem(440px)); */
+  width: 100%;
+  flex-shrink: 0;
+}
+
 .space {
     width: calc(100vw/13);;
 }

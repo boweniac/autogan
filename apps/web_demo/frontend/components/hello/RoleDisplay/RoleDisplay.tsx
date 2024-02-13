@@ -18,6 +18,20 @@ type RoleDisplayProps = {
 
 
 export default function RoleDisplay(props: RoleDisplayProps) {
+    const [viewportHeight, setViewportHeight] = useState(0); // 初始值设置为0或合理的默认值
+
+  useEffect(() => {
+    // 这确保了window.innerHeight只在客户端获取
+    setViewportHeight(window.innerHeight);
+
+    const handleResize = () => {
+      setViewportHeight(window.innerHeight);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
     // console.log(`props.avatarName:`+props.avatarName);
     return (
         <Stack
@@ -26,7 +40,8 @@ export default function RoleDisplay(props: RoleDisplayProps) {
             justify="space-between"
             style={{
                 position: 'fixed',
-                zIndex: -1
+                zIndex: -1,
+                top: `calc(${-0.80*viewportHeight}px)`
                 // zIndex: 1,
                 // 其他样式以调整内容位置和外观
             }}
