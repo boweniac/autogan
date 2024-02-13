@@ -30,7 +30,7 @@ export default function CustTextarea(props: CustTextareaProps) {
     const [storageProgress, setStorageProgress] = useState(0);
 
     const avatarState = localStore((state: LocalState) => state.avatarState);
-    const classTextarea = avatarState ? classes.textareaAvatarOn : "";
+    const classTextarea = avatarState ? classes.classTextareaAvatarOn : classes.classTextareaAvatarOff;
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
         event.stopPropagation();

@@ -1,10 +1,13 @@
 .scrollAreaAvatarOn {
+    /* height: calc(100vh - rem(130)); */
     height: 100%;
+    padding-bottom: rem(85);
     @media (max-width: $mantine-breakpoint-sm) {
-        height: calc(45vh);
+        height: calc(60vh);
       }
 }
 
 .scrollAreaAvatarOff {
     height: 100%;
+    padding-bottom: rem(85);
 }

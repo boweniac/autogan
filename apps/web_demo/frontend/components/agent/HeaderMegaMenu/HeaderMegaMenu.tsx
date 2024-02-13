@@ -39,6 +39,7 @@ import { LocalState, localStore } from '@/stores/LocalStore';
 import { updateMuteStateState } from '@/stores/LocalStoreActions';
 import { LeftTableOfContents } from '../LeftTableOfContents/LeftTableOfContents';
 import { NavbarMinimal } from '@/components/appshell/NavbarMinimal/NavbarMinimal';
+import { useEffect, useState } from 'react';
 
 type HeaderMegaMenuProps = {
     conversationID?: string;
@@ -53,13 +54,28 @@ export function HeaderMegaMenu(props: HeaderMegaMenuProps) {
     const [linksOpened, { toggle: toggleLinks }] = useDisclosure(false);
     const theme = useMantineTheme();
 
+    const [viewportHeight, setViewportHeight] = useState(0); // 初始值设置为0或合理的默认值
+
+  useEffect(() => {
+    // 这确保了window.innerHeight只在客户端获取
+    setViewportHeight(window.innerHeight);
+    console.log(`viewportHeight:`+JSON.stringify(window.innerHeight));
+    const handleResize = () => {
+      setViewportHeight(window.innerHeight);
+      console.log(`viewportHeight:`+JSON.stringify(window.innerHeight));
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
     return (
         <Box>
             <Drawer size={rem(270)} opened={drawerOpened} onClose={()=>{
                 closeDrawer()
                 }} withCloseButton={false} padding={0}>
                     <Box 
-                    h={`calc(100vh - 50px)`}
+                    h={viewportHeight}
                     // className={classes.mainNav}
                     style={{
                         display: "flex",

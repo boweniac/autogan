@@ -46,6 +46,22 @@ export function NavbarMinimal() {
   const activePage = localStore((state: LocalState) => state.activePage);
   const userToken = localStore((state: LocalState) => state.userToken);
 
+  const [viewportHeight, setViewportHeight] = useState(0); 
+
+  useEffect(() => {
+    // 这确保了window.innerHeight只在客户端获取
+    setViewportHeight(window.innerHeight);
+
+    const handleResize = () => {
+      setViewportHeight(window.innerHeight);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // const viewportHeight = window.innerHeight;
 //   useEffect(() => {
 //     if (router.isReady) {
 //       notifications.show({
@@ -69,7 +85,7 @@ export function NavbarMinimal() {
   )});
 
   return (
-    <nav className={classes.navbar}>
+    <nav style={{ height: `${viewportHeight}px`}} className={classes.navbar}>
       <Box>
       <Space h="xs" />
       <Center>

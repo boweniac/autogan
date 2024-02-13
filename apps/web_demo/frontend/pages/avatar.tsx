@@ -8,6 +8,6 @@ export default function Home() {
     w="100%"
     // className={classes.agentFrame}
 >
-<HelloScene avatarName="customerManagerGirl" animation="stay" test={true}/>
+<HelloScene avatarName="customerManagerGirl" animation="config" test={true}/>
 </Box>
 }

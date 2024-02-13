@@ -20,6 +20,22 @@ export default function RoleDisplayHello() {
     const [avatarName, setAvatarName] = useState<string>("customerManagerBoy");
     // console.log(`props.avatarName:`+props.avatarName);
     const currentAvatarIndex = useRef(0);
+
+    const [viewportHeight, setViewportHeight] = useState(0); // 初始值设置为0或合理的默认值
+
+  useEffect(() => {
+    // 这确保了window.innerHeight只在客户端获取
+    setViewportHeight(window.innerHeight);
+
+    const handleResize = () => {
+      setViewportHeight(window.innerHeight);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
     return (
         <Stack
             className={classes.roleDisplay}
@@ -28,7 +44,8 @@ export default function RoleDisplayHello() {
             style={{
                 position: 'fixed',
                 // zIndex: -1
-                // zIndex: 1,
+                zIndex: 1,
+                top: `calc(${-0.70*viewportHeight}px)`
                 // 其他样式以调整内容位置和外观
             }}
         >

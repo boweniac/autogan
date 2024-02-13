@@ -84,25 +84,19 @@ const CameraController = (props: CameraControllerProps) => {
 // };
 
 const HelloScene: React.FC<HelloSceneProps> = ({ avatarName, animation, test, audioAndLip,  audioEndCallback, animationPlayEndCallback}) => {
-  console.log(`audioAndLip?.avatarName:`+JSON.stringify(audioAndLip?.avatarName));
-  console.log(`audioAndLip?.avatarName || avatarName:`+JSON.stringify(audioAndLip?.avatarName || avatarName));
-  const avatarObject = avatarConfig[audioAndLip?.avatarName || "customerManagerGirl"]
+  const avatarObject = avatarConfig[audioAndLip?.avatarName || avatarName || "customerManagerGirl"]
   const [avatar, setAvatar] = useState<AvatarObject>(avatarObject);
-  const [name, setName] = useState<string>(audioAndLip?.avatarName || "customerManagerGirl");
+  const [name, setName] = useState<string>(audioAndLip?.avatarName || avatarName || "customerManagerGirl");
   const animations = animationGroup[animation]
 
   useEffect(() => {
     console.log(`audioAndLip:`+JSON.stringify(audioAndLip));
-    setName(audioAndLip?.avatarName || "customerManagerGirl")
+    setName(audioAndLip?.avatarName || avatarName || "customerManagerGirl")
 }, [avatarName, audioAndLip]);
 
 useEffect(() => {
   setAvatar(avatarConfig[name])
 }, [name]);
-console.log(`name:`+JSON.stringify(name));
-console.log(`cameraPositionY:`+JSON.stringify(avatar.cameraPositionY));
-console.log(`cameraPositionZ:`+JSON.stringify(avatar.cameraPositionZ));
-console.log(`targetY:`+JSON.stringify(avatar.targetY));
   return (
     <div style={{height: "100%", width: "100%"}}>
       {test && <HelloSceneConfig avatarName={name} setAvatarNamecallback={(v)=>{setName(v)}} setAvatarcallback={setAvatar}></HelloSceneConfig>}

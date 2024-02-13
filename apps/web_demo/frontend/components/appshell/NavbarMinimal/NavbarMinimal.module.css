@@ -6,7 +6,8 @@
   justify-content: space-between;
   flex-direction: column;
   border-right: rem(1px) solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
-  margin-bottom: rem(50px);
+  /* margin-bottom: rem(50px); */
+  padding-bottom: rem(50px);
 }
 
 .navbarMain {

@@ -1,34 +1,36 @@
 .agentFrame {
-  height: calc(100vh);
+    /* height: calc(100vh - rem(130)); */
     display: flex;
     flex-wrap: nowrap;
-    @media (max-width: $mantine-breakpoint-sm) {
-      height: calc(100vh - rem(80));
-    }
+    /* @media (max-width: $mantine-breakpoint-md) {
+      height: calc(100vh - rem(90));
+    } */
 }
 
 .conversationFrameAvatarOn {
     /* flex-grow: flex; */
-    height: calc(100vh - rem(50));
     padding-left: rem(50px);
     padding-right: rem(50px);
-    padding-bottom: rem(50px);
+    /* padding-bottom: rem(50px); */
     margin-right: rem(400);
+    /* height: calc(100vh - rem(130)); */
     @media (max-width: $mantine-breakpoint-sm) {
-      height: calc(100vh - rem(130));
       margin-right: 0;
     }
+    /* @media (max-width: $mantine-breakpoint-md) {
+      height: calc(100vh - rem(130));
+    } */
 }
 
 .conversationFrameAvatarOff {
-  height: calc(100vh - rem(50));
   /* flex-grow: flex; */
   padding-left: rem(50px);
   padding-right: rem(50px);
-  padding-bottom: rem(50px);
-  @media (max-width: $mantine-breakpoint-sm) {
+  /* padding-bottom: rem(50px); */
+  /* height: calc(100vh - rem(130)); */
+  /* @media (max-width: $mantine-breakpoint-md) {
     height: calc(100vh - rem(130));
-  }
+  } */
 }
 
 .speakButtonAvatarOn {

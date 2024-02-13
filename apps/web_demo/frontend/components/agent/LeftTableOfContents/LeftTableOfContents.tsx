@@ -7,7 +7,7 @@ import { AgentConversationMessage } from '@/stores/TypeAgentChat';
 import { useRouter } from 'next/router';
 import RenameModal from './RemoveModal/RenameModal';
 import { useDisclosure } from '@mantine/hooks';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import DeleteModal from './DeleteModal/DeleteModal';
 
 const links = [
@@ -32,6 +32,22 @@ export function LeftTableOfContents(props: LeftTableOfContentsProps) {
   const [openedDeleteModal, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false);
   const [conversationID, setConversationID] = useState<string>("");
   const [title, setTitle] = useState<string | undefined>("");
+
+  const [viewportHeight, setViewportHeight] = useState(0); // 初始值设置为0或合理的默认值
+
+  useEffect(() => {
+    // 这确保了window.innerHeight只在客户端获取
+    setViewportHeight(window.innerHeight);
+    console.log(`viewportHeight2:`+JSON.stringify(window.innerHeight));
+
+    const handleResize = () => {
+      setViewportHeight(window.innerHeight);
+      console.log(`viewportHeight2:`+JSON.stringify(window.innerHeight));
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const deleteConversation = () => {
     closeDeleteModal()
@@ -106,9 +122,8 @@ export function LeftTableOfContents(props: LeftTableOfContentsProps) {
 
   return (
             <Stack
-                h={`calc(100vh)`}
+                h={`calc(${viewportHeight}px)`}
                 w={`${rem(220)})`}
-                // gap={0}
             >
                 <Button
                   variant="gradient"

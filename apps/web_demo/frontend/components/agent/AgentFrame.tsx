@@ -45,9 +45,24 @@ export default function AgentFrame() {
 
     // const messages = getAgentConversationMessageState(queryConversationID)
 
+    // const messagesDisplayHeight = avatarState ? 
     const classConversationFrame = avatarState ? classes.conversationFrameAvatarOn : classes.conversationFrameAvatarOff;
     const classSpeakButton = avatarState ? classes.speakButtonAvatarOn : classes.speakButtonAvatarOff;
 
+    const [viewportHeight, setViewportHeight] = useState(0); // 初始值设置为0或合理的默认值
+
+  useEffect(() => {
+    // 这确保了window.innerHeight只在客户端获取
+    setViewportHeight(window.innerHeight);
+
+    const handleResize = () => {
+      setViewportHeight(window.innerHeight);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
     // useEffect(() => {
     //     if (agentRole == "CustomerManager") {
     //         setAvatarName(agentAvatarMapping["CustomerManager"]);
@@ -182,7 +197,7 @@ export default function AgentFrame() {
 
     return (
         <Box
-            // h={`calc(100vh)`}
+            h={`calc(${viewportHeight}px)`}
             w="100%"
             className={classes.agentFrame}
         >
@@ -193,26 +208,32 @@ export default function AgentFrame() {
             </Box>
 
             <Stack
-                h="100%"
+                // h="100%"
+                h={`calc(${viewportHeight}px)`}
+                // h={viewportHeight}
                 w="100%"
                 gap={0}
             >
                 <HeaderMegaMenu isLoading={isPlaying.current || isLoading} conversationID={queryConversationID} selectAvatarCallback={(v)=>{}} muteCallback={(v)=>{}}></HeaderMegaMenu>
                 <Stack
-                    // h="100%"
-                    // h={`calc(100vh - ${rem(50)})`}
+                    h={`calc(${viewportHeight}px - ${rem(50)})`}
                     justify="flex-end"
                     gap={0}
                     className={classConversationFrame}
                 >
                     <MessagesDisplay conversationID={queryConversationID} setLastMsgIdCallback={(value)=>{lastMsgId.current = value}} syncMessagesCallback={syncMessages}></MessagesDisplay>
-                    <CustTextarea conversationID={queryConversationID} isLoading={isLoading} callback={doSubmit} stopCallback={()=>{
+                    {/* <CustTextarea conversationID={queryConversationID} isLoading={isLoading} callback={doSubmit} stopCallback={()=>{
+                        loadingEnd()
+                        handleCancel()
+                        }} syncMessagesCallback={syncMessages}></CustTextarea>
+                    <SpeakButton callback={doSubmit}></SpeakButton> */}
+                </Stack>
+            </Stack>
+            <CustTextarea conversationID={queryConversationID} isLoading={isLoading} callback={doSubmit} stopCallback={()=>{
                         loadingEnd()
                         handleCancel()
                         }} syncMessagesCallback={syncMessages}></CustTextarea>
                     <SpeakButton callback={doSubmit}></SpeakButton>
-                </Stack>
-            </Stack>
             
             <RoleDisplay audioAndLip={audioAndLip} audioEndCallback={()=>{
                 playNextAudio()

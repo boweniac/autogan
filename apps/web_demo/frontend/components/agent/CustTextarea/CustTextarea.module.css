@@ -3,3 +3,34 @@
       /* display: none; */
     }
 }
+
+.classTextareaAvatarOn {
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+  z-index: 10;
+  padding-left: rem(320px);
+  padding-right: rem(500px);
+  padding-bottom: rem(50px);
+  /* margin-right: rem(400px); */
+  @media (max-width: $mantine-breakpoint-md) {
+    padding-left: rem(50px);
+  }
+  @media (max-width: $mantine-breakpoint-sm) {
+    padding-right: rem(50px);
+  }
+}
+
+.classTextareaAvatarOff {
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+  z-index: 10;
+  padding-left: rem(320px);
+  padding-right: rem(100px);
+  padding-bottom: rem(50px);
+  @media (max-width: $mantine-breakpoint-md) {
+    padding-right: rem(50px);
+    padding-left: rem(50px);
+  }
+}
