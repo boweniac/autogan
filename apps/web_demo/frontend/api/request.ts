@@ -183,14 +183,14 @@ export async function postRequestAPI(path: string, payload: any) {
             throw new Error(`Request failed with status code ${res.status} ${res.statusText}`);
         }
     } catch (e: any) {
-        resetLogOutState()
-        openLogInModal()
-        if (axios.isAxiosError(e)) {
-            notifications.show({
-                title: '服务错误',
-                message: e.message,
-                color: "red",
-            });
-        }
+        // resetLogOutState()
+        // openLogInModal()
+        // if (axios.isAxiosError(e)) {
+        //     notifications.show({
+        //         title: '服务错误',
+        //         message: e.message,
+        //         color: "red",
+        //     });
+        // }
     }
 }
