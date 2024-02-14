@@ -82,6 +82,10 @@ export async function streamAPI(path: string, payloadData: {[key: string]: strin
                 } else {
                     res.on("data", (chunk) => {
                         const data = JSON.parse(chunk)
+                        if (data.code === 300) {
+                            resetLogOutState()
+                            openLogInModal()
+                        }
                         notifications.show({
                             message: "请求错误：" + data.msg,
                             color: "red",
@@ -94,16 +98,12 @@ export async function streamAPI(path: string, payloadData: {[key: string]: strin
         req.write(payload);
         req.end();
     } catch (e: any) {
-        resetLogOutState()
-        openLogInModal()
         if (axios.isAxiosError(e)) {
-            console.error(e.response?.data);
+            notifications.show({
+                message: "请求错误：" + e,
+                color: "red",
+            });
         }
-        notifications.show({
-            message: "请求错误：" + e,
-            color: "red",
-        });
-        throw e;
     }
 };
 
@@ -121,7 +121,10 @@ export async function getRequestAPI(path: string) {
             headers: {
                 "Authorization": get().userToken,
             },
-            timeout: 60000
+            timeout: 60000,
+            validateStatus: function (status) {
+                return status < 500; // Resolve only if the status code is less than 500
+            }
         });
         if (res.status === 200) {
             if (res.data.code === 200) {
@@ -136,11 +139,19 @@ export async function getRequestAPI(path: string) {
                 });
             }
         } else {
-            throw new Error(`Request failed with status code ${res.status} ${res.statusText}`);
+            if (res.status === 400 && res.data.code === 300) {
+                resetLogOutState()
+                openLogInModal()
+                notifications.show({
+                    message: "请先完成登陆",
+                    color: "red",
+                });
+                return
+            } else {
+                throw new Error(`Request failed with status code ${res.status} ${res.statusText}`);
+            }
         }
     } catch (e: any) {
-        resetLogOutState()
-        openLogInModal()
         if (axios.isAxiosError(e)) {
             notifications.show({
                 title: '服务错误',
@@ -165,7 +176,10 @@ export async function postRequestAPI(path: string, payload: any) {
             headers: {
                 'Authorization': get().userToken
             },
-            timeout: 60000
+            timeout: 60000,
+            validateStatus: function (status) {
+                return status < 500; // Resolve only if the status code is less than 500
+            }
         });
         if (res.status === 200) {
             if (res.data.code === 200) {
@@ -180,17 +194,25 @@ export async function postRequestAPI(path: string, payload: any) {
             }
             
         } else {
-            throw new Error(`Request failed with status code ${res.status} ${res.statusText}`);
+            if (res.status === 400 && res.data.code === 300) {
+                resetLogOutState()
+                openLogInModal()
+                notifications.show({
+                    message: "请先完成登陆",
+                    color: "red",
+                });
+                return
+            } else {
+                throw new Error(`Request failed with status code ${res.status} ${res.statusText}`);
+            }
         }
     } catch (e: any) {
-        // resetLogOutState()
-        // openLogInModal()
-        // if (axios.isAxiosError(e)) {
-        //     notifications.show({
-        //         title: '服务错误',
-        //         message: e.message,
-        //         color: "red",
-        //     });
-        // }
+        if (axios.isAxiosError(e)) {
+            notifications.show({
+                title: '服务错误',
+                message: e.message,
+                color: "red",
+            });
+        }
     }
 }

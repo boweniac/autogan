@@ -36,10 +36,11 @@ export async function uploadFileStreamAPI(files: any[], apiType: string, baseId:
             body: formData,
         })
             .then(response => {
+                console.log(`response:`+JSON.stringify(response));
                 if (response.ok) {
                     return response.body;
                 } else {
-                    resetLogOutState()
+                    // resetLogOutState()
                     openLogInModal()
                     throw new Error('Network response was not ok.');
                 }
@@ -78,20 +79,19 @@ export async function uploadFileStreamAPI(files: any[], apiType: string, baseId:
             })
             .catch(error => {
                 console.error('There has been a problem with your fetch operation:', error);
-            });
+            })
+            .then(body => {
+                console.log(`response:`+JSON.stringify(body));
+              });
     });
     try {
         await Promise.all(uploaders);
     } catch (e: any) {
-        resetLogOutState()
-        openLogInModal()
         if (axios.isAxiosError(e)) {
-            console.error(e.response?.data);
+            notifications.show({
+                message: "请求错误：" + e,
+                color: "red",
+            });
         }
-        notifications.show({
-            message: "请求错误：" + e,
-            color: "red",
-        });
-        throw e;
     }
 };
