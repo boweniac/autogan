@@ -45,6 +45,21 @@ export default function Hello() {
     const [helloStart, setHelloStart] = useState<boolean>(false);
     const [introductionStart, setIntroductionStart] = useState<boolean>(false);
     const [avatarName, setAvatarName] = useState<string>(agentAvatarMapping["CustomerManager"]);
+
+    const [viewportHeight, setViewportHeight] = useState(0); // 初始值设置为0或合理的默认值
+
+  useEffect(() => {
+    // 这确保了window.innerHeight只在客户端获取
+    setViewportHeight(window.innerHeight);
+
+    const handleResize = () => {
+      setViewportHeight(window.innerHeight);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
     // const [currentMorphTargetHolder, setSpeakText] = useState<string>("");
     // new Audio()
     // const currentAbortController = new AbortController();
@@ -154,14 +169,14 @@ export default function Hello() {
         <>
             {
                 helloStart ? <Stack
-                h={`calc(100vh)`}
+                h={`calc(${viewportHeight}px)`}
                 w="100%"
                 className={classes.agentFrame}
             >
-                <HeaderMegaMenu isLoading={false} selectAvatarCallback={(v)=>{}} muteCallback={(v)=>{}}></HeaderMegaMenu>
+                <HeaderMegaMenu isLoading={isPlaying.current} selectAvatarCallback={(v)=>{}} muteCallback={(v)=>{}}></HeaderMegaMenu>
                 <Stack
                         w="100%"
-                        h={`calc(100vh - ${rem(100)})`}
+                        h={`calc(${viewportHeight}px - ${rem(50)})`}
                         justify="space-between"
                         gap={0}
                         className={classes.conversationFrame}

@@ -98,13 +98,17 @@ export default function AgentFrame() {
 
       const getAudio = (audioLink: AudioAndLip) => {
         if (audioLink.text) {
+            loadingStart()
             audioAndLipAPI(audioLink.text, avatarConfig[agentAvatarMapping[audioLink.agentName || ""]].voice || "", 1).then((res)=>{
+                loadingEnd()
                 isGeting.current = false
                 getNextAudio()
                 setAudioStack(prevStack => [...prevStack, {...audioLink, ...res, avatarName: agentAvatarMapping[audioLink?.agentName || ""]}]);
                 if (!isPlaying.current) {
                     playNextAudio();
                 }
+            }).catch(()=>{
+                loadingEnd()
             })
         }
       }

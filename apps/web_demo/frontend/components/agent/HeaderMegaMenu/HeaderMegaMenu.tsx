@@ -90,7 +90,7 @@ export function HeaderMegaMenu(props: HeaderMegaMenuProps) {
                         <Burger opened={drawerOpened} onClick={toggleDrawer} hiddenFrom="md" />
                     </Group>
 
-                    <Group>
+                    {!props.isLoading && <Group>
                         <Switch size="lg" checked={muteState} onChange={(v)=>{updateMuteStateState(v.currentTarget.checked)}} style={{marginRight: rem(32)}} color="dark.4" onLabel={<IconVolume
                             style={{ width: rem(16), height: rem(16) }}
                             stroke={2.5}
@@ -99,7 +99,7 @@ export function HeaderMegaMenu(props: HeaderMegaMenuProps) {
                                 stroke={2.5}
                             />} />
                         <AvatarMenu isLoading={props.isLoading} ></AvatarMenu>
-                    </Group>
+                    </Group>}
                 </Group>
             </header>
         </Box>

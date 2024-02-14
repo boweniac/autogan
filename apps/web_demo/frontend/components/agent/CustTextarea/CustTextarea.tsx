@@ -3,7 +3,7 @@ import { addAgentConversationMessageBlockState, addAgentMessageState, addAgentCo
 import { ActionIcon, Box, Button, Center, Container, FileButton, Flex, Loader, LoadingOverlay, MantineStyleProp, Modal, Popover, Progress, rem, Space, Text, Textarea } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import RecordButton from "./AudioToText/AudioToText";
 import { IconFile, IconMicrophone, IconPlayerStop } from "@tabler/icons-react";
 import { uploadFileStreamAPI } from "@/api/file/upload_file_stream";
@@ -31,6 +31,7 @@ export default function CustTextarea(props: CustTextareaProps) {
 
     const avatarState = localStore((state: LocalState) => state.avatarState);
     const classTextarea = avatarState ? classes.classTextareaAvatarOn : classes.classTextareaAvatarOff;
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
         event.stopPropagation();
@@ -43,6 +44,9 @@ export default function CustTextarea(props: CustTextareaProps) {
               const audio = new Audio()
               updateAudioState(audio)
               setValue("")
+              if (textareaRef.current) {
+                textareaRef.current.blur();
+              }
               props.callback(value);
             }
           }
@@ -65,6 +69,7 @@ export default function CustTextarea(props: CustTextareaProps) {
         >
           {/* <RecordButton></RecordButton> */}
           <Textarea
+              ref={textareaRef}
               maw="100%"
               radius="md"
               placeholder="按住 shift 可以换行"

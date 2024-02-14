@@ -41,7 +41,7 @@ export default function RoleDisplay(props: RoleDisplayProps) {
             style={{
                 position: 'fixed',
                 zIndex: -1,
-                top: `calc(${-0.80*viewportHeight}px)`
+                top: `calc(${-0.70*viewportHeight}px)`
                 // zIndex: 1,
                 // 其他样式以调整内容位置和外观
             }}

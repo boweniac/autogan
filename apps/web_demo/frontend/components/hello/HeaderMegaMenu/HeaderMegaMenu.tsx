@@ -53,9 +53,9 @@ export function HeaderMegaMenu(props: HeaderMegaMenuProps) {
     return (
         <Box>
             <header className={classes.header}>
-                <Group justify="flex-end" h="100%">
+                {!props.isLoading && <Group justify="flex-end" h="100%">
                     <AvatarMenu isLoading={props.isLoading} ></AvatarMenu>
-                </Group>
+                </Group>}
             </header>
         </Box>
     );

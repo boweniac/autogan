@@ -10,6 +10,8 @@
 }
 
 .title {
+    position: 'fixed';
+    z-index: -2;
     margin-top: 50;
     @media (max-width: $mantine-breakpoint-sm) {
         margin-top: 25;
