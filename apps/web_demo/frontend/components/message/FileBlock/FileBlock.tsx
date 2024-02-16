@@ -1,4 +1,4 @@
-import { Anchor, Progress, rem } from "@mantine/core";
+import { Anchor, Progress, rem, Text } from "@mantine/core";
 import { IconFileTypeDoc, IconFileTypeDocx, IconFileTypePdf, IconFileUnknown } from "@tabler/icons-react";
 import { getFileExtension } from "./FileBlockUtil";
 
@@ -11,7 +11,7 @@ type FileBlockProps = {
   export default function FileBlock(props: FileBlockProps) {
     const file_type = getFileExtension(props.content_tag)
     return (
-      <Anchor href={`https://aibowen-base.boweniac.top/${props.conversationID}/${props.content_tag}`} target="_blank" underline="always">
+      <Anchor href={`https://aibowen-base.boweniac.top/${props.conversationID}/${props.content_tag}`} c="#ffffff" target="_blank" underline="always">
         {file_type == "pdf" || file_type == "PDF" ? (
             <IconFileTypePdf
                 style={{ width: rem(80), height: rem(80) }}
@@ -34,6 +34,7 @@ type FileBlockProps = {
                 stroke={1.5}
           />
         )}
+        <Text c="#ffffff">{props.content_tag}</Text>
       </Anchor>
       // <div>
       //   {file_type == "pdf" || file_type == "PDF" ? (
