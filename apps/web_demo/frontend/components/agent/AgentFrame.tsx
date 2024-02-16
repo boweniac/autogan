@@ -37,6 +37,7 @@ export default function AgentFrame() {
 
     const isGeting = useRef(false);
     const isPlaying = useRef(false);
+    const isGetingAudio = useRef(false);
     // const avatarName = useRef(agentAvatarMapping["CustomerManager"]);
     const avatarVoice = useRef("");
     const lastMsgId = useRef("");
@@ -98,9 +99,9 @@ export default function AgentFrame() {
 
       const getAudio = (audioLink: AudioAndLip) => {
         if (audioLink.text) {
-            loadingStart()
+            isGetingAudio.current = true
             audioAndLipAPI(audioLink.text, avatarConfig[agentAvatarMapping[audioLink.agentName || ""]].voice || "", 1).then((res)=>{
-                loadingEnd()
+                isGetingAudio.current = false
                 isGeting.current = false
                 getNextAudio()
                 setAudioStack(prevStack => [...prevStack, {...audioLink, ...res, avatarName: agentAvatarMapping[audioLink?.agentName || ""]}]);
@@ -108,7 +109,7 @@ export default function AgentFrame() {
                     playNextAudio();
                 }
             }).catch(()=>{
-                loadingEnd()
+                isGetingAudio.current = false
             })
         }
       }
@@ -133,6 +134,13 @@ export default function AgentFrame() {
       }
 
       const doSubmit = async (value: string) => {
+        loadingEnd()
+        handleCancel()
+        setTextStack([])
+        setAudioStack([])
+        if (!value.startsWith("@")) {
+            value = "@CustomerManager " + value
+        }
         // 并非新对话
         if (queryConversationID == undefined) {
             addAgentConversation(value, router)
@@ -177,12 +185,8 @@ export default function AgentFrame() {
     }, []);
 
     useEffect(() => {
-        setTextStack(prevTextStack => {
-            return []
-        })
-        setAudioStack(prevTextStack => {
-            return []
-        })
+        setTextStack([])
+        setAudioStack([])
     }, [muteState]);
 
     useEffect(() => {
@@ -218,7 +222,7 @@ export default function AgentFrame() {
                 w="100%"
                 gap={0}
             >
-                <HeaderMegaMenu isLoading={isPlaying.current || isLoading} conversationID={queryConversationID} selectAvatarCallback={(v)=>{}} muteCallback={(v)=>{}}></HeaderMegaMenu>
+                <HeaderMegaMenu isLoading={isPlaying.current || isGetingAudio.current || isLoading} conversationID={queryConversationID} selectAvatarCallback={(v)=>{}} muteCallback={(v)=>{}}></HeaderMegaMenu>
                 <Stack
                     h={`calc(${viewportHeight}px - ${rem(50)})`}
                     justify="flex-end"
@@ -233,9 +237,11 @@ export default function AgentFrame() {
                     <SpeakButton callback={doSubmit}></SpeakButton> */}
                 </Stack>
             </Stack>
-            <CustTextarea conversationID={queryConversationID} isLoading={isLoading} callback={doSubmit} stopCallback={()=>{
+            <CustTextarea conversationID={queryConversationID} isLoading={isPlaying.current || isGetingAudio.current || isLoading} callback={doSubmit} stopCallback={()=>{
                         loadingEnd()
                         handleCancel()
+                        setTextStack([])
+                        setAudioStack([])
                         }} syncMessagesCallback={syncMessages}></CustTextarea>
                     <SpeakButton callback={doSubmit}></SpeakButton>
             

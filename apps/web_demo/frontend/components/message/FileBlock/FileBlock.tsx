@@ -36,29 +36,5 @@ type FileBlockProps = {
         )}
         <Text c="#ffffff">{props.content_tag}</Text>
       </Anchor>
-      // <div>
-      //   {file_type == "pdf" || file_type == "PDF" ? (
-      //       <IconFileTypePdf
-      //           style={{ width: rem(80), height: rem(80) }}
-      //           stroke={1.5}
-      //           // color="var(--mantine-color-blue-filled)"
-      //     />
-      //   ) : file_type == "docx" ? (
-      //       <IconFileTypeDocx
-      //           style={{ width: rem(80), height: rem(80) }}
-      //           stroke={1.5}
-      //     />
-      //   ) : file_type == "doc" ? (
-      //       <IconFileTypeDoc
-      //           style={{ width: rem(80), height: rem(80) }}
-      //           stroke={1.5}
-      //     />
-      //   ) : (
-      //       <IconFileUnknown
-      //           style={{ width: rem(80), height: rem(80) }}
-      //           stroke={1.5}
-      //     />
-      //   )}
-      // </div>
     );
   }
