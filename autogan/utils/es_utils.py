@@ -3,6 +3,7 @@ from asyncio import Queue
 from typing import Dict, Optional
 
 from elasticsearch import Elasticsearch
+from elasticsearch_dsl import Search, Q
 
 from autogan.utils.vector_utils import VectorTool
 
@@ -12,27 +13,24 @@ def _chat_file_index(dims: int) -> Dict:
         "mappings": {
             "properties": {
                 "user_id": {
-                    "type": "keyword"
+                    "type": "text"
                 },
                 "conversation_id": {
-                    "type": "keyword"
+                    "type": "text"
                 },
                 "file_name": {
-                    "type": "keyword"
+                    "type": "text"
                 },
                 "slice": {
-                    "type": "keyword"
+                    "type": "integer"
                 },
                 "vector": {
                     "type": "dense_vector",
-                    "dims": dims,
-                    "index": True,
-                    "similarity": "cosine",
+                    "dims": dims
                 },
                 "text": {
-                    "type": "text",
-                    "analyzer": "ik_max_word"
-                },
+                    "type": "text"
+                }
             }
         }
     }
@@ -108,11 +106,11 @@ class ESSearch:
             dims: Optional[int] = None
     ):
         self.es = Elasticsearch(f"http://{host}:{port}")
-        self.dims = dims if dims else 512
+        self.dims = dims if dims else 768
         self.create_index("chat_file_index", _chat_file_index(self.dims))
         self.create_index("user_file_index", _user_file_index(self.dims))
         self.create_index("web_detail_index", _web_detail_index(self.dims))
-        self.VectorTool = VectorTool(dims=self.dims)
+        self.VectorTool = VectorTool(dims=512)
 
     def create_index(self, index_name: str, body: Dict):
         if not self.es.indices.exists(index=index_name):
@@ -166,6 +164,7 @@ class ESSearch:
 
     def get_chat_file_pack(self, conversation_id: int, file_name: str, pack_size: int):
         query = {
+            "size": 100,
             "query": {
                 "bool": {
                     "must": [
@@ -179,24 +178,24 @@ class ESSearch:
             ]
         }
         response = self.es.search(index="chat_file_index", body=query)
-        print(f"response: {response}")
         values = []
         i = 1
         text = ""
         for value in response["hits"]["hits"]:
             text += value["_source"]["text"]
-            values.append(text)
             if i == pack_size:
+                values.append(text)
                 i = 1
                 text = ""
             else:
                 i += 1
+        values.append(text)
         return values
 
     def get_chat_file_hybrid(self, conversation_id: int, file_name: str, keyword: str):
         vectors = self.VectorTool.text_to_vectors(keyword)
         query = {
-            "size": 10,
+            "size": 5,
             "query": {
                 "bool": {
                     "must": [
@@ -219,39 +218,64 @@ class ESSearch:
         response = self.es.search(index="chat_file_index", body=query)
         values = []
         for value in response["hits"]["hits"]:
-            text = self.get_chat_file_slice(conversation_id, file_name, value["_source"]["slice"], value["_source"]["text"])
+            print(f'value["_source"]["text"]: {value["_source"]["text"]}')
+            print(f'value["_source"]["slice"]: {value["_source"]["slice"]}')
+            text = self.get_chat_file_slice(conversation_id, file_name, value["_source"]["slice"], 5)
+            print(f"text: {text}")
             values.append(text)
         return values
 
-    def get_chat_file_slice(self, conversation_id: int, file_name: str, slice: int, text: str):
-        slice_text = ""
-        if slice > 0:
-            query = {
-                "query": {
-                    "bool": {
-                        "must": [
-                            {"term": {"conversation_id": conversation_id}},
-                            {"term": {"file_name": file_name}},
-                            {"term": {"slice": slice-1}}
-                        ]
-                    }
-                }
-            }
-            response = self.es.search(index="chat_file_index", body=query)
-            slice_text = response["hits"]["hits"][0]["_source"]["text"]
-        slice_text += text
+    def get_chat_file_slice(self, conversation_id: int, file_name: str, slice: int, increment_size: int):
+        min_slice = 0
+        if slice > increment_size:
+            min_slice = slice - increment_size
+        max_slice = slice + increment_size
         query = {
             "query": {
                 "bool": {
                     "must": [
-                        {"term": {"conversation_id": conversation_id}},
-                        {"term": {"file_name": file_name}},
-                        {"term": {"slice": slice - 1}}
+                        {"match": {"conversation_id": conversation_id}},
+                        {"match": {"file_name": file_name}},
+                        {"range": {"slice": {"gte": min_slice, "lte": max_slice}}}
                     ]
                 }
             }
         }
         response = self.es.search(index="chat_file_index", body=query)
-        if response["hits"]["hits"]:
-            slice_text = response["hits"]["hits"][0]["_source"]["text"]
+        slice_text = ""
+        for value in response["hits"]["hits"]:
+            slice_text += value["_source"]["text"]
         return slice_text
+
+    # def get_chat_file_slice(self, conversation_id: int, file_name: str, slice: int, text: str):
+    #     slice_text = ""
+    #     if slice > 0:
+    #         query = {
+    #             "query": {
+    #                 "bool": {
+    #                     "must": [
+    #                         {"match": {"conversation_id": conversation_id}},
+    #                         {"match": {"file_name": file_name}},
+    #                         {"match": {"slice": slice-1}}
+    #                     ]
+    #                 }
+    #             }
+    #         }
+    #         response = self.es.search(index="chat_file_index", body=query)
+    #         slice_text = response["hits"]["hits"][0]["_source"]["text"]
+    #     slice_text += text
+    #     query = {
+    #         "query": {
+    #             "bool": {
+    #                 "must": [
+    #                     {"match": {"conversation_id": conversation_id}},
+    #                     {"match": {"file_name": file_name}},
+    #                     {"match": {"slice": slice - 1}}
+    #                 ]
+    #             }
+    #         }
+    #     }
+    #     response = self.es.search(index="chat_file_index", body=query)
+    #     if response["hits"]["hits"]:
+    #         slice_text = response["hits"]["hits"][0]["_source"]["text"]
+    #     return slice_text

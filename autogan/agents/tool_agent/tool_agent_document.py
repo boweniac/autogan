@@ -59,14 +59,14 @@ class ToolAgentDocument(UniversalAgent):
         :param work_dir: The relative path of the document, default is extensions
         """
         duty = duty if duty else {
-            "EN": """I can view files uploaded by users and tell you what I see in the content. However, I need to know the exact file name (including the extension) and the specific question you have.""",
-            "CN": """我可以查看用户上传的文件，并将我看到的内容告诉你。但我需要知道准确的文件名称（包括扩展名）还有你要了解的问题"""
+            "EN": """I can view files uploaded by users and tell you what I see in the content. However, I need to know the exact file name (including the extension) and the specific question you have (For example: legal review, the main content of the document, the process of car insurance reporting, etc).""",
+            "CN": """我可以查看用户上传的文件，并将我看到的内容告诉你。但我需要知道准确的文件名称（包括扩展名）还有你要了解的问题（例如：进行法律审核、文件的主要内容、车险报案的流程等）"""
         }
 
         work_flow = work_flow if work_flow else {
             "EN": """There are two tools available to help you review user-uploaded files. Please choose one based on the situation:
 
-1. summary: This tool provides answers by analyzing the entire content of the file, but it consumes a lot of resources. When using it, please output in JSON format {"file": "filename (including extension)", "question": "the question you want to know"}, and add the summary symbol, for example:
+1. summary: This tool provides answers by analyzing the entire content of the file, For example: contract review, extract the main content of the document, etc. but it consumes a lot of resources. When using it, please output in JSON format {"file": "filename (including extension)", "question": "the question you want to know"}, and add the summary symbol, for example:
 ```summary
 {"file": "test.pdf", "question": "Please review this contract"}
 ```
@@ -78,8 +78,8 @@ When using it, please enclose the English question that Wolfram can understand i
 ```
 
 Note: When you decide to use a tool, please do not @ anyone.""",
-    "CN": """这里有两个工具，可以帮你查看用户上传的文件，请根据实际情况进行选择:
-1. summary:这个工具通过分析完整的文件内容给出答案，但是会消耗很多资源。使用时请输出json格式{"file": "文件名（包括扩展名）", "question": "需要了解的问题"}，并加上 summary 符号，例如:
+            "CN": """这里有两个工具，可以帮你查看用户上传的文件，请根据实际情况进行选择:
+1. summary:这个工具通过分析完整的文件内容给出答案，例如：合同审核，提炼文件主要内容等。但是会消耗很多资源。使用时请输出json格式{"file": "文件名（包括扩展名）", "question": "需要了解的问题"}，并加上 summary 符号，例如:
 ```summary
 {"file": "test.pdf", "question": "审核下这份合同"}
 ```
@@ -113,21 +113,18 @@ Note: When you decide to use a tool, please do not @ anyone.""",
                       tokens: Optional[int] = None) -> tuple[str, int]:
         param = text_to_json(code)
         if param and lang == "summary" and code:
-            texts = self.switch.es.get_chat_file_pack(conversation_id, param["file"], 4)
+            texts = self.switch.es.get_chat_file_pack(conversation_id, param["file"], 40)
         elif param and lang == "search" and code:
             texts = self.switch.es.get_chat_file_hybrid(conversation_id, param["file"], param["question"])
         else:
             return """Search failure""", 18
-
-        print(f"texts: {texts}")
-        print(f"focus: {param['question']}")
         return self._summary_function(texts, param["question"])
 
     def _summary_function(self, texts: list, focus: str) -> tuple[str, int]:
         text, token = compressed_texts(self.switch.default_language, texts, self.get_agent_config.summary_model_config,
-                                focus,
-                                self.get_agent_config.summary_model_config.request_config.max_messages_tokens)
+                                       focus,
+                                       self.get_agent_config.summary_model_config.request_config.max_messages_tokens)
         if text and token:
             return text, token
         else:
-            return 'File opening failure', 3
+            return 'No relevant content found', 3

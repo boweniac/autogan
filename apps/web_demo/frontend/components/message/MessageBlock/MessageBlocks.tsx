@@ -7,6 +7,7 @@ import MarkdownBlock from "../MarkdownBlock/MarkdownBlock";
 
 
 type UserMessageBlockProps = {
+    conversationID?: string | undefined
     mainAgent: string;
     name: string | undefined;
     message_blocks: MessageBlock[];
@@ -30,7 +31,7 @@ export default function MessageBlocks(props: UserMessageBlockProps) {
                     {
                         props.message_blocks.map((mb) => 
                             {
-                                return mb.contentType == "file" ? <FileBlock content_tag={mb.contentTag}></FileBlock> : <MarkdownBlock key={mb.localID} content_type={mb.contentType} content_tag={mb.contentTag} content={mb.content!}></MarkdownBlock>
+                                return mb.contentType == "file" ? <FileBlock conversationID={props.conversationID} content_tag={mb.contentTag}></FileBlock> : <MarkdownBlock key={mb.localID} content_type={mb.contentType} content_tag={mb.contentTag} content={mb.content!}></MarkdownBlock>
                             }
                             // <MarkdownBlock key={mb.localID} content_type={mb.content_type} content_tag={mb.content_tag} content={mb.content!}></MarkdownBlock>
                         )

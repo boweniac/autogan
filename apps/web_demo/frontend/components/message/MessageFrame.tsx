@@ -8,6 +8,7 @@ import { LocalState, localStore } from "@/stores/LocalStore";
 type FlexDirection = 'row' | 'row-reverse';
 
 type MessageBlockProps = {
+    conversationID?: string | undefined
     mainAgent: string;
     message: Message;
 }
@@ -33,7 +34,7 @@ export default function MessageFrame(props: MessageBlockProps) {
             className={classes.messageFrame}
         >
             <AvatarBlock avatarName={agentAvatarMapping[name]}></AvatarBlock>
-            <MessageBlocks mainAgent={props.mainAgent} name={props.message.agent_name} message_blocks={props.message.message_blocks}></MessageBlocks>
+            <MessageBlocks conversationID={props.conversationID} mainAgent={props.mainAgent} name={props.message.agent_name} message_blocks={props.message.message_blocks}></MessageBlocks>
         </Flex>
     )
 }

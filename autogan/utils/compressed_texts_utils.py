@@ -11,19 +11,11 @@ def compressed_texts(lang: str, texts: list, summary_model_config: LLMConfig, fo
     total_text = ""
     values = []
     for st in texts:
-        print(f"st: {st}")
         content, tokens = generate_text_focus(lang, st, focus, summary_model_config)
-        print(f"content1: {content}")
-        print(f"contentType: {type(content)}")
-        print(f"tokens1: {tokens}")
-        print(f"tokensType: {type(tokens)}")
-        if content:
+        if content and content != "None":
             values.append((content, tokens))
             total_tokens += tokens
             total_text += content
-    print(f"total_text: {total_text}")
-    print(f"total_tokens: {total_tokens}")
-    print(f"safe_size: {safe_size}")
     while total_tokens > safe_size:
         total_tokens = 0
         total_text = ""
@@ -35,14 +27,14 @@ def compressed_texts(lang: str, texts: list, summary_model_config: LLMConfig, fo
             x += v[0]
             if t > safe_size:
                 content, tokens = generate_text_focus(lang, x, focus, summary_model_config)
-                if content:
+                if content and content != "None":
                     data.append((content, tokens))
                     total_tokens += tokens
                     total_text += content
                 t = 0
                 x = ""
         content, tokens = generate_text_focus(lang, x, focus, summary_model_config)
-        if content:
+        if content and content != "None":
             data.append((content, tokens))
             total_tokens += tokens
             total_text += content
@@ -56,16 +48,16 @@ def generate_text_focus(lang: str, text: str, focus: str, summary_model_config: 
     info = environment_info()
     if lang == "CN":
         system_prompt = """# 角色
-你是一个善于实时发现真相的特工
+你是一个专业的全能型秘书
 
 ## 技能
-能够从用户发送的信息中找到有助于推断问题答案的内容。
+能够根据用户提出的要求和给定的文档，完成总结、审核、答疑等任务。
 
 ## 约束条件
 - 请注意，如果信息的内容没有有价值的信息，请省略其他礼貌用语，只输出一个单词:None。
 - 请帮我过滤掉信息中涉及政治、地缘政治、暴力、性等敏感内容。"""
         chat_messages = [{'role': 'system', 'content': system_prompt}, {'role': 'user',
-                                                                        'content': f'需要推断的问题是:{focus}\n\n当前时间是:\n{info}\n\n信息内容是:\n\n{text}'}]
+                                                                        'content': f'客户的要求是:{focus}\n\n当前时间是:\n{info}\n\n文档内容是:\n\n{text}'}]
     else:
         system_prompt = """# role
 You are an agent who is good at discovering the truth in real-time

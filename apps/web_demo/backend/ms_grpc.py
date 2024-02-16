@@ -259,12 +259,14 @@ class Agent(agent_pb2_grpc.AgentServicer):
             user_id = request.user_id
             base_id = request.base_id
             conversation_id = request.conversation_id
-            _, ext = os.path.splitext(request.file_name)
-            file_name = f"{snowflake_id.next_id()}.{ext}"
+            # _, ext = os.path.splitext(request.file_name)
+            # file_name = f"{snowflake_id.next_id()}.{ext}"
+            file_name = request.file_name
             file = request.file
+
             with open(f"extensions/{file_name}", "wb") as f:
                 f.write(file)
-            bucket.put_object_from_file(file_name, f"extensions/{file_name}")
+            bucket.put_object_from_file(f"{conversation_id}/{file_name}", f"extensions/{file_name}")
             ft = File()
             text = ft.read(file_name)
             if not user_id:
@@ -285,7 +287,14 @@ class Agent(agent_pb2_grpc.AgentServicer):
                     "content": f"Upload file: {file_name}",
                     "tokens": 0
                 }
+                par_task_id, task_id = storage.convert_main_or_sub_task_id(conversation_id, "CustomerManager")
+                if task_id is None:
+                    task_id = snowflake_id.next_id()
+                storage.add_task(conversation_id, conversation_id, "Customer", "HUMAN", task_id, "CustomerManager", "AGENT", f"Upload file: {file_name}")
                 storage.add_message(conversation_id, msg)
+                storage.add_compressed_message(task_id,
+                                             {'role': 'user',
+                                              'name': "Customer", 'content': f"Upload file: {file_name}", 'tokens': 0})
                 test_service.add_file_message(conversation_id, "Customer", file_name)
                 data = {
                     "msg_id": msg_id,

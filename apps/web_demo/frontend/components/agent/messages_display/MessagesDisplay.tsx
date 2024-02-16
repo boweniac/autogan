@@ -63,7 +63,7 @@ export default function MessagesDisplay(props: MessagesDisplayProps) {
          className={classScrollArea} 
          type="never" viewportRef={viewport}>
             {agentConversation?.messages?.map((message) => (
-                <MessageFrame mainAgent="Customer" key={message.localID} message={message} />
+                <MessageFrame conversationID={props.conversationID} mainAgent="Customer" key={message.localID} message={message} />
             ))}
         </ScrollArea>
     );

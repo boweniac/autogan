@@ -4,13 +4,14 @@ import { getFileExtension } from "./FileBlockUtil";
 
 
 type FileBlockProps = {
+    conversationID?: string | undefined
     content_tag: string | undefined;
   }
   
   export default function FileBlock(props: FileBlockProps) {
     const file_type = getFileExtension(props.content_tag)
     return (
-      <Anchor href={`https://aibowen-base.boweniac.top/${props.content_tag}`} target="_blank" underline="always">
+      <Anchor href={`https://aibowen-base.boweniac.top/${props.conversationID}/${props.content_tag}`} target="_blank" underline="always">
         {file_type == "pdf" || file_type == "PDF" ? (
             <IconFileTypePdf
                 style={{ width: rem(80), height: rem(80) }}
