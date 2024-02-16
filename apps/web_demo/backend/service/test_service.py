@@ -1,5 +1,7 @@
 from typing import Optional
 
+from oss2 import Bucket
+
 import autogan
 
 from apps.web_demo.backend.service.service import UniversalService
@@ -14,7 +16,8 @@ class TestService(UniversalService):
             super_rich: Optional[str] = None,
             stream_mode: Optional[bool] = None,
             storage: Optional[StorageProtocol] = None,
-            es: Optional[ESSearch] = None
+            es: Optional[ESSearch] = None,
+            bucket: Optional[Bucket] = None
     ):
         llm_config_dict = autogan.dict_from_json(default_agent_config)
         human = autogan.HumanAgent("Customer", "请帮助我完成业务", autogan.InputModel.API)
@@ -37,8 +40,9 @@ class TestService(UniversalService):
 Your code
 ```""")
         test_staff = autogan.ToolAgentCodeExecution("Tester")
+        painter_exp = autogan.ToolAgentPainter(bucket)
 
-        org_structure = [human, cust_manager, search_exp, secretary, file_exp, [coder, test_staff]]
+        org_structure = [human, cust_manager, search_exp, secretary, file_exp, painter_exp, [coder, test_staff]]
 
         super().__init__(
             llm_config_dict,

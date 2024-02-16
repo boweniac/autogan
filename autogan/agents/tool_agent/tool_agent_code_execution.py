@@ -60,7 +60,7 @@ Your python code
                       tokens: Optional[int] = None) -> tuple[str, int]:
         print(f"code: {code}")
         try:
-            execution_result, tokens = self._code_execution.code_execution_reply(code)
+            execution_result, tokens, output = self._code_execution.code_execution_reply(code)
             if execution_result:
                 return execution_result, tokens
             else:

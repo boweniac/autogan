@@ -41,7 +41,7 @@ class CodeExecution:
         self._win32 = sys.platform == "win32"
         self._path_separator = self._win32 and "\\" or "/"
 
-    def code_execution_reply(self, text: str) -> Tuple[str, int]:
+    def code_execution_reply(self, text: str) -> Tuple[str, int, Optional[str]]:
         """Execute code and return result
         执行代码并返回结果
 
@@ -54,7 +54,7 @@ class CodeExecution:
             --tokens: Tokens of the execution result
                 执行结果的 tokens
         """
-
+        output_execute = ""
         # Determine whether it is running in docker
         if os.path.exists("/.dockerenv"):
             lang, code = self.extract_code(text)
@@ -62,7 +62,8 @@ class CodeExecution:
                 exitcode = 1
                 output = "Submit your Python code to me and I can tell you the execution result. But I can't write code or talk to you. So please just submit the completed code to me encapsulated with ``` symbols. And you should always use the 'print' function for the output"
             else:
-                exitcode, output = self.execute(code, lang=lang)
+                exitcode, output_execute = self.execute(code, lang=lang)
+                output = output_execute
         else:
             exitcode = 1
             output = "executing code needs to run in a docker environment"
@@ -79,7 +80,7 @@ class CodeExecution:
             execution_result = f"exitcode: {exitcode} ({result})\nCode output: \n{output}"
         tokens = count_text_tokens(execution_result)
 
-        return execution_result, tokens
+        return execution_result, tokens, output_execute
 
     def execute(
             self,

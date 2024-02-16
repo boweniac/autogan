@@ -52,7 +52,7 @@ storage = DBStorage()
 snowflake_id = SnowflakeIdGenerator(datacenter_id=1, worker_id=1)
 es_config_dict = autogan.dict_from_json("ES_SEARCH")
 es = ESSearch(es_config_dict["host"], es_config_dict["port"], es_config_dict["dims"])
-test_service = TestService("LLM_CONFIG", "off", True, storage, es)
+test_service = TestService("LLM_CONFIG", "off", True, storage, es, bucket)
 consul_config_dict = autogan.dict_from_json("CONSUL_CONFIG")
 service_config_dict = autogan.dict_from_json("SERVICE_CONFIG")
 

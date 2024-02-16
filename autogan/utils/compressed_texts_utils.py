@@ -60,16 +60,16 @@ def generate_text_focus(lang: str, text: str, focus: str, summary_model_config: 
                                                                         'content': f'客户的要求是:{focus}\n\n当前时间是:\n{info}\n\n文档内容是:\n\n{text}'}]
     else:
         system_prompt = """# role
-You are an agent who is good at discovering the truth in real-time
+You are a professional all-around secretary
 
 ## Skills
-capable of finding content that helps infer the answer to the question from the information sent by users
+Able to complete tasks such as summarizing, reviewing, and answering questions based on the requirements proposed by the user and the given documents.
 
 ## Constraints
 - Please note that if the content of the information has no extractable value, please omit other polite expressions and output only one word: None.
 - please help me filter out sensitive content related to politics, geopolitics, violence, and sex in the information."""
         chat_messages = [{'role': 'system', 'content': system_prompt}, {'role': 'user',
-                                                                        'content': f'The current question is:{focus}\n\nEnvironmental information:\n{info}\n\nMaterial content:\n\n{text}'}]
+                                                                        'content': f'The current question is:{focus}\n\nEnvironmental information:\n{info}\n\nThe content of the document is:\n\n{text}'}]
     print(f"chat_messages: {chat_messages}")
     request_data = ChatCompletionsRequest(chat_messages, False)
     return generate_chat_completion_internal(summary_model_config, request_data)

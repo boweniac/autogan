@@ -5,6 +5,7 @@ from .tool_agent.tool_agent_file import ToolAgentFile
 from .tool_agent.tool_agent_document import ToolAgentDocument
 from .tool_agent.tool_agent_mail import ToolAgentMail
 from .tool_agent.tool_agent_search import ToolAgentSearch
+from .tool_agent.tool_agent_painter import ToolAgentPainter
 
 __all__ = [
     "HumanAgent",
@@ -15,4 +16,5 @@ __all__ = [
     "ToolAgentMail",
     "ToolAgentSearch",
     "InputModel",
+    "ToolAgentPainter",
 ]
