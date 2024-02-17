@@ -1,4 +1,5 @@
 import json
+import os
 from asyncio import Queue
 from typing import Dict, Optional
 
@@ -120,21 +121,39 @@ class ESSearch:
         self.es.index(index=index_name, document=doc)
 
     def add_chat_file(self, user_id: int, conversation_id: int, file_name: str, file: str, response: Optional[Queue] = None):
-        values = self.VectorTool.text_to_vectors(file, response)
-        l = len(values)
-        for i, value in enumerate(values):
+        _, ext = os.path.splitext(file_name)
+        if ext == '.xlsx':
+            value = {
+                "text": file,
+                "user_id": user_id,
+                "conversation_id": conversation_id,
+                "file_name": file_name,
+                "slice": 0
+            }
             data = {
                 "step": "add_chat_file",
-                "index": i + 1,
-                "length": l,
+                "index": 1,
+                "length": 1,
             }
             text = f'data: {json.dumps(data, ensure_ascii=False)}\n\n'
             response.put(text)
-            value["user_id"] = user_id
-            value["conversation_id"] = conversation_id
-            value["file_name"] = file_name
-            value["slice"] = i
             self.es.index(index="chat_file_index", document=value)
+        else:
+            values = self.VectorTool.text_to_vectors(file, response)
+            l = len(values)
+            for i, value in enumerate(values):
+                data = {
+                    "step": "add_chat_file",
+                    "index": i + 1,
+                    "length": l,
+                }
+                text = f'data: {json.dumps(data, ensure_ascii=False)}\n\n'
+                response.put(text)
+                value["user_id"] = user_id
+                value["conversation_id"] = conversation_id
+                value["file_name"] = file_name
+                value["slice"] = i
+                self.es.index(index="chat_file_index", document=value)
 
     def add_user_file(self, user_id: int, base_id: int, file_name: str, file: str, response: Optional[Queue] = None):
         values = self.VectorTool.text_to_vectors(file, response)

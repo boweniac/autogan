@@ -54,6 +54,7 @@ def generate_text_focus(lang: str, text: str, focus: str, summary_model_config: 
 能够根据用户提出的要求和给定的文档，完成总结、审核、答疑等任务。
 
 ## 约束条件
+- 在输出结果时，如涉及到数值或法律条款，请将相关原始数据一并输出。
 - 请注意，如果信息的内容没有有价值的信息，请省略其他礼貌用语，只输出一个单词:None。
 - 请帮我过滤掉信息中涉及政治、地缘政治、暴力、性等敏感内容。"""
         chat_messages = [{'role': 'system', 'content': system_prompt}, {'role': 'user',

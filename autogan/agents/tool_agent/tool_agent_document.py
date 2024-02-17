@@ -64,7 +64,7 @@ class ToolAgentDocument(UniversalAgent):
         }
 
         work_flow = work_flow if work_flow else {
-            "EN": """There are two tools available to help you review user-uploaded files. Please choose one based on the situation:
+            "EN": """There are three tools available to help you review user-uploaded files. Please choose one based on the situation:
 
 1. summary: This tool provides answers by analyzing the entire content of the file, For example: contract review, extract the main content of the document, etc. but it consumes a lot of resources. When using it, please output in JSON format {"file": "filename (including extension)", "question": "the question you want to know"}, and add the summary symbol, for example:
 ```summary
@@ -78,7 +78,7 @@ When using it, please enclose the English question that Wolfram can understand i
 ```
 
 Note: When you decide to use a tool, please do not @ anyone.""",
-            "CN": """这里有两个工具，可以帮你查看用户上传的文件，请根据实际情况进行选择:
+            "CN": """这里有三个工具，可以帮你查看用户上传的文件，请根据实际情况进行选择:
 1. summary:这个工具通过分析完整的文件内容给出答案，例如：合同审核，提炼文件主要内容等。但是会消耗很多资源。使用时请输出json格式{"file": "文件名（包括扩展名）", "question": "需要了解的问题"}，并加上 summary 符号，例如:
 ```summary
 {"file": "test.pdf", "question": "审核下这份合同"}
@@ -87,6 +87,11 @@ Note: When you decide to use a tool, please do not @ anyone.""",
 2. search:这个工具可以先从文件中查询出相关内容在进行总结，消耗的资源很小。使用时请输出json格式{"file": "文件名（包括扩展名）", "question": "需要了解的问题"}，并加上 search 符号，例如:
 ```search
 {"file": "test.pdf", "question": "车险报案的流程是？"}
+```
+
+3. excel:这是一个处理 excel 的专用工具，对于 excel 文件的相关请求请使用此工具。使用时请输出json格式{"file": "文件名（包括扩展名）", "question": "需要了解的问题"}，并加上 excel 符号，例如:
+```search
+{"file": "test.xlsx", "question": "销售额的变化趋势是？"}
 ```
 
 注意:当您决定使用某个工具时，请不要@任何人。"""
@@ -106,6 +111,8 @@ Note: When you decide to use a tool, please do not @ anyone.""",
             return lang, code, "Searching", "File content"
         elif lang == "search" and code:
             return lang, code, "Searching", "File content"
+        elif lang == "excel" and code:
+            return lang, code, "Searching", "File content"
         else:
             return "", "", "Searching", "File content"
 
@@ -116,6 +123,8 @@ Note: When you decide to use a tool, please do not @ anyone.""",
             texts = self.switch.es.get_chat_file_pack(conversation_id, param["file"], 40)
         elif param and lang == "search" and code:
             texts = self.switch.es.get_chat_file_hybrid(conversation_id, param["file"], param["question"])
+        elif param and lang == "excel" and code:
+            texts = self.switch.es.get_chat_file_pack(conversation_id, param["file"], 40)
         else:
             return """Search failure""", 18
         return self._summary_function(texts, param["question"])

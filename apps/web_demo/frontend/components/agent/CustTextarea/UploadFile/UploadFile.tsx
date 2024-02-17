@@ -46,7 +46,7 @@ type UploadFileProps = {
                     })
                 }
             }
-          }} accept=".pdf,.docx,.txt">
+          }} accept=".pdf,.docx,.txt,.xlsx">
           {(p) => {
           return <ActionIcon 
           // disabled={props.conversationID == undefined} 
