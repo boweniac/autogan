@@ -4,10 +4,10 @@ from typing import Optional
 from autogan.oai.chat_api_utils import chat_completions, process_response, ChatCompletionsRequest
 from autogan.oai.chat_config_utils import LLMConfig
 from autogan.oai.count_tokens_utils import count_text_tokens
-from autogan.oai.conv_holder import ConvHolder
+from autogan.oai.conv_holder import DialogueManager
 
 
-def generate_chat_completion(llm_config: LLMConfig, request_data: ChatCompletionsRequest, conv_info: ConvHolder,
+def generate_chat_completion(llm_config: LLMConfig, request_data: ChatCompletionsRequest, conv_info: DialogueManager,
                              content_type: str, content_tag: str) \
         -> tuple[Optional[str], Optional[int]]:
     """Call the LLM interface
@@ -64,7 +64,7 @@ def generate_chat_completion(llm_config: LLMConfig, request_data: ChatCompletion
                 return None, None
 
 
-async def a_generate_chat_completion(llm_config: LLMConfig, request_data: ChatCompletionsRequest, conv_info: ConvHolder,
+async def a_generate_chat_completion(llm_config: LLMConfig, request_data: ChatCompletionsRequest, conv_info: DialogueManager,
                                      content_type: str, content_tag: str) \
         -> tuple[Optional[str], Optional[int]]:
     """Call the LLM interface

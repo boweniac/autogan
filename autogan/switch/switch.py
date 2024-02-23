@@ -8,9 +8,9 @@ from autogan.oai.chat_generate_utils import generate_chat_completion_internal, g
 from autogan.protocol.response_protocol import ResponseProtocol
 
 from autogan import UniversalAgent
-from autogan.oai.chat_config_utils import AgentConfig
+from autogan.oai.chat_config_utils import AgentLLMConfig
 from autogan.protocol.storage_protocol import StorageProtocol
-from autogan.oai.conv_holder import ConvHolder
+from autogan.oai.conv_holder import DialogueManager
 from autogan.switch.default_response import DefaultResponse
 from autogan.protocol.switch_protocol import SwitchProtocol
 from autogan.utils.es_utils import ESSearch
@@ -85,10 +85,9 @@ class Switch(SwitchProtocol):
         """
         self.task_tag = task_tag if task_tag else "/task"
         self.default_language = "EN" if default_language is None else default_language
-        self.default_agent_config = AgentConfig(default_agent_config)
+        self.default_agent_config = AgentLLMConfig(default_agent_config)
         self._agents = defaultdict(UniversalAgent)  # key: agent name value: agent object
         self._init_agents(org_structure)
-        self._init_agents_workmates(org_structure)
         if invited_speakers:
             self._inviting_to_speak(invited_speakers)
         self.default_consider_mode = consider_mode if consider_mode else "auto"
@@ -96,13 +95,6 @@ class Switch(SwitchProtocol):
         self.storage = storage
         self.es = es
         self.default_agent = default_agent
-
-    @property
-    def default_agent_name(self) -> Optional[str]:
-        if self.default_agent:
-            return self.default_agent.name
-        else:
-            return None
 
     def _init_agents(self, org_structure: list):
         """注册组织架构中的所有 agent"""
@@ -117,111 +109,113 @@ class Switch(SwitchProtocol):
             else:
                 raise ImportError("There are unknown type objects in the organizational structure.")
 
-    def _init_agents_workmates(self, org_structure: list):
-        """Arrange for each agent to communicate with other agents according to the organizational structure.
-        根据组织架构，为每个 agent 安排可以与其沟通的其他 agent
+        self._init_agents_work(org_structure)
 
-        An agent should not exist in multiple departments.
-        agent 不应存在于多个部门中
+    def _init_agents_work(self, org_structure: list):
+        """根据组织架构，为 agent 分配同事和工作
 
-        :param org_structure: Organizational structure
-            组织架构
+        :param org_structure: 组织架构
         """
         if isinstance(org_structure[0], str):
-            # The current list is workflow mode
-            # 当前数组是工作流数组
-            agent_list_len = len(org_structure)
+            # 当前部门为工作流模式
+            self._init_agents_work_for_pipeline(org_structure)
+        else:
+            # 当前部门为普通模式
+            self._init_agents_work_for_free(org_structure)
 
-            for index, main_item in enumerate(org_structure):
-                workmates = ""
+    def _init_agents_work_for_pipeline(self, org_structure: list):
+        """根据组织架构，为 agent 分配同事和工作（工作流模式）
 
-                # Skip the first element
-                if index == 0:
-                    continue
+        :param org_structure: 组织架构
+        """
+        list_len = len(org_structure)
 
-                # Get the next agent
+        for index, current_item in enumerate(org_structure):
+            # 跳过首个标志位元素
+            if index == 0:
+                continue
+
+            workmates = ""
+
+            # 获取当前 agent 或部门负责人
+            if isinstance(current_item, list):
+                self._init_agents_work(current_item)
+                current_agent = current_item[0]
+            elif isinstance(current_item, UniversalAgent):
+                current_agent = current_item
+            else:
+                # 约束工作流模式的子部门，不能亦为工作流模式
+                raise ImportError("There are unknown type objects in the organizational structure.")
+
+            if index == list_len - 1:
+                # 如果已遍历到最后一个元素
+                next_agent_name = "\\"
+            else:
+                # 如果未遍历到最后一个元素
+                # 获取下一个 agent 或部门负责人
                 if isinstance(org_structure[index + 1], list):
-                    agent = org_structure[index + 1][0]
+                    next_agent = org_structure[index + 1][0]
+                elif isinstance(org_structure[index + 1], UniversalAgent):
+                    next_agent = org_structure[index + 1]
                 else:
-                    agent = org_structure[index + 1]
+                    # 约束工作流模式的子部门，不能亦为工作流模式
+                    raise ImportError("There are unknown type objects in the organizational structure.")
+
+                next_agent_name = next_agent.name
+                next_agent_duty = next_agent.get_duty
+                # print(f"{name}: {duty}")
+                workmates = f"""
+{next_agent_name} : {next_agent_duty}"""
+
+            current_agent.assign_workmates(workmates, next_agent_name)
+
+    def _init_agents_work_for_free(self, org_structure: list):
+        """根据组织架构，为 agent 分配同事和工作（普通模式）
+
+        :param org_structure: 组织架构
+        """
+        for current_item in org_structure:
+            workmates = ""
+
+            # 获取当前 agent 或部门负责人
+            if isinstance(current_item, list):
+                self._init_agents_work(current_item)
+                current_agent = current_item[0]
+            else:
+                current_agent = current_item
+
+            if not isinstance(current_agent, UniversalAgent):
+                continue
+
+            # 建立同事关系
+            for item in org_structure:
+                if isinstance(item, list):
+                    if isinstance(item[0], str):
+                        if item[0] == "F":
+                            # If it is a workflow
+                            if isinstance(item[1], list):
+                                agent = item[1][0]
+                            else:
+                                agent = item[1]
+                        else:
+                            continue
+                    else:
+                        agent = item[0]
+                else:
+                    agent = item
 
                 if not isinstance(agent, UniversalAgent):
                     raise ImportError("There are unknown type objects in the organizational structure.")
 
-                if index == agent_list_len - 1:
-                    # If this is the last element
-                    name = "\\"
-                else:
-                    # If the next element is a list
-                    name = agent.name
-                    duty = agent.duty
-                    # print(f"{name}: {duty}")
-                    workmates = f"""
-{name} : {duty}"""
-
-                # Get the current agent
-                if isinstance(main_item, list):
-                    # If the current element is a list
-                    self._init_agents_workmates(main_item)
-                    main_agent = main_item[0]
-                else:
-                    main_agent = main_item
-
-                if not isinstance(main_agent, UniversalAgent):
+                if agent.name == current_agent.name:
                     continue
 
-                if not agent.pipeline or agent.pipeline == "\\":
-                    agent.workmates += workmates
-                    agent.pipeline = name
-                    agent.init_prompts(self.default_language, self.task_tag, workmates, name)
-        else:
-            # The current list is non-workflow mode.
-            # 当前数组是非工作流数组
-            for main_item in org_structure:
-                workmates = ""
-
-                if isinstance(main_item, list):
-                    self._init_agents_workmates(main_item)
-                    main_agent = main_item[0]
-                else:
-                    main_agent = main_item
-
-                if not isinstance(main_agent, UniversalAgent):
-                    continue
-
-                for item in org_structure:
-                    # Establish a leveling relationship between current department leaders
-                    if isinstance(item, list):
-                        # If other elements are lists
-                        if isinstance(item[0], str):
-                            if item[0] == "F":
-                                # If it is a workflow
-                                if isinstance(item[1], list):
-                                    agent = item[1][0]
-                                else:
-                                    agent = item[1]
-                            else:
-                                continue
-                        else:
-                            agent = item[0]
-                            if agent.name == main_agent.name:
-                                continue
-                    else:
-                        agent = item
-
-                    if not isinstance(agent, UniversalAgent):
-                        raise ImportError("There are unknown type objects in the organizational structure.")
-
-                    if agent.name == main_agent.name:
-                        continue
-
-                    name = agent.name
-                    duty = agent.duty
-                    # print(f"{name}: {duty}")
-                    workmates += f"""
+                name = agent.name
+                duty = agent.get_duty
+                # print(f"{name}: {duty}")
+                workmates += f"""
 {name} : {duty}"""
-                main_agent.workmates += workmates
-                main_agent.init_prompts(self.default_language, self.task_tag, workmates, "")
+            current_agent.assign_workmates(workmates, "")
 
     def _inviting_to_speak(self, invited_speaker: UniversalAgent):
         """Invite the human agent to publish the first task
@@ -237,38 +231,38 @@ class Switch(SwitchProtocol):
         conversation_id = snowflake_id.next_id()
         response_proxy = DefaultResponse()
 
-        conv_info = ConvHolder(conversation_id, conversation_id, response_proxy, snowflake_id)
-        conv_info.init_message("system")
-        conv_info.switch_to_agent(conversation_id, f"@{invited_speaker.name} Please enter: ")
+        conv_info = DialogueManager(conversation_id, response_proxy, snowflake_id)
+        conv_info.init_message_before_generate("system")
+        conv_info.after_switch(conversation_id, f"@{invited_speaker.name} Please enter: ")
         invited_speaker.receive(conv_info)
 
-    def handle_and_forward(self, conv_info: ConvHolder, content_type: Optional[str] = "main", content_tag: Optional[str] = "") -> None:
+    def handle_and_forward(self, conv_info: DialogueManager, content_type: Optional[str] = "main", content_tag: Optional[str] = "") -> None:
         handle_dict = self.handle(conv_info, content_type, content_tag)
         if handle_dict:
             if handle_dict["type"] == "system":
-                conv_info.to_system_alert(handle_dict["content"])
+                conv_info.init_message_before_alert(handle_dict["content"])
                 self.system_alert(conv_info)
             elif handle_dict["type"] == "new_task":
-                conv_info.switch_to_agent(handle_dict["switch_task_id"], handle_dict["content"])
+                conv_info.after_switch(handle_dict["switch_task_id"], handle_dict["content"])
                 handle_dict["receiver"].new_task(conv_info)
             else:
-                conv_info.switch_to_agent(handle_dict["switch_task_id"], handle_dict["content"])
+                conv_info.after_switch(handle_dict["switch_task_id"], handle_dict["content"])
                 handle_dict["receiver"].receive(conv_info)
 
-    async def a_handle_and_forward(self, conv_info: ConvHolder, content_type: Optional[str] = "main", content_tag: Optional[str] = "") -> None:
+    async def a_handle_and_forward(self, conv_info: DialogueManager, content_type: Optional[str] = "main", content_tag: Optional[str] = "") -> None:
         handle_dict = self.handle(conv_info, content_type, content_tag)
         if handle_dict:
             if handle_dict["type"] == "system":
-                conv_info.to_system_alert(handle_dict["content"])
+                conv_info.init_message_before_alert(handle_dict["content"])
                 await self.a_system_alert(conv_info)
             elif handle_dict["type"] == "new_task":
-                conv_info.switch_to_agent(handle_dict["switch_task_id"], handle_dict["content"])
+                conv_info.after_switch(handle_dict["switch_task_id"], handle_dict["content"])
                 await handle_dict["receiver"].a_new_task(conv_info)
             else:
-                conv_info.switch_to_agent(handle_dict["switch_task_id"], handle_dict["content"])
+                conv_info.after_switch(handle_dict["switch_task_id"], handle_dict["content"])
                 await handle_dict["receiver"].a_receive(conv_info)
 
-    def handle(self, conv_info: ConvHolder, content_type: Optional[str] = "main", content_tag: Optional[str] = "") \
+    def handle(self, conv_info: DialogueManager, content_type: Optional[str] = "main", content_tag: Optional[str] = "") \
             -> Optional[Dict]:
         """Handle messages and forward to other agent.
         处理消息并转发给其他代理
@@ -299,13 +293,11 @@ class Switch(SwitchProtocol):
 
         :param conv_info: pusher task id.
         """
-        requester = self._agents[conv_info.requester_name]
+        requester = self._agents[conv_info.sender_name]
 
-        responder_name = conv_info.responder_name
-        print(f"responder_name: {responder_name}")
+        responder_name = conv_info.receiver_name
         if responder_name is None and self.default_agent and requester.agent_type == "HUMAN":
             responder_name = self.default_agent.name
-        print(f"responder_name: {responder_name}")
         content = conv_info.content
 
         self.storage and self.storage.add_message(conv_info.conversation_id, conv_info.message(content_type, content_tag))
@@ -318,27 +310,20 @@ class Switch(SwitchProtocol):
                 current_task_id = conv_info.task_id
                 switch_task_id = conv_info.task_id
                 sender_name = "system"
-                content = f"@{conv_info.requester_name} {responder_name} not exist, do not @{responder_name} again, Also please do not attempt to converse with me, this is just a system message."
+                content = f"@{conv_info.sender_name} {responder_name} not exist, do not @{responder_name} again, Also please do not attempt to converse with me, this is just a system message."
             elif re.search(fr'@\w+ {self.task_tag}', content):
                 response_type = "new_task"
                 receiver = self._agents[responder_name]
                 current_task_id = conv_info.task_id
                 switch_task_id = conv_info.snowflake_id_generator.next_id()
-                sender_name = conv_info.requester_name
-
-                # Establish a relationship between the push task and the receiver task.
-                receiver.add_task(conv_info.conversation_id,
-                                  conv_info.task_id, requester.name, requester.agent_type,
-                                  switch_task_id, content)
-                # requester.save_sub_to_main_task_id(switch_task_id, conv_info.task_id)
-                # receiver.save_main_to_sub_task_id(conv_info.conversation_id, conv_info.task_id, switch_task_id)
+                sender_name = conv_info.sender_name
             else:
                 receiver = self._agents[responder_name]
-                sender_name = conv_info.requester_name
+                sender_name = conv_info.sender_name
                 current_task_id = conv_info.task_id
                 switch_task_id = conv_info.task_id
 
-                main_task_id, sub_task_id = receiver.convert_main_or_sub_task_id(conv_info.task_id)
+                main_task_id, sub_task_id = receiver.storage_convert_main_or_sub_task_id(conv_info.task_id)
                 if sub_task_id:
                     # Translate the session ID of the requester into the sub-session ID of the receiver.
                     switch_task_id = sub_task_id
@@ -346,7 +331,7 @@ class Switch(SwitchProtocol):
                     # Translate the session id of the sender into the superior session id of the receiver.
                     switch_task_id = main_task_id
                 if switch_task_id == conv_info.task_id:
-                    latest_task_id = receiver.get_conversation_latest_task(conv_info.conversation_id)
+                    latest_task_id = receiver.storage_get_conversation_latest_task(conv_info.conversation_id)
                     if requester.agent_type == "HUMAN" and latest_task_id:
                         response_type = "general"
                         switch_task_id = latest_task_id
@@ -355,15 +340,6 @@ class Switch(SwitchProtocol):
                         # If no subtasks of the task from the requester are found, a prompt is needed to create the task first.
                         response_type = "new_task"
                         switch_task_id = conv_info.snowflake_id_generator.next_id()
-
-                        # Establish a relationship between the push task and the receiver task.
-                        self.storage.add_task(conv_info.conversation_id,
-                                              conv_info.task_id, requester.name, requester.agent_type,
-                                              switch_task_id, receiver.name, receiver.agent_type,
-                                              content)
-                        # requester.save_sub_to_main_task_id(switch_task_id, conv_info.task_id)
-                        # receiver.save_main_to_sub_task_id(conv_info.conversation_id, conv_info.task_id, switch_task_id)
-                        # Create a new task.
                         content = content.replace(f"@{responder_name} ", f"@{responder_name} {self.task_tag} ")
                 else:
                     response_type = "general"
@@ -375,9 +351,18 @@ class Switch(SwitchProtocol):
                 current_task_id = conv_info.task_id
                 switch_task_id = conv_info.task_id
                 sender_name = "system"
-                content = f"@{conv_info.requester_name} Any reply must start with @ + recipient's name, Also please do not attempt to converse with me, this is just a system message."
+                content = f"@{conv_info.sender_name} Any reply must start with @ + recipient's name, Also please do not attempt to converse with me, this is just a system message."
             else:
                 return
+        # 当 agent type 不为 TOOL 且不为 HUMAN 时，应限制输入 tokens 长度
+        if ((receiver.agent_type != "TOOL" and receiver.agent_type != "HUMAN") and conv_info.completion_tokens >
+                receiver.get_agent_llm_config.main_model_config.request_config.max_messages_tokens * 0.5):
+            response_type = "system"
+            receiver = requester
+            current_task_id = conv_info.task_id
+            switch_task_id = conv_info.task_id
+            sender_name = "system"
+            content = f"@{conv_info.sender_name} {responder_name} The task is too long."
         if (
                 self.default_agent_config.main_model_config.request_config.max_conv_turns >= conv_info.response_proxy.conv_turns) or not conv_info.response_proxy.need_to_stop():
             conv_info.response_proxy.conv_turns += 1
@@ -387,50 +372,22 @@ class Switch(SwitchProtocol):
         else:
             return
 
-    def system_alert(self, conv_info: ConvHolder) -> None:
+    def system_alert(self, conv_info: DialogueManager) -> None:
         self.storage and self.storage.add_message(conv_info.conversation_id, conv_info.message("system"))
         conv_info.response(0, "system", "", conv_info.content, conv_info.completion_tokens, None)
         conv_info.response(1, "system", "", '[DONE]', 0, None)
         # conv_info.response_proxy.send(conv_info.msg_id, conv_info.task_id, conv_info.requester_name, 0, "system", conv_info.content, conv_info.completion_tokens, None)
-        self._agents[conv_info.responder_name].receive(conv_info)
+        self._agents[conv_info.receiver_name].receive(conv_info)
 
-    async def a_system_alert(self, conv_info: ConvHolder) -> None:
+    async def a_system_alert(self, conv_info: DialogueManager) -> None:
         self.storage and self.storage.add_message(conv_info.conversation_id, conv_info.message("system"))
         await conv_info.a_response(0, "system", "", conv_info.content, conv_info.completion_tokens, None)
         await conv_info.a_response(1, "system", "", '[DONE]', 0, None)
         # await conv_info.response_proxy.a_send(conv_info.msg_id, conv_info.task_id, conv_info.requester_name, 0, "system", conv_info.content, conv_info.completion_tokens, None)
-        await self._agents[conv_info.responder_name].a_receive(conv_info)
+        await self._agents[conv_info.receiver_name].a_receive(conv_info)
 
-    def auto_title(self, user_id: int, conversation_id: int, response: ResponseProtocol, snowflake_id_generator: SnowflakeIdGenerator) -> None:
-        db_messages = self.storage.get_messages(conversation_id)
-        messages = []
-        for message in db_messages:
-            messages.append({
-                "role": "user" if message["agent_name"] == "Customer" else "assistant",
-                "content": message["content"]
-            })
-        messages.append({
-            "role": "system",
-            "content": "请帮我根据以上对话内容生成对话标题，字数在 20因内。"
-        })
-        request_data = ChatCompletionsRequest(messages, True)
-        conv_info = ConvHolder(conversation_id, conversation_id, response, snowflake_id_generator)
-        title, token = generate_chat_completion(self.default_agent_config.summary_model_config, request_data, conv_info, "", "")
-        self.storage.update_conversation_title(user_id, conversation_id, title)
+    def auto_title(self, request_data: ChatCompletionsRequest, conv_info: DialogueManager) -> tuple[str, int]:
+        return generate_chat_completion(self.default_agent_config.summary_model_config, request_data, conv_info, "", "")
 
-    async def a_auto_title(self, user_id: int, conversation_id: int, response: ResponseProtocol, snowflake_id_generator: SnowflakeIdGenerator) -> None:
-        db_messages = self.storage.get_messages(conversation_id)
-        messages = []
-        for message in db_messages:
-            messages.append({
-                "role": "user" if message["agent_name"] == "Customer" else "assistant",
-                "content": message["content"]
-            })
-        messages.append({
-            "role": "system",
-            "content": "请帮我根据以上对话内容生成对话标题，字数在 20因内。"
-        })
-        request_data = ChatCompletionsRequest(messages, True)
-        conv_info = ConvHolder(conversation_id, conversation_id, response, snowflake_id_generator)
-        title, token = await a_generate_chat_completion(self.default_agent_config.summary_model_config, request_data, conv_info, "", "")
-        self.storage.update_conversation_title(user_id, conversation_id, title)
+    async def a_auto_title(self, request_data: ChatCompletionsRequest, conv_info: DialogueManager) -> tuple[str, int]:
+        return await a_generate_chat_completion(self.default_agent_config.summary_model_config, request_data, conv_info, "", "")

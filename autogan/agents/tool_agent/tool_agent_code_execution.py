@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from autogan.agents.universal_agent import UniversalAgent
 from autogan.tools.code_execution_tool import CodeExecution
 
@@ -49,18 +49,13 @@ Your python code
         )
         self._code_execution = CodeExecution(work_dir)
 
-    # def tool_filter(self, param: Optional[str] = None) -> tuple[str, str, str, str]:
-    #     lang, code = CodeExecution.extract_code(param)
-    #     if lang == "mail" and code:
-    #         return lang, code, "Sending", "Sent successfully"
-    #     else:
-    #         return "", "", "Sending", "Send failure"
+    def tool_parameter_identification(self, content: Optional[str] = None) -> tuple[List[tuple], str, str]:
+        return [("", content)], "execution", "Execution results"
 
-    def tool_function(self, conversation_id: int, task_id: int, lang: Optional[str] = None, code: Optional[str] = None,
-                      tokens: Optional[int] = None) -> tuple[str, int]:
-        print(f"code: {code}")
+    def tool_call_function(self, conversation_id: int, task_id: int, tool: str, param: str | dict) -> tuple[str, int]:
+        print(f"param: {param}")
         try:
-            execution_result, tokens, output = self._code_execution.code_execution_reply(code)
+            execution_result, tokens, output = self._code_execution.code_execution_reply(param)
             if execution_result:
                 return execution_result, tokens
             else:

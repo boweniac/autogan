@@ -41,7 +41,6 @@ class WebSearch:
             return None
 
         url = result[0]["link"]
-        print(url)
         proxies = {
             'http': proxy_config_dict["http"],
             'https': proxy_config_dict["https"]
@@ -54,10 +53,11 @@ class WebSearch:
 
         # Remove extra line breaks
         s = re.sub('\n+', '\n', main_text)
-        print(f"main_text: {s}")
-        # print(s)
+
         if s:
-            return s
+            return f"""url: {url}
+    
+    detail: {s}"""
         else:
             return None
 
@@ -75,7 +75,6 @@ class WebSearch:
 
         # 接口参数
         url = "https://www.googleapis.com/customsearch/v1"
-        print(f"quote(keyword): {quote(keyword)}")
         params = {
             'q': keyword,
             'start': start,
@@ -101,7 +100,6 @@ class WebSearch:
                 # Extract the title, link, and snippet fields from each object in the items field.
                 results = []
                 for item in data['items']:
-                    print(f"result: {item}")
                     result = {
                         'title': item.get('title', ''),
                         'link': item.get('link', ''),

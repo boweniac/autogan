@@ -48,7 +48,7 @@ class ConfigList:
         return len(self._config_list)
 
 
-class AgentConfig:
+class AgentLLMConfig:
     """The agent configuration includes:
     agent 配置包括：
 

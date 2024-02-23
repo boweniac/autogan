@@ -23,6 +23,7 @@ export interface MessageBlock {
     localID?: string | undefined;
     msgId?: string | undefined;
     agentName?: string | undefined;
+    agentType?: string | undefined;
     contentType?: string | undefined;
     contentTag?: string | undefined;
     content?: string | undefined;

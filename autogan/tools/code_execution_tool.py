@@ -57,7 +57,9 @@ class CodeExecution:
         output_execute = ""
         # Determine whether it is running in docker
         if os.path.exists("/.dockerenv"):
-            lang, code = self.extract_code(text)
+            lang, code = self.extract_code(text)[0]
+            print(f"lang: {lang}")
+            print(f"code: {code}")
             if code is None:
                 exitcode = 1
                 output = "Submit your Python code to me and I can tell you the execution result. But I can't write code or talk to you. So please just submit the completed code to me encapsulated with ``` symbols. And you should always use the 'print' function for the output"
@@ -169,7 +171,7 @@ class CodeExecution:
             return 1, f"execution error: {e}"
 
     @staticmethod
-    def extract_code(text: str) -> Tuple[Optional[str], Optional[str]]:
+    def extract_code(text: str) -> list:
         """Extract code from text
 
         :param text: 包含代码的文本，代码必须以```符号封装
@@ -178,8 +180,9 @@ class CodeExecution:
             --lang: Code must be encapsulated with ``` symbol
             --code: Code to be executed
         """
-        match = re.findall(r"```(\w*)\n(.*?)\n```", text, flags=re.DOTALL)
-        return match[0] if match else (None, None)
+        matches = re.findall(r"```(\w*)\s(.*?)```", text, flags=re.DOTALL)
+        print(f"matches: {matches}")
+        return matches
 
     @staticmethod
     def infer_lang(code) -> str:

@@ -200,12 +200,13 @@ class GetMessagesWhenChangedResponse(_message.Message):
     def __init__(self, code: _Optional[int] = ..., msg: _Optional[str] = ..., data: _Optional[_Iterable[_Union[GetMessagesWhenChangedResponseData, _Mapping]]] = ...) -> None: ...
 
 class GetMessagesWhenChangedResponseData(_message.Message):
-    __slots__ = ("msg_id", "task_id", "content_type", "content_tag", "agent_name", "content", "tokens")
+    __slots__ = ("msg_id", "task_id", "content_type", "content_tag", "agent_name", "agent_type", "content", "tokens")
     MSG_ID_FIELD_NUMBER: _ClassVar[int]
     TASK_ID_FIELD_NUMBER: _ClassVar[int]
     CONTENT_TYPE_FIELD_NUMBER: _ClassVar[int]
     CONTENT_TAG_FIELD_NUMBER: _ClassVar[int]
     AGENT_NAME_FIELD_NUMBER: _ClassVar[int]
+    AGENT_TYPE_FIELD_NUMBER: _ClassVar[int]
     CONTENT_FIELD_NUMBER: _ClassVar[int]
     TOKENS_FIELD_NUMBER: _ClassVar[int]
     msg_id: int
@@ -213,9 +214,10 @@ class GetMessagesWhenChangedResponseData(_message.Message):
     content_type: str
     content_tag: str
     agent_name: str
+    agent_type: str
     content: str
     tokens: int
-    def __init__(self, msg_id: _Optional[int] = ..., task_id: _Optional[int] = ..., content_type: _Optional[str] = ..., content_tag: _Optional[str] = ..., agent_name: _Optional[str] = ..., content: _Optional[str] = ..., tokens: _Optional[int] = ...) -> None: ...
+    def __init__(self, msg_id: _Optional[int] = ..., task_id: _Optional[int] = ..., content_type: _Optional[str] = ..., content_tag: _Optional[str] = ..., agent_name: _Optional[str] = ..., agent_type: _Optional[str] = ..., content: _Optional[str] = ..., tokens: _Optional[int] = ...) -> None: ...
 
 class GetMessagesRequest(_message.Message):
     __slots__ = ("user_id", "conversation_id")

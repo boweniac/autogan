@@ -1,6 +1,6 @@
 import re
 from collections import defaultdict
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 
 from autogan.tools.code_execution_tool import CodeExecution
 
@@ -17,27 +17,11 @@ class ToolAgentSearch(UniversalAgent):
     def __init__(
             self,
             search_config: Dict,
-            agent_config: Optional[Dict] = None,
+            agent_llm_config: Optional[Dict] = None,
             retry_times: Optional[int] = 10,
             name: Optional[str] = "WebSearchExp",
             duty: Optional[str] | Optional[dict] = None,
             work_flow: Optional[str] | Optional[dict] = None,
-            # duty: Optional[str] = 'Not only can I search for information on the internet, '
-            #                       'but I can also answer questions using the Wolfram engine.',
-            # duty: Optional[str] = '我不但可以从网络上搜索资料，还可以通过 wolfram 引擎来回答问题。',
-            #             work_flow: Optional[str] = """我希望你是一个网络搜索专家，当你收到搜索请求时，你有一下两种工具可供选择：
-            #
-            #  1. web: 可以在网络上查找资料。使用时请在你的输出内容中，将搜索关键词用```web\n ``` 符号封装，例如：
-            # ```web
-            # Your search keywords
-            # ```
-            #
-            # 2.wolfram: 可以使用wolfram引擎，帮你计算或查询数学、金融、单位转换、数据分析、科学、地理、历史、文化、电影、音乐等相关数据。使用时请在你的输出内容中，将 wolfram 可以理解的英文问题用```wolfram\n ``` 符号封装，例如：
-            # ```wolfram
-            # one wolfram query
-            # ```
-            #
-            # 注意：当你决定使用工具时，请不要@任何人""",
     ):
         """WebSearchExpert
 
@@ -53,7 +37,7 @@ class ToolAgentSearch(UniversalAgent):
         Within the same task session domain, if the search keywords are the same,
         the offset of the search results will accumulate and move backwards.
 
-        :param agent_config: The agent configuration includes:
+        :param agent_llm_config: The agent configuration includes:
             agent 配置包括：
             - main_model: The LLM configuration of the agent's main body.
                 agent 主体的 LLM 配置。
@@ -81,33 +65,50 @@ class ToolAgentSearch(UniversalAgent):
 
 1. web: You can search for information on the internet. When using it, please enclose the search keywords in your output with the ```web\n ``` symbol, for example:
 ```web
-Your search keywords
+Your search keywords 1
+```
+
+```web
+Your search keywords 2
 ```
 
 2. wolfram: You can use the Wolfram engine to help you calculate or query data related to Mathematics, finance, unit conversion, data analysis, science, geography, history, culture, movies, music, etc. 
 When using it, please enclose the English question that Wolfram can understand in your output with the ```wolfram\n ``` symbol, for example:
 ```wolfram
-one wolfram query
+one wolfram query 1
 ```
 
-Note: When you decide to use a tool, please do not @ anyone.""",
+```wolfram
+one wolfram query 2
+```
+
+Note: 
+- When you decide to use a tool, please do not @ anyone.""",
             "CN": """我希望你是一个互联网搜索专家。当您收到搜索请求时，您有以下两个工具可供选择:
 1. web:你可以在互联网上搜索信息。使用时，请在输出的搜索关键字中加上 web 符号，例如:
 ```web
-你的搜索关键词
+你的搜索关键词 1
+```
+
+```web
+你的搜索关键词 2
 ```
 2. wolfram:您可以使用 wolfram 引擎来帮助您计算或查询与数学、金融、单位转换、数据分析、科学、地理、历史、文化、电影、音乐等相关的数据。
 使用时，请在输出中附上 Wolfram 能理解的英文问题，并加上 Wolfram 符号，例如:
 ```wolfram
-one wolfram query
+one wolfram query 1
 ```
 
-注意:当您决定使用某个工具时，请不要@任何人。
-"""
+```wolfram
+one wolfram query 2
+```
+
+注意:
+- 当您决定使用某个工具时，请不要@任何人。"""
         }
         super().__init__(
             name,
-            agent_config=agent_config,
+            agent_llm_config=agent_llm_config,
             duty=duty,
             work_flow=work_flow,
             agent_type="TOOLMAN"
@@ -118,28 +119,22 @@ one wolfram query
         self._conversation_search_index = defaultdict(int)
         self._retry_times = retry_times
 
-    def tool_filter(self, param: Optional[str] = None) -> tuple[str, str, str, str]:
-        lang, code = CodeExecution.extract_code(param)
-        if lang == "web" and code:
-            return lang, code, "Searching", "Search results"
-        elif lang == "wolfram" and code:
-            return lang, code, "Searching", "Search results"
-        else:
-            return "", "", "Searching", "Search results"
+    def tool_parameter_identification(self, content: Optional[str] = None) -> tuple[List[tuple], str, str]:
+        param_list = CodeExecution.extract_code(content)
+        return param_list, "Searching", "Search results"
 
-    def tool_function(self, conversation_id: int, task_id: int, lang: Optional[str] = None, code: Optional[str] = None,
-                      tokens: Optional[int] = None) -> tuple[str, int]:
-        if lang == "web" and code:
+    def tool_call_function(self, conversation_id: int, task_id: int, tool: str, param: str | dict) -> tuple[str, int]:
+        if tool == "web" and param:
             if self._web_search:
-                content, completion_tokens = self._web_function(task_id, code)
+                content, completion_tokens = self._web_function(task_id, param)
                 return content, completion_tokens
             else:
                 return "Please add the Google Custom Search JSON API configuration.", 0
-        elif lang == "wolfram" and code:
+        elif tool == "wolfram" and param:
             content_tag = ""
             content_tag_end = ""
             if self._wolfram_alpha:
-                content, completion_tokens = self._wolfram_alpha_function(code)
+                content, completion_tokens = self._wolfram_alpha_function(param)
                 return content, completion_tokens
             else:
                 return "Please add the WolframAlphaAPI configuration.", 0
@@ -160,9 +155,9 @@ one wolfram query
 
             if detail:
                 # Extract content related to the user's question from the webpage content.
-                compressed_text, total_tokens = compressed_text_universal(
-                    detail, self.get_agent_config.summary_model_config, self._conversation_focus[task_id]['content'],
-                    self.get_agent_config.summary_model_config.request_config.max_messages_tokens)
+                compressed_text, total_tokens = compressed_text_universal(self.switch.default_language,
+                    detail, self.get_agent_llm_config.summary_model_config, self._task_info[task_id]['content'],
+                    self.get_agent_llm_config.summary_model_config.request_config.max_messages_tokens)
                 if compressed_text:
                     return compressed_text, total_tokens
             if i == loop - 1:

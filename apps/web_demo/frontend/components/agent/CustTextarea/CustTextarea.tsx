@@ -56,7 +56,7 @@ export default function CustTextarea(props: CustTextareaProps) {
     const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {setValue(event.target.value)};
 
     useEffect(() => {
-      if (popoverOpened && props.conversationID) {
+      if (popoverOpened && props.conversationID && !props.isLoading) {
         props.syncMessagesCallback()
       }
   }, [popoverOpened]);

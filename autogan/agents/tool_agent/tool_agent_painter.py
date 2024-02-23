@@ -1,6 +1,6 @@
 import re
 from collections import defaultdict
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 
 from oss2 import Bucket
 
@@ -21,7 +21,7 @@ class ToolAgentPainter(UniversalAgent):
     def __init__(
             self,
             bucket: Bucket,
-            agent_config: Optional[Dict] = None,
+            agent_llm_config: Optional[Dict] = None,
             name: Optional[str] = "PainterExp",
             duty: Optional[str] | Optional[dict] = None,
             work_flow: Optional[str] | Optional[dict] = None,
@@ -41,7 +41,7 @@ class ToolAgentPainter(UniversalAgent):
         Within the same task session domain, if the search keywords are the same,
         the offset of the search results will accumulate and move backwards.
 
-        :param agent_config: The agent configuration includes:
+        :param agent_llm_config: The agent configuration includes:
             agent 配置包括：
             - main_model: The LLM configuration of the agent's main body.
                 agent 主体的 LLM 配置。
@@ -123,7 +123,7 @@ xx 风格，xx 内容
         }
         super().__init__(
             name,
-            agent_config=agent_config,
+            agent_llm_config=agent_llm_config,
             duty=duty,
             work_flow=work_flow,
             agent_type="TOOLMAN"
@@ -131,22 +131,16 @@ xx 风格，xx 内容
         self._code_execution = CodeExecution(work_dir)
         self._bucket = bucket
 
-    def tool_filter(self, param: Optional[str] = None) -> tuple[str, str, str, str]:
-        lang, code = CodeExecution.extract_code(param)
-        if lang == "python" and code:
-            return lang, param, "Generating", "Generate results"
-        elif lang == "model" and code:
-            return lang, code, "Generating", "Generate results"
-        else:
-            return "", "", "Generating", "Generate results"
+    def tool_parameter_identification(self, content: Optional[str] = None) -> tuple[List[tuple], str, str]:
+        param_list = CodeExecution.extract_code(content)
+        return param_list, "Generating", "Generate results"
 
-    def tool_function(self, conversation_id: int, task_id: int, lang: Optional[str] = None, code: Optional[str] = None,
-                      tokens: Optional[int] = None) -> tuple[str, int]:
-        if lang == "python" and code:
-            content, completion_tokens = self._matplotlib_function(conversation_id, code)
+    def tool_call_function(self, conversation_id: int, task_id: int, tool: str, param: str | dict) -> tuple[str, int]:
+        if tool == "python" and param:
+            content, completion_tokens = self._matplotlib_function(conversation_id, param)
             return content, completion_tokens
-        elif lang == "model" and code:
-            content, completion_tokens = self._model_function(code)
+        elif tool == "model" and param:
+            content, completion_tokens = self._model_function(param)
             return content, completion_tokens
         else:
             return """Please make a choice between web and wolfram, and use the ``` symbol for encapsulation, for example:

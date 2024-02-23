@@ -1,4 +1,4 @@
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 
 from autogan.tools.code_execution_tool import CodeExecution
 from autogan.utils.compressed_texts_utils import compressed_texts
@@ -13,7 +13,7 @@ from autogan.tools.file_tool import File
 class ToolAgentDocument(UniversalAgent):
     def __init__(
             self,
-            agent_config: Optional[Dict] = None,
+            agent_llm_config: Optional[Dict] = None,
             name: Optional[str] = "DocumentExp",
             duty: Optional[str] | Optional[dict] = None,
             work_flow: Optional[str] | Optional[dict] = None,
@@ -40,7 +40,7 @@ class ToolAgentDocument(UniversalAgent):
 
         Receive file names with extensions.
 
-        :param agent_config: The agent configuration includes:
+        :param agent_llm_config: The agent configuration includes:
             agent 配置包括：
             - main_model: The LLM configuration of the agent's main body.
                 agent 主体的 LLM 配置。
@@ -98,41 +98,33 @@ Note: When you decide to use a tool, please do not @ anyone.""",
         }
         super().__init__(
             name,
-            agent_config=agent_config,
+            agent_llm_config=agent_llm_config,
             duty=duty,
             work_flow=work_flow,
             agent_type="TOOLMAN"
         )
         self._file = File(work_dir)
 
-    def tool_filter(self, param: Optional[str] = None) -> tuple[str, str, str, str]:
-        lang, code = CodeExecution.extract_code(param)
-        if lang == "summary" and code:
-            return lang, code, "Searching", "File content"
-        elif lang == "search" and code:
-            return lang, code, "Searching", "File content"
-        elif lang == "excel" and code:
-            return lang, code, "Searching", "File content"
-        else:
-            return "", "", "Searching", "File content"
+    def tool_parameter_identification(self, content: Optional[str] = None) -> tuple[List[tuple], str, str]:
+        param_list = CodeExecution.extract_code(content)
+        return param_list, "Searching", "File content"
 
-    def tool_function(self, conversation_id: int, task_id: int, lang: Optional[str] = None, code: Optional[str] = None,
-                      tokens: Optional[int] = None) -> tuple[str, int]:
-        param = text_to_json(code)
-        if param and lang == "summary" and code:
+    def tool_call_function(self, conversation_id: int, task_id: int, tool: str, param: str | dict) -> tuple[str, int]:
+        param = text_to_json(param)
+        if param and tool == "summary" and param:
             texts = self.switch.es.get_chat_file_pack(conversation_id, param["file"], 40)
-        elif param and lang == "search" and code:
+        elif param and tool == "search" and param:
             texts = self.switch.es.get_chat_file_hybrid(conversation_id, param["file"], param["question"])
-        elif param and lang == "excel" and code:
+        elif param and tool == "excel" and param:
             texts = self.switch.es.get_chat_file_pack(conversation_id, param["file"], 40)
         else:
             return """Search failure""", 18
         return self._summary_function(texts, param["question"])
 
     def _summary_function(self, texts: list, focus: str) -> tuple[str, int]:
-        text, token = compressed_texts(self.switch.default_language, texts, self.get_agent_config.summary_model_config,
+        text, token = compressed_texts(self.switch.default_language, texts, self.get_agent_llm_config.summary_model_config,
                                        focus,
-                                       self.get_agent_config.summary_model_config.request_config.max_messages_tokens)
+                                       self.get_agent_llm_config.summary_model_config.request_config.max_messages_tokens)
         if text and token:
             return text, token
         else:

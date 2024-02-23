@@ -1,4 +1,4 @@
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 
 from autogan.tools.code_execution_tool import CodeExecution
 
@@ -12,7 +12,7 @@ from autogan.tools.file_tool import File
 class ToolAgentFile(UniversalAgent):
     def __init__(
             self,
-            agent_config: Optional[Dict] = None,
+            agent_llm_config: Optional[Dict] = None,
             name: Optional[str] = "FileReadExp",
             duty: Optional[
                 str] = 'I am a document assistant, capable of helping you open local Word, Excel, and PDF files, and also able to append new content to the end of DOCX files.',
@@ -52,7 +52,7 @@ Note: When you decide to use a tool, please do not @ anyone.""",
 
         Receive file names with extensions.
 
-        :param agent_config: The agent configuration includes:
+        :param agent_llm_config: The agent configuration includes:
             agent 配置包括：
             - main_model: The LLM configuration of the agent's main body.
                 agent 主体的 LLM 配置。
@@ -72,28 +72,22 @@ Note: When you decide to use a tool, please do not @ anyone.""",
         """
         super().__init__(
             name,
-            agent_config=agent_config,
+            agent_llm_config=agent_llm_config,
             duty=duty,
             work_flow=work_flow,
             agent_type="TOOLMAN"
         )
         self._file = File(work_dir)
 
-    def tool_filter(self, param: Optional[str] = None) -> tuple[str, str, str, str]:
-        lang, code = CodeExecution.extract_code(param)
-        if lang == "reader" and code:
-            return lang, code, "Opening", "File content"
-        elif lang == "append" and code:
-            return lang, code, "Opening", "File content"
-        else:
-            return "", "", "Opening", "File content"
+    def tool_parameter_identification(self, content: Optional[str] = None) -> tuple[List[tuple], str, str]:
+        param_list = CodeExecution.extract_code(content)
+        return param_list, "Opening", "File content"
 
-    def tool_function(self, conversation_id: int, task_id: int, lang: Optional[str] = None, code: Optional[str] = None,
-                      tokens: Optional[int] = None) -> tuple[str, int]:
-        if lang == "reader" and code:
-            return self._reader_function(code)
-        elif lang == "append" and code:
-            return self._append_function(code)
+    def tool_call_function(self, conversation_id: int, task_id: int, tool: str, param: str | dict) -> tuple[str, int]:
+        if tool == "reader" and param:
+            return self._reader_function(param)
+        elif tool == "append" and param:
+            return self._append_function(param)
         else:
             return """Please make a choice between reader and append, and use the ``` symbol for encapsulation, for example:
         ```reader

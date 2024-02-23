@@ -6,7 +6,7 @@ from autogan.oai.count_tokens_utils import count_text_tokens
 from autogan.agents.universal_agent import UniversalAgent
 from enum import Enum
 
-from autogan.oai.conv_holder import ConvHolder
+from autogan.oai.conv_holder import DialogueManager
 
 
 class InputModel(Enum):
@@ -18,7 +18,7 @@ class HumanAgent(UniversalAgent):
     def __init__(
             self,
             name,
-            duty: Optional[str] = None,
+            duty: Optional[str] | Optional[dict] = None,
             model: Optional[InputModel] = InputModel.TERMINAL
     ):
         """Human agent
@@ -28,6 +28,10 @@ class HumanAgent(UniversalAgent):
         :param name: The agent name should be unique in the organizational structure.
         :param duty: Used to explain one's job responsibilities to other agents.
         """
+        duty = duty if duty else {
+            "EN": """I am a customer of your company, seeking help.""",
+            "CN": """我是贵公司的客户，来寻求帮助"""
+        }
         super().__init__(
             name,
             duty=duty,
@@ -35,24 +39,23 @@ class HumanAgent(UniversalAgent):
         )
         self._model = model
 
-    def new_task(self, conv_info: ConvHolder):
+    def new_task(self, conv_info: DialogueManager):
         if self._model == InputModel.TERMINAL:
             super().new_task(conv_info)
 
-    async def a_new_task(self, conv_info: ConvHolder):
+    async def a_new_task(self, conv_info: DialogueManager):
         if self._model == InputModel.TERMINAL:
             await super().a_new_task(conv_info)
 
-    def receive(self, conv_info: ConvHolder):
+    def receive(self, conv_info: DialogueManager):
         if self._model == InputModel.TERMINAL:
             super().receive(conv_info)
 
-    async def a_receive(self, conv_info: ConvHolder):
+    async def a_receive(self, conv_info: DialogueManager):
         if self._model == InputModel.TERMINAL:
             await super().a_receive(conv_info)
 
-    def tool_function(self, conversation_id: int, task_id: int, lang: Optional[str] = None, code: Optional[str] = None,
-                      tokens: Optional[int] = None) -> tuple[str, int, str, str]:
+    def tool_call_function(self, conversation_id: int, task_id: int, tool: str, param: str | dict) -> tuple[str, int, str, str]:
         if self._model == InputModel.TERMINAL:
             try:
                 reply = input("Please enter: ")

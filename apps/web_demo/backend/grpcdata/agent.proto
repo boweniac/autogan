@@ -146,8 +146,9 @@ message GetMessagesWhenChangedResponseData {
   string content_type = 3;
   string content_tag = 4;
   string agent_name = 5;
-  string content = 6;
-  uint32 tokens = 7;
+  string agent_type = 6;
+  string content = 7;
+  uint32 tokens = 8;
 }
 
 message GetMessagesRequest {

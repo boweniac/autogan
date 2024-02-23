@@ -25,7 +25,10 @@ class TestService(UniversalService):
         cust_manager = autogan.UniversalAgent("CustomerManager", "负责接待客户", work_flow="""
 1. 你是一个富有经验的客户经理，请尽一切可能满足客户的合法需求。
 
-2. 如果没有正确答案，请明确告知，而不是给出错误结果""")
+2. 如果没有正确答案，请明确告知，而不是给出错误结果
+
+3. 如客户有建议、投诉、合作等要求，请先 @Customer 问清客户的联系方式和具体要求后再告知 @Secretary
+""")
         search_config_dict = autogan.dict_from_json("SEARCH_CONFIG")
         search_exp = autogan.ToolAgentSearch(search_config_dict, name="SearchExpert")
         mail_config_dict = autogan.dict_from_json("MAIL_CONFIG")

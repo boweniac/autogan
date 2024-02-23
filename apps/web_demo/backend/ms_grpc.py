@@ -6,7 +6,8 @@ import autogan
 
 from apps.web_demo.backend.db.db_storage import DBStorage
 from apps.web_demo.backend.introduction_data import introduction_data
-from autogan.oai.conv_holder import ConvHolder
+from autogan.oai.chat_api_utils import ChatCompletionsRequest
+from autogan.oai.conv_holder import DialogueManager
 from autogan.tools.file_tool import File
 from pydub import AudioSegment
 
@@ -40,12 +41,14 @@ from flask import Flask, jsonify
 
 app = Flask(__name__)
 
+
 @app.route('/health', methods=['GET'])
 def health_check():
     # 在这里执行必要的健康检查
     # 例如: 检查数据库连接等
     # 如果一切正常，返回200
     return jsonify({"status": "healthy"}), 200
+
 
 app = FastAPI()
 storage = DBStorage()
@@ -55,6 +58,7 @@ es = ESSearch(es_config_dict["host"], es_config_dict["port"], es_config_dict["di
 test_service = TestService("LLM_CONFIG", "off", True, storage, es, bucket)
 consul_config_dict = autogan.dict_from_json("CONSUL_CONFIG")
 service_config_dict = autogan.dict_from_json("SERVICE_CONFIG")
+
 
 # aliyun_access = AliyunAccess()
 
@@ -109,8 +113,23 @@ class Agent(agent_pb2_grpc.AgentServicer):
                 data_queue = queue.Queue()
                 stop_event = threading.Event()
                 stream_response = GrpcResponse(data_queue, stop_event)
+
+                db_messages = storage.get_messages(conversation_id)
+                messages = []
+                for message in db_messages:
+                    messages.append({
+                        "role": "user" if message["agent_type"] == "HUMAN" else "assistant",
+                        "content": message["content"]
+                    })
+                messages.append({
+                    "role": "system",
+                    "content": "请帮我根据以上对话内容生成对话标题，字数在 20因内。"
+                })
+                request_data = ChatCompletionsRequest(messages, True)
+                conv_info = DialogueManager(conversation_id, stream_response, snowflake_id)
+
                 test_thread = threading.Thread(target=test_service.auto_title, args=(
-                    user_id, conversation_id, stream_response, snowflake_id))
+                    storage, request_data, conv_info, user_id, conversation_id))
                 test_thread.start()
                 while True:
                     while not data_queue.empty():
@@ -198,6 +217,7 @@ class Agent(agent_pb2_grpc.AgentServicer):
 
             if storage.user_conversation_permissions(user_id, conversation_id):
                 messages = storage.get_messages_when_changed(conversation_id, last_msg_id)
+                print(messages)
                 if messages is None:
                     messages = []
                 return agent_pb2.GetMessagesWhenChangedResponse(code=200, data=messages)
@@ -275,7 +295,7 @@ class Agent(agent_pb2_grpc.AgentServicer):
 
             data_queue = queue.Queue()
             stop_event = threading.Event()
-            # stream_response = GrpcResponse(data_queue, stop_event)
+            stream_response = GrpcResponse(data_queue, stop_event)
             if api_type == "chat":
                 msg_id = snowflake_id.next_id()
                 msg = {
@@ -284,18 +304,21 @@ class Agent(agent_pb2_grpc.AgentServicer):
                     "content_type": "file",
                     "content_tag": file_name,
                     "agent_name": "Customer",
+                    "agent_type": "HUMAN",
                     "content": f"Upload file: {file_name}",
                     "tokens": 0
                 }
                 par_task_id, task_id = storage.convert_main_or_sub_task_id(conversation_id, "CustomerManager")
                 if task_id is None:
                     task_id = snowflake_id.next_id()
-                storage.add_task(conversation_id, conversation_id, "Customer", "HUMAN", task_id, "CustomerManager", "AGENT", f"Upload file: {file_name}")
+                storage.add_task(conversation_id, conversation_id, "Customer", "HUMAN", task_id, "CustomerManager",
+                                 "AGENT", f"Upload file: {file_name}")
                 storage.add_message(conversation_id, msg)
-                storage.add_compressed_message(task_id,
-                                             {'role': 'user',
-                                              'name': "Customer", 'content': f"Upload file: {file_name}", 'tokens': 0})
-                test_service.add_file_message(conversation_id, "Customer", file_name)
+                conv_info = DialogueManager(conversation_id, stream_response, snowflake_id)
+                conv_info.init_message_before_generate("Customer", "HUMAN")
+                conv_info.before_switch(f"Upload file: {file_name}", 3)
+                test_service.add_file_message(conv_info)
+
                 data = {
                     "msg_id": msg_id,
                     "agent_name": "Customer",

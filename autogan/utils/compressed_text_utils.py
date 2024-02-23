@@ -5,11 +5,12 @@ from typing import Optional, List
 from autogan.oai.chat_api_utils import ChatCompletionsRequest
 from autogan.oai.chat_config_utils import LLMConfig
 from autogan.oai.count_tokens_utils import count_text_tokens
+from autogan.prompt.utils.compressed_text_prompts import CompressedTextPrompts
 from autogan.utils.environment_utils import environment_info
 from autogan.oai.chat_generate_utils import generate_chat_completion_internal
 
 
-def compressed_text_universal(text: str,
+def compressed_text_universal(lang: str, text: str,
                               summary_model_config: LLMConfig,
                               focus: Optional[str] = None,
                               safe_size: Optional[int] = None) -> tuple[Optional[str], Optional[int]]:
@@ -48,9 +49,9 @@ def compressed_text_universal(text: str,
 
     for st in split_texts:
         if focus:
-            content, tokens = generate_text_clues(st, focus, summary_model_config)
+            content, tokens = generate_text_clues(lang, st, focus, summary_model_config)
         else:
-            content, tokens = generate_text_summary(st, summary_model_config)
+            content, tokens = generate_text_summary(lang, st, summary_model_config)
 
         if content != "None":
             compressed_text += content + "\n"
@@ -58,14 +59,14 @@ def compressed_text_universal(text: str,
 
     if compressed_text:
         if safe_size and safe_size < total_tokens:
-            return compressed_text_into_safe_size(compressed_text, safe_size, summary_model_config)
+            return compressed_text_into_safe_size(lang, compressed_text, safe_size, summary_model_config)
         else:
             return compressed_text, total_tokens
     else:
         return None, None
 
 
-def compressed_text_into_safe_size(text: str, safe_size: int, summary_model_config: LLMConfig) \
+def compressed_text_into_safe_size(lang: str, text: str, safe_size: int, summary_model_config: LLMConfig) \
         -> tuple[Optional[str], Optional[int]]:
     """Compress the text to a safe size
     压缩文本至安全尺寸
@@ -100,7 +101,7 @@ def compressed_text_into_safe_size(text: str, safe_size: int, summary_model_conf
     split_safe_size = int(safe_size / len(split_texts))
 
     for st in split_texts:
-        content, tokens = generate_text_summary(st, summary_model_config, split_safe_size)
+        content, tokens = generate_text_summary(lang, st, summary_model_config, split_safe_size)
 
         if content:
             compressed_text += content + "\n"
@@ -112,7 +113,7 @@ def compressed_text_into_safe_size(text: str, safe_size: int, summary_model_conf
         return None, None
 
 
-def generate_text_summary(text: str, summary_model_config: LLMConfig, safe_size: Optional[int] = None) \
+def generate_text_summary(lang: str, text: str, summary_model_config: LLMConfig, safe_size: Optional[int] = None) \
         -> tuple[str, int]:
     """Generate a general summary of the text
     生成文本普通摘要
@@ -130,34 +131,15 @@ def generate_text_summary(text: str, summary_model_config: LLMConfig, safe_size:
         --total_tokens: Total tokens after compression.
             压缩后的整体tokens。
     """
-
-    if safe_size:
-        system_prompt = """I hope you are an article filter and refiner, filtering and refining the articles sent by users. Please ensure that your summary does not exceed the limit of max_tokens.
-When the content of the article is not enough to refine, please omit other polite language and only output one word: None.
-If the article can be refined, please help me filter out sensitive content related to politics, geopolitics, violence, and sex from the article, and extract the main content from the article.
-Please note that the description perspective and chapter structure of the extracted content should be as consistent as possible with the original text, and try to retain details for subsequent reasoning. Please omit other polite language and only output the refined content."""
-        chat_prompt = f"max_tokens: {safe_size}\n\nArticle content:\n{text}"
-    #        system_prompt = """我希望你是一个文章过滤与提炼器，过滤和提炼用户发送的文章，请确保您的总结不超过 max_tokens 的限制.
-    # 当文章内容不足以提炼时，请省略其他客套用语，仅输出一个单词：None。
-    # 如果文章可以精炼请帮我滤掉文章中与政治、地缘政治、暴力、性等有关的敏感内容,并从文章中提炼出主要内容.
-    # 注意提炼出的内容其描述视角和章节结构尽量与原文一致，并尽可能的保留细节以用于后续推理，请省略其他客套用语，仅输出提炼好的内容。"""
-    #        chat_prompt = f"max_tokens: {safe_size}\n\n文章内容：\n\n{text}"
-    else:
-        system_prompt = """I hope you can serve as an article filter and refiner, filtering and refining the articles sent by users. If the content of the article is insufficient for refinement, please omit other polite phrases and output only one word: None.
-If the article can be refined, please help me filter out sensitive content related to politics, geopolitics, violence, and sex from the article, and extract the main content from the article.
-Please note that the perspective and chapter structure of the extracted content should be as consistent with the original as possible, and retain as many details as possible for subsequent reasoning. Please omit other polite phrases and only output the refined content."""
-        chat_prompt = f"Article content:\n{text}"
-        # system_prompt = """我希望你是一个文章过滤与提炼器，过滤和提炼用户发送的文章。当文章内容不足以提炼时，请省略其他客套用语，仅输出一个单词：None。
-        #                  如果文章可以精炼请帮我滤掉文章中与政治、地缘政治、暴力、性等有关的敏感内容，并从文章中提炼出主要内容。
-        #                  注意提炼出的内容其描述视角和章节结构尽量与原文一致，并尽可能的保留细节以用于后续推理。请省略其他客套用语，仅输出提炼好的内容。"""
-        # chat_prompt = f"文章内容：\n{text}"
+    compressed_text_prompts = CompressedTextPrompts(lang)
+    system_prompt, chat_prompt = compressed_text_prompts.summary(text, safe_size)
 
     chat_messages = [{'role': 'system', 'content': system_prompt}, {'role': 'user', 'content': chat_prompt}]
     request_data = ChatCompletionsRequest(chat_messages, False)
     return generate_chat_completion_internal(summary_model_config, request_data)
 
 
-def generate_text_clues(text: str, focus: str, summary_model_config: LLMConfig) -> tuple[str, int]:
+def generate_text_clues(lang: str, text: str, focus: str, summary_model_config: LLMConfig) -> tuple[str, int]:
     """Generate a clue summary of the text
     生成文本线索摘要
 
@@ -174,15 +156,12 @@ def generate_text_clues(text: str, focus: str, summary_model_config: LLMConfig) 
         --total_tokens: Total tokens after compression.
             压缩后的整体tokens。
     """
+    compressed_text_prompts = CompressedTextPrompts(lang)
+    system_prompt, chat_prompt = compressed_text_prompts.clue(text, focus)
 
-    info = environment_info()
-    system_prompt = """I hope you are an agent who is good at discovering the truth in real-time, capable of finding content that helps infer the answer to the question from the information sent by users. 
-Please note that if the content of the information has no extractable value, please omit other polite expressions and output only one word: None. Also, please help me filter out sensitive content related to politics, geopolitics, violence, and sex in the information."""
-    # system_prompt = """我希望你是一个善于发现实时真相的探员, 能从用户发送的资料中帮我找到有助于推断出问题答案的内容。
-    #                     需要注意的是，如果资料内容没有可提取的价值，请省略其他客套用语，仅输出一个单词：None。另外还请帮我过滤掉资料中与政治、地缘政治、暴力、性等有关的敏感内容。"""
     chat_messages = [{'role': 'system', 'content': system_prompt}, {'role': 'user',
-                                                                    'content': f'The current question is:{focus}\n\nEnvironmental information:\n{info}\n\nMaterial content:\n\n{text}'}]
-    # chat_messages = [{'role': 'user', 'content': f'当前的问题是：{focus}\n\n环境信息：\n{info}\n\n资料内容：\n\n{text}'}]
+                                                                    'content': chat_prompt}]
+
     request_data = ChatCompletionsRequest(chat_messages, False)
     return generate_chat_completion_internal(summary_model_config, request_data)
 
