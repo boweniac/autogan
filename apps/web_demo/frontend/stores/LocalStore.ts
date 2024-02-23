@@ -59,7 +59,7 @@ const store = () => ({ ...initialState } as LocalState);
 
 export const localStore = create<LocalState>()(
     persist(store, {
-        name: "local-store-v2",
+        name: "local-store-v3",
         partialize: (state) =>
             Object.fromEntries(
                 Object.entries(state).filter(([key]) => !excludeFromState.includes(key))
