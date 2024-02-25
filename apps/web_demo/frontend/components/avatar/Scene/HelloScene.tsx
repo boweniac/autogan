@@ -90,7 +90,6 @@ const HelloScene: React.FC<HelloSceneProps> = ({ avatarName, animation, test, au
   const animations = animationGroup[animation]
 
   useEffect(() => {
-    console.log(`audioAndLip:`+JSON.stringify(audioAndLip));
     setName(audioAndLip?.avatarName || avatarName || "customerManagerGirl")
 }, [avatarName, audioAndLip]);
 

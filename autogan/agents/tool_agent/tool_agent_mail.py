@@ -74,9 +74,7 @@ The "files" field is optional.""",
 
     def tool_call_function(self, conversation_id: int, task_id: int, tool: str, param: str | dict) -> tuple[str, int]:
         try:
-            print(f"code: {param}")
             param = text_to_json(param)
-            print(f"param: {param}")
             if param:
                 reply = self._send_email.send(param['to'], param.get("subject", ""), param.get("text", ""), param.get("files", []))
 

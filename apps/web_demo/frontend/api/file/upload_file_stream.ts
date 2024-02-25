@@ -36,7 +36,6 @@ export async function uploadFileStreamAPI(files: any[], apiType: string, baseId:
             body: formData,
         })
             .then(response => {
-                console.log(`response:`+JSON.stringify(response));
                 if (response.ok) {
                     return response.body;
                 } else {

@@ -1,5 +1,5 @@
 import { Anchor, Progress, rem, Text } from "@mantine/core";
-import { IconFileTypeDoc, IconFileTypeDocx, IconFileTypePdf, IconFileUnknown } from "@tabler/icons-react";
+import { IconFileTypeDoc, IconFileTypeDocx, IconFileTypePdf, IconFileTypeXls, IconFileUnknown } from "@tabler/icons-react";
 import { getFileExtension } from "./FileBlockUtil";
 
 
@@ -28,7 +28,17 @@ type FileBlockProps = {
                 style={{ width: rem(80), height: rem(80) }}
                 stroke={1.5}
           />
-        ) : (
+        ) : file_type == "xlsx" ? (
+          <IconFileTypeXls
+              style={{ width: rem(80), height: rem(80) }}
+              stroke={1.5}
+        />
+      ) : file_type == "xls" ? (
+        <IconFileTypeXls
+            style={{ width: rem(80), height: rem(80) }}
+            stroke={1.5}
+      />
+    ) : (
             <IconFileUnknown
                 style={{ width: rem(80), height: rem(80) }}
                 stroke={1.5}

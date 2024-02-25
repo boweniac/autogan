@@ -50,19 +50,26 @@ export const AgentIntroductionSend = async (caseID: string, sliceCallback: (src:
                                 sliceCallback(data)
                             }
 
-                            let currentChar = 0;
-                            let prevText = ""
-                            const typeWriter = setInterval(() => {
-                                if (message_block.content) {
-                                    prevText += message_block.content[currentChar]
-                                    updateIntroductionConversationMessageBlockState(messageLocalID, messageBlockLocalID, {content: prevText})
-                                    currentChar++;
-                                    if (currentChar === message_block.content.length) {
-                                        clearInterval(typeWriter)
-                                        processMessageBlocks(blockIndex + 1);
-                                    };
-                                }
-                            }, 200);
+                            if (message_block.audioAndLip?.audioFile) {
+                                let currentChar = 0;
+                                let prevText = ""
+                                // const regex = /[\u4e00-\u9fa5]|[a-zA-Z]+/g;
+                                const contents = message_block.content?.split(/((?:[\u4e00-\u9fa5])|(?:[a-zA-Z]+))/g).filter(Boolean);
+                                const typeWriter = setInterval(() => {
+                                    if (contents) {
+                                        prevText += contents[currentChar]
+                                        updateIntroductionConversationMessageBlockState(messageLocalID, messageBlockLocalID, {content: prevText})
+                                        currentChar++;
+                                        if (currentChar === contents.length) {
+                                            clearInterval(typeWriter)
+                                            processMessageBlocks(blockIndex + 1);
+                                        };
+                                    }
+                                }, 200);
+                            } else {
+                                updateIntroductionConversationMessageBlockState(messageLocalID, messageBlockLocalID, {content: message_block.content})
+                                processMessageBlocks(blockIndex + 1);
+                            }
 
                             // return () => clearInterval(typeWriter);
                         } else {

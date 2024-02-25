@@ -159,10 +159,7 @@ export default function AgentFrame() {
                 }
             }, () => {
                 loadingEnd()
-                console.log(`getAgentConversationInfoState(queryConversationID):`+JSON.stringify(getAgentConversationInfoState(queryConversationID)));
-                console.log(`getAgentConversationInfoState(queryConversationID)?.title:`+JSON.stringify(getAgentConversationInfoState(queryConversationID)?.title));
                 if (!getAgentConversationInfoState(queryConversationID)?.title) {
-                    console.log(`lslslslsl:`);
                     const s = new AbortController().signal;
                     AutoTitle(queryConversationID, s, ()=>{})
                 }

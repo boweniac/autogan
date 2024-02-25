@@ -54,7 +54,7 @@ export default function MessagesDisplay(props: MessagesDisplayProps) {
         // 当 yourVariable 变化时，设置一个1秒的延时
         const timer = setTimeout(() => {
             setHelloSelect(true)
-        }, 1000);
+        }, 2500);
     
         // 如果 yourVariable 在1秒内再次变化，清除上一个定时器
         return () => clearTimeout(timer);

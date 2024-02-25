@@ -53,7 +53,6 @@ Your python code
         return [("", content)], "execution", "Execution results"
 
     def tool_call_function(self, conversation_id: int, task_id: int, tool: str, param: str | dict) -> tuple[str, int]:
-        print(f"param: {param}")
         try:
             execution_result, tokens, output = self._code_execution.code_execution_reply(param)
             if execution_result:

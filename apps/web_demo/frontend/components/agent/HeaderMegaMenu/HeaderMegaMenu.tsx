@@ -59,10 +59,8 @@ export function HeaderMegaMenu(props: HeaderMegaMenuProps) {
   useEffect(() => {
     // 这确保了window.innerHeight只在客户端获取
     setViewportHeight(window.innerHeight);
-    console.log(`viewportHeight:`+JSON.stringify(window.innerHeight));
     const handleResize = () => {
       setViewportHeight(window.innerHeight);
-      console.log(`viewportHeight:`+JSON.stringify(window.innerHeight));
     };
 
     window.addEventListener('resize', handleResize);

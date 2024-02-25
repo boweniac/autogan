@@ -32,7 +32,17 @@ export default function MarkdownBlock(props: MarkdownBlockProps) {
     //   if (message.role === "assistant") {
       md = md.use(mdHighlight);
     //   }
-  
+      md.use(function(md) {
+        const defaultRender = md.renderer.rules.image || function(tokens, idx, options, env, self) {
+          return self.renderToken(tokens, idx, options);
+        };
+      
+        md.renderer.rules.image = function(tokens, idx, options, env, self) {
+          tokens[idx].attrJoin('class', 'auto-resize');
+          return defaultRender(tokens, idx, options, env, self);
+        };
+      });
+      
       return md.render(props.content);
     };
   

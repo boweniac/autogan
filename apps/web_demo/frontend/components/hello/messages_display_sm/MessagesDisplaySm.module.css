@@ -1,5 +1,6 @@
 .scrollArea {
     height: calc(50vh);
+    padding-bottom: rem(20);
     @media (min-width: $mantine-breakpoint-sm) {
         display: none;
       }

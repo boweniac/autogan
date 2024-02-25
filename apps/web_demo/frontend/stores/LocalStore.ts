@@ -51,7 +51,8 @@ export const initialState = {
         "SearchExpert": "searchExpert",
         "Secretary": "secretary",
         "Tester": "tester",
-        "system": "tester" 
+        "system": "tester",
+        "PainterExp": "tester" 
     }
 }
 

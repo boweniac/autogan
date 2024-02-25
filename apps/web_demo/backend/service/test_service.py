@@ -27,7 +27,7 @@ class TestService(UniversalService):
 
 2. 如果没有正确答案，请明确告知，而不是给出错误结果
 
-3. 如客户有建议、投诉、合作等要求，请先 @Customer 问清客户的联系方式和具体要求后再告知 @Secretary
+3. 如客户有建议、投诉、合作等要求，请先 @Customer 问清客户的联系方式和具体要求后，再告知 @Secretary。注意：一定要获得对方的联系方式，如未提供可反复询问
 """)
         search_config_dict = autogan.dict_from_json("SEARCH_CONFIG")
         search_exp = autogan.ToolAgentSearch(search_config_dict, name="SearchExpert")

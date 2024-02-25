@@ -368,7 +368,7 @@ class GetIntroductionResponseAudioAndLipData(_message.Message):
     def __init__(self, audio_file: _Optional[_Union[GetIntroductionResponseAudioAndLipAudioFileData, _Mapping]] = ..., lips_data: _Optional[str] = ...) -> None: ...
 
 class GetIntroductionResponseAudioAndLipAudioFileData(_message.Message):
-    __slots__ = ("customer_manager_boy", "customer_manager_girl", "coder", "document_exp", "search_expert", "secretary", "tester")
+    __slots__ = ("customer_manager_boy", "customer_manager_girl", "coder", "document_exp", "search_expert", "secretary", "tester", "painter_exp")
     CUSTOMER_MANAGER_BOY_FIELD_NUMBER: _ClassVar[int]
     CUSTOMER_MANAGER_GIRL_FIELD_NUMBER: _ClassVar[int]
     CODER_FIELD_NUMBER: _ClassVar[int]
@@ -376,6 +376,7 @@ class GetIntroductionResponseAudioAndLipAudioFileData(_message.Message):
     SEARCH_EXPERT_FIELD_NUMBER: _ClassVar[int]
     SECRETARY_FIELD_NUMBER: _ClassVar[int]
     TESTER_FIELD_NUMBER: _ClassVar[int]
+    PAINTER_EXP_FIELD_NUMBER: _ClassVar[int]
     customer_manager_boy: str
     customer_manager_girl: str
     coder: str
@@ -383,4 +384,5 @@ class GetIntroductionResponseAudioAndLipAudioFileData(_message.Message):
     search_expert: str
     secretary: str
     tester: str
-    def __init__(self, customer_manager_boy: _Optional[str] = ..., customer_manager_girl: _Optional[str] = ..., coder: _Optional[str] = ..., document_exp: _Optional[str] = ..., search_expert: _Optional[str] = ..., secretary: _Optional[str] = ..., tester: _Optional[str] = ...) -> None: ...
+    painter_exp: str
+    def __init__(self, customer_manager_boy: _Optional[str] = ..., customer_manager_girl: _Optional[str] = ..., coder: _Optional[str] = ..., document_exp: _Optional[str] = ..., search_expert: _Optional[str] = ..., secretary: _Optional[str] = ..., tester: _Optional[str] = ..., painter_exp: _Optional[str] = ...) -> None: ...

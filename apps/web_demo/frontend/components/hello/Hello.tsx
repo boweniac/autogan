@@ -102,6 +102,7 @@ export default function Hello() {
                 // console.log(`nextAudio:`+JSON.stringify(nextAudio));
                 // console.log(`rest:`+JSON.stringify(rest));
                 isPlaying.current = true
+                console.log(`nextAudio:`+JSON.stringify(nextAudio));
                 setAudioAndLip(nextAudio)
                 // playAudio(nextAudio); // 播放下一个音频
                 return rest
@@ -153,6 +154,7 @@ export default function Hello() {
                 const audioAndLip = convertToAudioAndLipDemo(value, agentAvatarMapping[value?.agentName || ""])
                 setAudioStack(prevStack => [...prevStack, {...audioAndLip, avatarName: agentAvatarMapping[audioAndLip?.agentName || ""]}]);
                 if (!isPlaying.current) {
+                    console.log(`isPlaying.current:`+JSON.stringify(isPlaying.current));
                     playNextAudio();
                 }
             }
@@ -189,6 +191,7 @@ export default function Hello() {
                             const audioAndLip = convertToAudioAndLipDemo(value, agentAvatarMapping[value?.agentName || ""])
                             setAudioStack(prevStack => [...prevStack, audioAndLip]);
                             if (!isPlaying.current) {
+                                console.log(`MessagesDisplay`);
                                 playNextAudio();
                             }
                         }} selectCallback={(value)=>{
@@ -198,7 +201,8 @@ export default function Hello() {
                         }}></MessagesDisplay>
                     </Stack>
                 <RoleDisplay avatarName={avatarName} audioAndLip={audioAndLip} audioEndCallback={()=>{
-                    setAudioAndLip(undefined)
+                    // setAudioAndLip(undefined)
+                    console.log(`audioEndCallback`);
                     playNextAudio()
                 }}/>
             </Stack> : <Box

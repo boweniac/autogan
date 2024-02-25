@@ -75,6 +75,17 @@ export const avatarConfig: { [key: string]: AvatarObject } = {
         "cameraPositionY": 1.7,
         "cameraPositionZ": 1.4,
         "targetY": 1.7,
+    },
+    "painterExp": {
+        "modelPath": "/avatars/Tester.glb",
+        "voice": "fable",
+        "ambientLightIntensity": 4,
+        "pointLightY": 1,
+        "pointLightZ": 1,
+        "pointLightIntensity": 4,
+        "cameraPositionY": 1.7,
+        "cameraPositionZ": 1.4,
+        "targetY": 1.7,
     }
 };
 
@@ -104,14 +115,14 @@ export interface AvatarObject {
 
 export const corresponding: { [key: string]: string } = {
     "A": "viseme_PP",
-    "B": "viseme_kk",
-    "C": "viseme_I",
+    "B": "viseme_SS",
+    "C": "viseme_E",
     "D": "viseme_aa",
     "E": "viseme_O",
     "F": "viseme_U",
     "G": "viseme_FF",
-    "H": "viseme_TH",
-    "X": "viseme_PP",
+    "H": "viseme_CH",
+    "X": "viseme_sil",
   };
   
   export const nodeKeyToIndex: { [key: string]: number } = {

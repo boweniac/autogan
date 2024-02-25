@@ -87,9 +87,8 @@ const GLBModel: React.FC<GLBModelProps> = ({ animation, position, audioAndLip, a
         // const audio = new Audio()
         // const audio = new Audio(`${audioAndLip.audioFile}`)
         audio.src = `${audioAndLip.audioFile}`;
-        console.log(`audioAndLip.audioFile:`+JSON.stringify(audioAndLip.audioFile));
         audio.play().catch(error => {
-          console.log(`audio.play.error:`+JSON.stringify(error));
+          console.log(`play.error:`+JSON.stringify(error));
           if (audioEndCallback) {
             audioEndCallback()
           }
@@ -109,7 +108,7 @@ const GLBModel: React.FC<GLBModelProps> = ({ animation, position, audioAndLip, a
                   }
                   const teethNode = teethNodes[audioAndLip?.avatarName || avatarName]
                   if (teethNode instanceof THREE.Mesh && teethNode.morphTargetInfluences) {
-                    teethNode.morphTargetInfluences[currentMorphTargetIndex.current] = 0;
+                    teethNode.morphTargetInfluences[11] = 0;
                   }
                   break
                 }
@@ -119,7 +118,7 @@ const GLBModel: React.FC<GLBModelProps> = ({ animation, position, audioAndLip, a
                 }
                 const teethNode = teethNodes[audioAndLip?.avatarName || agentAvatarMapping["customerManagerGirl"]]
                 if (teethNode instanceof THREE.Mesh && teethNode.morphTargetInfluences) {
-                  teethNode.morphTargetInfluences[currentMorphTargetIndex.current] = 0;
+                  teethNode.morphTargetInfluences[11] = 0;
                 }
               }
             }

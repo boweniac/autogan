@@ -137,6 +137,8 @@ xx 风格，xx 内容
 
     def tool_call_function(self, conversation_id: int, task_id: int, tool: str, param: str | dict) -> tuple[str, int]:
         if tool == "python" and param:
+            param = f"""```python
+{param}```"""
             content, completion_tokens = self._matplotlib_function(conversation_id, param)
             return content, completion_tokens
         elif tool == "model" and param:
