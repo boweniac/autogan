@@ -426,7 +426,7 @@ def serve():
         # 尝试注册服务到Consul
         c.agent.service.register(
             "agent",
-            service_id="agent-2",
+            service_id="agent-3",
             address=consul_host,
             port=grpc_port,
             tags=[consul_config_dict["tags"]],
