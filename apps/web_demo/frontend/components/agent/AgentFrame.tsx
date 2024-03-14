@@ -100,7 +100,7 @@ export default function AgentFrame() {
       const getAudio = (audioLink: AudioAndLip) => {
         if (audioLink.text) {
             isGetingAudio.current = true
-            audioAndLipAPI(audioLink.text, avatarConfig[agentAvatarMapping[audioLink.agentName || ""]].voice || "", 1).then((res)=>{
+            audioAndLipAPI(audioLink.text, avatarConfig[agentAvatarMapping[audioLink.agentName || ""]].voice || "", 0.8).then((res)=>{
                 isGetingAudio.current = false
                 isGeting.current = false
                 getNextAudio()

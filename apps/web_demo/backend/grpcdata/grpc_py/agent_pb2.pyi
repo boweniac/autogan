@@ -386,3 +386,35 @@ class GetIntroductionResponseAudioAndLipAudioFileData(_message.Message):
     tester: str
     painter_exp: str
     def __init__(self, customer_manager_boy: _Optional[str] = ..., customer_manager_girl: _Optional[str] = ..., coder: _Optional[str] = ..., document_exp: _Optional[str] = ..., search_expert: _Optional[str] = ..., secretary: _Optional[str] = ..., tester: _Optional[str] = ..., painter_exp: _Optional[str] = ...) -> None: ...
+
+class TextTranslateRequest(_message.Message):
+    __slots__ = ("text", "model", "voice", "speed")
+    TEXT_FIELD_NUMBER: _ClassVar[int]
+    MODEL_FIELD_NUMBER: _ClassVar[int]
+    VOICE_FIELD_NUMBER: _ClassVar[int]
+    SPEED_FIELD_NUMBER: _ClassVar[int]
+    text: str
+    model: str
+    voice: str
+    speed: float
+    def __init__(self, text: _Optional[str] = ..., model: _Optional[str] = ..., voice: _Optional[str] = ..., speed: _Optional[float] = ...) -> None: ...
+
+class TextTranslateResponse(_message.Message):
+    __slots__ = ("code", "msg", "data")
+    CODE_FIELD_NUMBER: _ClassVar[int]
+    MSG_FIELD_NUMBER: _ClassVar[int]
+    DATA_FIELD_NUMBER: _ClassVar[int]
+    code: int
+    msg: str
+    data: _containers.RepeatedCompositeFieldContainer[TextTranslateResponseData]
+    def __init__(self, code: _Optional[int] = ..., msg: _Optional[str] = ..., data: _Optional[_Iterable[_Union[TextTranslateResponseData, _Mapping]]] = ...) -> None: ...
+
+class TextTranslateResponseData(_message.Message):
+    __slots__ = ("split", "translate", "audio")
+    SPLIT_FIELD_NUMBER: _ClassVar[int]
+    TRANSLATE_FIELD_NUMBER: _ClassVar[int]
+    AUDIO_FIELD_NUMBER: _ClassVar[int]
+    split: str
+    translate: str
+    audio: str
+    def __init__(self, split: _Optional[str] = ..., translate: _Optional[str] = ..., audio: _Optional[str] = ...) -> None: ...

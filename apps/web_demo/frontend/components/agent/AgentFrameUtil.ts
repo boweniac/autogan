@@ -80,7 +80,7 @@ export const AgentConversationSend = async (conversationID: string, value: strin
                         updateAgentConversationMessageBlockState(conversationID, messageLocalID, messageBlockLocalID, {contentTag: res.contentTag})
                     }
                     // 一个消息块的结束
-                    if (textSlice && agent_name != "PainterExp") {
+                    if (textSlice && agent_name != "PainterExp" && agent_name != "SearchExpert") {
                         sliceCallback({"text": textSlice, "agentName": agent_name})
                     }
                     text = ""
@@ -136,7 +136,7 @@ export const AgentConversationSend = async (conversationID: string, value: strin
                             if (res.content.includes('```')) {
                                 // 识别代码块的开始和结束
                                 coding = !coding
-                                if (coding && textSlice && agent_name != "PainterExp") {
+                                if (coding && textSlice && agent_name != "PainterExp" && agent_name != "SearchExpert") {
                                     sliceCallback({"text": textSlice, "agentName": agent_name})
                                     hold = true
                                     sliceLength = 0
@@ -147,7 +147,7 @@ export const AgentConversationSend = async (conversationID: string, value: strin
                                 // 跳过代码块
                                 textSlice += res.content
                                 sliceLength++
-                                if (textSlice.length > 10 && !coding &&  agent_name != "PainterExp") {
+                                if (textSlice.length > 10 && !coding &&  agent_name != "PainterExp" && agent_name != "SearchExpert") {
                                     sliceCallback({"text": textSlice, "agentName": agent_name})
                                     hold = true
                                     sliceLength = 0
@@ -162,7 +162,7 @@ export const AgentConversationSend = async (conversationID: string, value: strin
                         if (res.content.includes('```')) {
                             // 识别代码块的开始和结束
                             coding = !coding
-                            if (coding && textSlice &&  agent_name != "PainterExp") {
+                            if (coding && textSlice &&  agent_name != "PainterExp" && agent_name != "SearchExpert") {
                                 sliceCallback({"text": textSlice, "agentName": agent_name})
                                 hold = true
                                 sliceLength = 0
@@ -173,12 +173,12 @@ export const AgentConversationSend = async (conversationID: string, value: strin
                             textSlice += res.content
                             sliceLength++
                             if (regex.test(res.content)) {
-                                if (sliceLength > 15) {
+                                if (sliceLength > 60) {
                                     hold = false
                                 }
 
                             }
-                            if (sliceLength > 15 && !hold && !coding &&  agent_name != "PainterExp") {
+                            if (sliceLength > 60 && !hold && !coding &&  agent_name != "PainterExp" && agent_name != "SearchExpert") {
                                 sliceCallback({"text": textSlice, "agentName": agent_name})
                                 hold = true
                                 sliceLength = 0

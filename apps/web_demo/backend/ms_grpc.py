@@ -356,6 +356,57 @@ class Agent(agent_pb2_grpc.AgentServicer):
             data = []
         return agent_pb2.GetIntroductionResponse(code=200, data=data)
 
+    def RpcTextTranslate(self, request, context):
+        text = request.text
+        model = request.model
+        voice = request.voice
+        speed = request.speed
+        print(text)
+
+        paragraphs = text.split('\n')
+        # paragraphs = []
+        # paragraph = []
+        #
+        # for line in lines:
+        #     if line.strip() == '':
+        #         if paragraph:
+        #             paragraphs.append(' '.join(paragraph))
+        #             paragraph = []
+        #     else:
+        #         paragraph.append(line.strip())
+        #
+        # if paragraph:
+        #     paragraphs.append(' '.join(paragraph))
+
+        translate_list = []
+
+        llm_config_dict = autogan.dict_from_json("LLM_CONFIG")
+        default_agent_config = autogan.oai.chat_config_utils.AgentLLMConfig(llm_config_dict).summary_model_config
+
+        for paragraph in paragraphs:
+            audio_speech_request = AudioSpeechRequest(paragraph, model, voice, speed)
+
+            file_name, lips_data = generate_audio(audio_speech_request)
+
+            file_url = f"https://aibowen-base.boweniac.top/{file_name}"
+
+#             messages = [{'role': 'user', 'content': f"""你好，请帮我将以下英文的含义使用中文表达出来
+#
+# {paragraph}"""}]
+#             request_data = autogan.oai.chat_api_utils.ChatCompletionsRequest(messages, False)
+#             content, _ = autogan.oai.chat_generate_utils.generate_chat_completion_internal(default_agent_config, request_data)
+            content = ""
+            data = {
+                "split": paragraph,
+                "translate": content,
+                "audio": file_url
+            }
+
+            translate_list.append(data)
+
+        return agent_pb2.TextTranslateResponse(code=200, data=translate_list)
+
+
 
 def serve():
     try:

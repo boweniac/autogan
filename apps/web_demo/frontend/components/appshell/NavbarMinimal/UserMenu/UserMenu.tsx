@@ -17,7 +17,6 @@ export default function UserMenu() {
     const userToken = localStore((state: LocalState) => state.userToken);
     const userPhone = localStore((state: LocalState) => state.userPhone);
     const openedLogInModal = localStore((state: LocalState) => state.openedLogInModal);
-    // const [openedLogInModal, { open: openLogInModal, close: closeLogInModal }] = useDisclosure(false);
     const [openedChangePhoneModal, { open: openChangePhoneModal, close: closeChangePhoneModal }] = useDisclosure(false);
     const [openedChangePasswordModal, { open: openChangePasswordModal, close: closeChangePasswordModal }] = useDisclosure(false);
     const typeLogInModal = useRef("登录");

@@ -18,6 +18,7 @@ service Agent {
   rpc RpcAudioToText(AudioToTextRequest) returns (AudioToTextResponse);
   rpc RpcAddFileStream (AddFileRequest) returns (stream StreamResponse) {}
   rpc RpcGetIntroduction(GetIntroductionRequest) returns (GetIntroductionResponse);
+  rpc RpcTextTranslate(TextTranslateRequest) returns (TextTranslateResponse);
 }
 
 message AgentRequest {
@@ -249,4 +250,23 @@ message GetIntroductionResponseAudioAndLipAudioFileData {
   string secretary = 6;
   string tester = 7;
   string painter_exp = 8;
+}
+
+message TextTranslateRequest {
+  string text = 1;
+  string model = 2;
+  string voice = 3;
+  float speed = 4;
+}
+
+message TextTranslateResponse {
+  uint32 code = 1;
+  string msg = 2;
+  repeated TextTranslateResponseData data = 3;
+}
+
+message TextTranslateResponseData {
+  string split = 1;
+  string translate = 2;
+  string audio = 3;
 }
