@@ -139,7 +139,7 @@ xx 风格，xx 内容
         if tool == "python" and param:
             param = f"""```python
 {param}```"""
-            content, completion_tokens = self._matplotlib_function(conversation_id, param)
+            content, completion_tokens = self._matplotlib_function(task_id, param)
             return content, completion_tokens
         elif tool == "model" and param:
             content, completion_tokens = self._model_function(param)
@@ -150,14 +150,13 @@ xx 风格，xx 内容
 one wolfram query
 ```""", 18
 
-    def _matplotlib_function(self, conversation_id: int, param: str) -> tuple[str, int]:
-        print(f"param: {param}")
+    def _matplotlib_function(self, task_id: int, param: str) -> tuple[str, int]:
         try:
             execution_result, tokens, output = self._code_execution.code_execution_reply(param)
             if output:
                 output = output.rstrip("\n")
-                self._bucket.put_object_from_file(f"{conversation_id}/{output}", f"extensions/{output}")
-                return f'![Example Image](https://aibowen-base.boweniac.top/{conversation_id}/{output})', tokens
+                self._bucket.put_object_from_file(f"{task_id}/{output}", f"extensions/{output}")
+                return f'![Example Image](https://aibowen-base.boweniac.top/{task_id}/{output})', tokens
             else:
                 raise ValueError("Code execution failed.")
         except Exception as e:

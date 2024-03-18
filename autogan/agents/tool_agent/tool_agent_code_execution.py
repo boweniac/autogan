@@ -61,6 +61,4 @@ Your python code
                 raise ValueError("Code execution failed.")
         except Exception as e:
             print(e)
-            return ("Code execution failed, please make sure that the code guard has added ``` symbols at the， To "
-                    "install dependencies, use the python3 -m pip install xxx statement"
-                    "beginning and end"), 20
+            return ("Code execution failed, please make sure that the code guard has added ``` symbols at the beginning and end"), 20

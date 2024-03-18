@@ -41,6 +41,13 @@ class TestService(UniversalService):
 @Tester 请帮我执行代码
 ```python
 Your code
+print(xxx)
+```
+注意：你的结果必须以print进行输出，否则无法得到反馈。
+
+3. 当运行结果提示 No module 时，请不要轻易放弃，你可以通过提交指令来安装缺少的 module，例如：
+```
+pip install xxx
 ```""")
         test_staff = autogan.ToolAgentCodeExecution("Tester")
         painter_exp = autogan.ToolAgentPainter(bucket)

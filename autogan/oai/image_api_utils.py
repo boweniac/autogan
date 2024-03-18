@@ -18,7 +18,7 @@ class ImageRequest:
         data = {
             "model": "dall-e-3",
             "prompt": prompt,
-            "size": "1024x1024",
+            "size": "1024x1792",
             "quality": "hd",
             "n": 1
         }
