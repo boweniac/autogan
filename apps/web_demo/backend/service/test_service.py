@@ -48,7 +48,9 @@ print(xxx)
 3. 当运行结果提示 No module 时，请不要轻易放弃，你可以通过提交指令来安装缺少的 module，例如：
 ```
 pip install xxx
-```""")
+```
+
+4. 如果收到绘图任务（如趋势图、饼状图、柱状图等）请拒绝，不要尝试用 python 代码绘图""")
         test_staff = autogan.ToolAgentCodeExecution("Tester")
         painter_exp = autogan.ToolAgentPainter(bucket)
 
