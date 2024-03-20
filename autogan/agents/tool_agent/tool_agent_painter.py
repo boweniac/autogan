@@ -84,6 +84,7 @@ plt.grid(True)
 plt.savefig('line_chart.png')
 print('line_chart.png')
 ```
+Please note: Do not blindly use equal intervals on the timeline, but make annotations on the actual timeline.
 
 2. model: You can call the stable diffusion model to generate images.
 When using, please output the image prompt and add the model symbol on the outside, for example:
@@ -111,6 +112,7 @@ plt.grid(True)
 plt.savefig('line_chart.png')
 print('line_chart.png')
 ```
+注意：时间轴请不要盲目使用等差间隔，要在实际的时间轴上做标注
 
 2. model:您可以调用 stable diffusion 模型来生成图片。
 使用时，请在输出图片提示词并在外层加上 model 符号，例如:
