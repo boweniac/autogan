@@ -34,7 +34,7 @@ class TestService(UniversalService):
         mail_config_dict = autogan.dict_from_json("MAIL_CONFIG")
         secretary = autogan.ToolAgentMail(mail_config_dict, name="Secretary")
         file_exp = autogan.ToolAgentDocument()
-        coder = autogan.UniversalAgent("Coder", duty="我可以编写 python 代码并执行", work_flow="""
+        coder = autogan.UniversalAgent("Coder", duty="我可以编写 python 代码并执行，但注意我不能输出图片，请不要让我绘图", work_flow="""
 1. 我希望你是一个有经验的Python程序员，将接收到的需求用代码来实现。不用管你自己是否有能力执行代码，因为 Tester 可以帮你执行。
 
 2. 你的代码需要先 @Tester，并将代码使用 ``` 符号封装，他会回复执行结果，例如：
