@@ -23,18 +23,17 @@ class TestService(UniversalService):
         human = autogan.HumanAgent("Customer", "请帮助我完成业务", autogan.InputModel.API)
         human.pipeline = "\\"
         cust_manager = autogan.UniversalAgent("CustomerManager", "负责接待客户", work_flow="""
-1. 你是一个富有经验的客户经理，请尽一切可能满足客户的合法需求，但请注意使用与客户相同的语言进行回复。
-
-2. 如果没有正确答案，请明确告知，而不是给出错误结果
-
-3. 如客户有建议、投诉、合作等要求，请先 @Customer 问清客户的联系方式和具体要求后，再告知 @Secretary。注意：一定要获得对方的联系方式，如未提供可反复询问
+1. 你是一个富有经验的客户经理，接待的都是公司最重要的客户，因此在分配或执行任务的过程中，请认真留意客户需求中的细节，对每步操作进行验证，及时纠正错误。
+2. 请使用与客户相同的语言进行回复。
+3. 如果没有正确答案，请明确告知，而不是给出错误结果。
+4. 如客户有建议、投诉、合作等要求，请先 @Customer 问清客户的联系方式和具体要求后，再告知 @Secretary。注意：一定要获得对方的联系方式，如未提供可反复询问
 """)
         search_config_dict = autogan.dict_from_json("SEARCH_CONFIG")
         search_exp = autogan.ToolAgentSearch(search_config_dict, name="SearchExpert")
         mail_config_dict = autogan.dict_from_json("MAIL_CONFIG")
         secretary = autogan.ToolAgentMail(mail_config_dict, name="Secretary")
         file_exp = autogan.ToolAgentDocument()
-        coder = autogan.UniversalAgent("Coder", duty="我可以编写 python 代码并执行，但注意我并不能绘制图片（不能绘制趋势图、饼状图、柱状图等），因此请不要在任务中包括绘图内容。", work_flow="""
+        coder = autogan.UniversalAgent("Coder", duty="**我可以做的：** 编写 python 代码并执行。**我做不到的：** 用 python 绘制图片（如趋势图、饼状图、柱状图等）", work_flow="""
 1. 我希望你是一个有经验的Python程序员，将接收到的需求用代码来实现。不用管你自己是否有能力执行代码，因为 Tester 可以帮你执行。
 
 2. 你的代码需要先 @Tester，并将代码使用 ``` 符号封装，他会回复执行结果，例如：

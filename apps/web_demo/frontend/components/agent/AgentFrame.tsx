@@ -87,6 +87,7 @@ export default function AgentFrame() {
         setTextStack(prevTextStack => {
             if (prevTextStack && prevTextStack.length > 0) {
                 const [nextText, ...textRest] = prevTextStack;
+                // console.log(`取出文本切片:`+nextText.text);
                 getAudio(nextText);
                 return textRest
             } else {
@@ -99,7 +100,8 @@ export default function AgentFrame() {
       const getAudio = (audioLink: AudioAndLip) => {
         if (audioLink.text) {
             audioAndLipAPI(audioLink.text, avatarConfig[agentAvatarMapping[audioLink.agentName || ""]].voice || "", 1.1).then((res)=>{
-                isGeting.current = false
+                // console.log(`生成音频文本:`+audioLink.text);
+                // console.log(`生成音频连接:`+res.audioFile);
                 getNextAudio()
                 setAudioStack(prevStack => [...prevStack, {...audioLink, ...res, avatarName: agentAvatarMapping[audioLink?.agentName || ""]}]);
                 if (!isPlaying.current) {
@@ -107,7 +109,7 @@ export default function AgentFrame() {
                     playNextAudio();
                 }
             }).catch(()=>{
-                isGeting.current = false
+                getNextAudio()
             })
         }
       }
@@ -116,6 +118,8 @@ export default function AgentFrame() {
         setAudioStack(prevStack => {
             if (prevStack && prevStack.length > 0) {
                 const [nextAudio, ...rest] = prevStack;
+                // console.log(`播放音频文本:`+nextAudio.text);
+                // console.log(`播放音频连接:`+nextAudio.audioFile);
                 if (nextAudio.agentName && nextAudio.agentName != "Customer") {
                     setAgentRole(nextAudio.agentName)
                 }
@@ -152,6 +156,7 @@ export default function AgentFrame() {
             AgentConversationSend(queryConversationID, value, signal, (text)=>{
                 if (text) {
                     setTextStack(prevTextStack => {
+                        // console.log(`压入文本切片:`+text.text);
                         return [...prevTextStack, text]
                     })
                     if (!isGeting.current && !muteState) {

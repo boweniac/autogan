@@ -57,8 +57,8 @@ class ToolAgentSearch(UniversalAgent):
             定义 agent 的工作流程。
         """
         duty = duty if duty else {
-            "EN": """Not only can I search for information on the internet, but I can also answer questions using the Wolfram engine.""",
-            "CN": """我不但可以在网络上搜索信息，还可以利用 Wolfram engine 来回答问题"""
+            "EN": """1. I can not only search for information on the internet. 2. I can use the Wolfram engine to answer questions 3. I can use the Wolfram engine to calculate formulas.""",
+            "CN": """1. 我不但可以在网络上搜索信息。2. 可以利用 Wolfram engine 来回答问题。3. 可以利用 Wolfram engine 来计算公式"""
         }
         work_flow = work_flow if work_flow else {
             "EN": """I hope you are an internet search expert. When you receive a search request, you have the following two tools to choose from:
