@@ -76,12 +76,15 @@ export const AgentConversationSend = async (conversationID: string, value: strin
         (res) => {
             if (res) {
                 if (res.content == "[DONE]") {
+                    // 一个消息块的结束
                     if (res.contentType == "tool") {
                         updateAgentConversationMessageBlockState(conversationID, messageLocalID, messageBlockLocalID, {contentTag: res.contentTag})
                     }
-                    // 一个消息块的结束
-                    if (textSlice && agent_name != "PainterExp" && agent_name != "SearchExpert") {
+                    if (textSlice && agent_name != "PainterExp" && agent_name != "DocumentExp" && agent_name != "SearchExpert") {
                         sliceCallback({"text": textSlice, "agentName": agent_name})
+                    }
+                    if (res.contentType == "tool" && (agent_name == "PainterExp" || agent_name == "DocumentExp" || agent_name == "SearchExpert")) {
+                        sliceCallback({"text": "执行结束", "agentName": agent_name})
                     }
                     text = ""
                     // agent_name = ""
@@ -119,6 +122,9 @@ export const AgentConversationSend = async (conversationID: string, value: strin
                                 content: res.content,
                                 tokens: res.tokens
                             })
+                            if (agent_name == "PainterExp" || agent_name == "DocumentExp" || agent_name == "SearchExpert") {
+                                sliceCallback({"text": "开始执行", "agentName": agent_name})
+                            }
                         } else {
                             // 同一角色新的消息块
                             addAgentConversationMessageBlockState(conversationID, messageLocalID, {
@@ -136,7 +142,7 @@ export const AgentConversationSend = async (conversationID: string, value: strin
                             if (res.content.includes('```')) {
                                 // 识别代码块的开始和结束
                                 coding = !coding
-                                if (coding && textSlice && agent_name != "PainterExp" && agent_name != "SearchExpert") {
+                                if (coding && textSlice && agent_name != "PainterExp" && agent_name != "DocumentExp" && agent_name != "SearchExpert") {
                                     sliceCallback({"text": textSlice, "agentName": agent_name})
                                     hold = true
                                     sliceLength = 0
@@ -147,7 +153,7 @@ export const AgentConversationSend = async (conversationID: string, value: strin
                                 // 跳过代码块
                                 textSlice += res.content
                                 sliceLength++
-                                if (textSlice.length > 10 && !coding &&  agent_name != "PainterExp" && agent_name != "SearchExpert") {
+                                if (textSlice.length > 10 && !coding &&  agent_name != "PainterExp" && agent_name != "DocumentExp" && agent_name != "SearchExpert") {
                                     sliceCallback({"text": textSlice, "agentName": agent_name})
                                     hold = true
                                     sliceLength = 0
@@ -162,7 +168,7 @@ export const AgentConversationSend = async (conversationID: string, value: strin
                         if (res.content.includes('```')) {
                             // 识别代码块的开始和结束
                             coding = !coding
-                            if (coding && textSlice &&  agent_name != "PainterExp" && agent_name != "SearchExpert") {
+                            if (coding && textSlice &&  agent_name != "PainterExp" && agent_name != "DocumentExp" && agent_name != "SearchExpert") {
                                 sliceCallback({"text": textSlice, "agentName": agent_name})
                                 hold = true
                                 sliceLength = 0
@@ -178,7 +184,7 @@ export const AgentConversationSend = async (conversationID: string, value: strin
                                 }
 
                             }
-                            if (sliceLength > 60 && !hold && !coding &&  agent_name != "PainterExp" && agent_name != "SearchExpert") {
+                            if (sliceLength > 60 && !hold && !coding &&  agent_name != "PainterExp" && agent_name != "DocumentExp" && agent_name != "SearchExpert") {
                                 sliceCallback({"text": textSlice, "agentName": agent_name})
                                 hold = true
                                 sliceLength = 0
