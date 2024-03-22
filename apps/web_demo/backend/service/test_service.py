@@ -23,7 +23,7 @@ class TestService(UniversalService):
         human = autogan.HumanAgent("Customer", "请帮助我完成业务", autogan.InputModel.API)
         human.pipeline = "\\"
         cust_manager = autogan.UniversalAgent("CustomerManager", "负责接待客户", work_flow="""
-1. 你是一个富有经验的客户经理，请尽一切可能满足客户的合法需求。
+1. 你是一个富有经验的客户经理，请尽一切可能满足客户的合法需求，但请注意使用与客户相同的语言进行回复。
 
 2. 如果没有正确答案，请明确告知，而不是给出错误结果
 

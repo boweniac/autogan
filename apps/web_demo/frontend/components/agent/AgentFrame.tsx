@@ -86,7 +86,6 @@ export default function AgentFrame() {
     const getNextAudio = () => {
         setTextStack(prevTextStack => {
             if (prevTextStack && prevTextStack.length > 0) {
-                isGeting.current = true
                 const [nextText, ...textRest] = prevTextStack;
                 getAudio(nextText);
                 return textRest
@@ -99,17 +98,16 @@ export default function AgentFrame() {
 
       const getAudio = (audioLink: AudioAndLip) => {
         if (audioLink.text) {
-            isGetingAudio.current = true
-            audioAndLipAPI(audioLink.text, avatarConfig[agentAvatarMapping[audioLink.agentName || ""]].voice || "", 0.8).then((res)=>{
-                isGetingAudio.current = false
+            audioAndLipAPI(audioLink.text, avatarConfig[agentAvatarMapping[audioLink.agentName || ""]].voice || "", 1.1).then((res)=>{
                 isGeting.current = false
                 getNextAudio()
                 setAudioStack(prevStack => [...prevStack, {...audioLink, ...res, avatarName: agentAvatarMapping[audioLink?.agentName || ""]}]);
                 if (!isPlaying.current) {
+                    isPlaying.current = true
                     playNextAudio();
                 }
             }).catch(()=>{
-                isGetingAudio.current = false
+                isGeting.current = false
             })
         }
       }
@@ -118,7 +116,6 @@ export default function AgentFrame() {
         setAudioStack(prevStack => {
             if (prevStack && prevStack.length > 0) {
                 const [nextAudio, ...rest] = prevStack;
-                isPlaying.current = true
                 if (nextAudio.agentName && nextAudio.agentName != "Customer") {
                     setAgentRole(nextAudio.agentName)
                 }
@@ -131,6 +128,10 @@ export default function AgentFrame() {
                 return []
             }
           });
+      }
+
+      const audioEndCallback = () => {
+        playNextAudio()
       }
 
       const doSubmit = async (value: string) => {
@@ -154,6 +155,7 @@ export default function AgentFrame() {
                         return [...prevTextStack, text]
                     })
                     if (!isGeting.current && !muteState) {
+                        isGeting.current = true
                         getNextAudio();
                     }
                 }
@@ -219,7 +221,7 @@ export default function AgentFrame() {
                 w="100%"
                 gap={0}
             >
-                <HeaderMegaMenu isLoading={isPlaying.current || isGetingAudio.current || isLoading} conversationID={queryConversationID} selectAvatarCallback={(v)=>{}} muteCallback={(v)=>{}}></HeaderMegaMenu>
+                <HeaderMegaMenu isLoading={isPlaying.current || isGeting.current || isLoading} conversationID={queryConversationID} selectAvatarCallback={(v)=>{}} muteCallback={(v)=>{}}></HeaderMegaMenu>
                 <Stack
                     h={`calc(${viewportHeight}px - ${rem(50)})`}
                     justify="flex-end"
@@ -234,7 +236,7 @@ export default function AgentFrame() {
                     <SpeakButton callback={doSubmit}></SpeakButton> */}
                 </Stack>
             </Stack>
-            <CustTextarea conversationID={queryConversationID} isLoading={isPlaying.current || isGetingAudio.current || isLoading} callback={doSubmit} stopCallback={()=>{
+            <CustTextarea conversationID={queryConversationID} isLoading={isPlaying.current || isGeting.current || isLoading} callback={doSubmit} stopCallback={()=>{
                         loadingEnd()
                         handleCancel()
                         setTextStack([])
@@ -242,9 +244,7 @@ export default function AgentFrame() {
                         }} syncMessagesCallback={syncMessages}></CustTextarea>
                     <SpeakButton callback={doSubmit}></SpeakButton>
             
-            <RoleDisplay audioAndLip={audioAndLip} audioEndCallback={()=>{
-                playNextAudio()
-            }}/>
+            <RoleDisplay audioAndLip={audioAndLip} audioEndCallback={audioEndCallback}/>
         </Box>
     );
 }

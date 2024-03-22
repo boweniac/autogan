@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { ObjectMap, useFrame, useLoader } from '@react-three/fiber';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js'
 import * as THREE from 'three';
@@ -81,16 +81,23 @@ const GLBModel: React.FC<GLBModelProps> = ({ animation, position, audioAndLip, a
       };
   }, [router.isReady]);
 
+  const onAudioEnded = useCallback(() => {
+    if (audioEndCallback) {
+      audioEndCallback();
+    }
+  }, [audioEndCallback]); 
+
     useEffect(()=>{
       const audio = getAudioState()
       if (audioAndLip?.audioFile && audio) {
         // const audio = new Audio()
         // const audio = new Audio(`${audioAndLip.audioFile}`)
         audio.src = `${audioAndLip.audioFile}`;
+        audio.load();
         audio.play().catch(error => {
           console.log(`play.error:`+JSON.stringify(error));
           if (audioEndCallback) {
-            audioEndCallback()
+            onAudioEnded()
           }
         });
         const handleTimeUpdate = () => {
@@ -127,11 +134,16 @@ const GLBModel: React.FC<GLBModelProps> = ({ animation, position, audioAndLip, a
         audio.ontimeupdate = () => {
           handleTimeUpdate();
         };
-        audio.addEventListener('ended', () => {
-          if (audioEndCallback) {
-            audioEndCallback()
-          }
-        });
+
+        // 由于现在 `onAudioEnded` 是稳定的，我们可以正确移除之前添加的监听器
+        audio.removeEventListener('ended', onAudioEnded);
+        audio.addEventListener('ended', onAudioEnded);
+
+        // 返回一个清理函数来移除监听器，以防组件卸载
+        return () => {
+          audio.removeEventListener('ended', onAudioEnded);
+        };
+        
       }
     }, [audioAndLip])
     
