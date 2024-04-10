@@ -19,6 +19,8 @@ service Agent {
   rpc RpcAddFileStream (AddFileRequest) returns (stream StreamResponse) {}
   rpc RpcGetIntroduction(GetIntroductionRequest) returns (GetIntroductionResponse);
   rpc RpcTextTranslate(TextTranslateRequest) returns (TextTranslateResponse);
+  rpc RpcImageBatch(ImageBatchRequest) returns (ImageBatchResponse);
+
 }
 
 message AgentRequest {
@@ -269,4 +271,21 @@ message TextTranslateResponseData {
   string split = 1;
   string translate = 2;
   string audio = 3;
+}
+
+message ImageBatchRequest {
+  string text = 1;
+  uint32 n = 2;
+  string size = 3;
+}
+
+message ImageBatchResponse {
+  uint32 code = 1;
+  string msg = 2;
+  repeated ImageBatchResponseData data = 3;
+}
+
+message ImageBatchResponseData {
+  string split = 1;
+  string url = 2;
 }

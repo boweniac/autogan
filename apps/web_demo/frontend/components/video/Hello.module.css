@@ -1,0 +1,20 @@
+.agentFrame {
+    display: flex;
+    flex-wrap: nowrap;
+}
+
+.conversationFrame {
+    flex-grow: flex;
+    padding-left: rem(50px);
+    padding-right: rem(50px);
+}
+
+.title {
+    position: 'fixed';
+    z-index: -2;
+    margin-top: 50;
+    @media (max-width: $mantine-breakpoint-sm) {
+        margin-top: 25;
+        width: calc(100vw);
+      }
+}

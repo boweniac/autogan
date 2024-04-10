@@ -10,17 +10,21 @@ class ImageRequest:
     def __init__(
             self,
             prompt: str,
+            size: Optional[str] = None,
+            n: Optional[int] = None,
     ):
-        self.openai = self._openai(prompt)
+        self.size: str = "1024x1024" if size is None else size
+        self.n: int = 1 if n is None else n
+        self.openai = self._openai(prompt, self.size, self.n)
 
     @staticmethod
-    def _openai(prompt: str):
+    def _openai(prompt: str, size: str, n: int):
         data = {
             "model": "dall-e-3",
             "prompt": prompt,
-            "size": "1024x1792",
+            "size": size,
             "quality": "hd",
-            "n": 1
+            "n": n
         }
         return data
 

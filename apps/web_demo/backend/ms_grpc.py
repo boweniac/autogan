@@ -8,6 +8,8 @@ from apps.web_demo.backend.db.db_storage import DBStorage
 from apps.web_demo.backend.introduction_data import introduction_data
 from autogan.oai.chat_api_utils import ChatCompletionsRequest
 from autogan.oai.conv_holder import DialogueManager
+from autogan.oai.image_api_utils import ImageRequest
+from autogan.oai.image_generate_utils import generate_image
 from autogan.tools.file_tool import File
 from pydub import AudioSegment
 
@@ -390,12 +392,12 @@ class Agent(agent_pb2_grpc.AgentServicer):
 
             file_url = f"https://aibowen-base.boweniac.top/{file_name}"
 
-#             messages = [{'role': 'user', 'content': f"""你好，请帮我将以下英文的含义使用中文表达出来
-#
-# {paragraph}"""}]
-#             request_data = autogan.oai.chat_api_utils.ChatCompletionsRequest(messages, False)
-#             content, _ = autogan.oai.chat_generate_utils.generate_chat_completion_internal(default_agent_config, request_data)
-            content = ""
+            messages = [{'role': 'user', 'content': f"""你好，请帮我将以下英文的含义使用中文表达出来
+
+{paragraph}"""}]
+            request_data = autogan.oai.chat_api_utils.ChatCompletionsRequest(messages, False)
+            content, _ = autogan.oai.chat_generate_utils.generate_chat_completion_internal(default_agent_config, request_data)
+#             content = ""
             data = {
                 "split": paragraph,
                 "translate": content,
@@ -405,6 +407,46 @@ class Agent(agent_pb2_grpc.AgentServicer):
             translate_list.append(data)
 
         return agent_pb2.TextTranslateResponse(code=200, data=translate_list)
+
+    def RpcImageBatch(self, request, context):
+        text = request.text
+        n = request.n
+        size = request.size
+        print(text)
+
+        paragraphs = text.split('\n')
+
+        image_list = []
+
+        llm_config_dict = autogan.dict_from_json("LLM_CONFIG")
+        default_agent_config = autogan.oai.chat_config_utils.AgentLLMConfig(llm_config_dict).summary_model_config
+
+        for paragraph in paragraphs:
+            messages = [{'role': 'user', 'content': f"""#  描绘内容
+{paragraph}
+
+# 图片要求
+- 感觉：平静、淡雅、从容
+- 应适当的加入一点科技元素
+- 上下不要留白
+- 比例：9:16 竖屏
+- 清晰度：高清
+- 图片中请不要包含字母"""}]
+            print(f"messages: {messages}")
+            request_data = autogan.oai.chat_api_utils.ChatCompletionsRequest(messages, False)
+            content, _ = autogan.oai.chat_generate_utils.generate_chat_completion_internal(default_agent_config,
+                                                                                           request_data)
+            print(f"content: {content}")
+            image_request = ImageRequest(content, size, n)
+            image = generate_image(image_request)
+            data = {
+                "split": paragraph,
+                "url": image,
+            }
+
+            image_list.append(data)
+
+        return agent_pb2.ImageBatchResponse(code=200, data=image_list)
 
 
 

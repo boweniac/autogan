@@ -140,12 +140,9 @@ def generate_chat_completion_internal(llm_config: LLMConfig, request_data: ChatC
         time.sleep(llm_config.request_config.request_interval_time)
         api_key = llm_config.api_key(i)
         try:
-            print(i)
             for message in chat_completions(api_key, llm_config.request_config, request_data):
-                print(f"message: {message}")
                 if message:
                     content, tokens = process_response(message, False)
-                    print(f"content: {content}")
                     if content:
                         if tokens == 0:
                             tokens = count_text_tokens(tokens, api_key['model'])

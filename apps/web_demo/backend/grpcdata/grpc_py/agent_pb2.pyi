@@ -418,3 +418,31 @@ class TextTranslateResponseData(_message.Message):
     translate: str
     audio: str
     def __init__(self, split: _Optional[str] = ..., translate: _Optional[str] = ..., audio: _Optional[str] = ...) -> None: ...
+
+class ImageBatchRequest(_message.Message):
+    __slots__ = ("text", "n", "size")
+    TEXT_FIELD_NUMBER: _ClassVar[int]
+    N_FIELD_NUMBER: _ClassVar[int]
+    SIZE_FIELD_NUMBER: _ClassVar[int]
+    text: str
+    n: int
+    size: str
+    def __init__(self, text: _Optional[str] = ..., n: _Optional[int] = ..., size: _Optional[str] = ...) -> None: ...
+
+class ImageBatchResponse(_message.Message):
+    __slots__ = ("code", "msg", "data")
+    CODE_FIELD_NUMBER: _ClassVar[int]
+    MSG_FIELD_NUMBER: _ClassVar[int]
+    DATA_FIELD_NUMBER: _ClassVar[int]
+    code: int
+    msg: str
+    data: _containers.RepeatedCompositeFieldContainer[ImageBatchResponseData]
+    def __init__(self, code: _Optional[int] = ..., msg: _Optional[str] = ..., data: _Optional[_Iterable[_Union[ImageBatchResponseData, _Mapping]]] = ...) -> None: ...
+
+class ImageBatchResponseData(_message.Message):
+    __slots__ = ("split", "url")
+    SPLIT_FIELD_NUMBER: _ClassVar[int]
+    URL_FIELD_NUMBER: _ClassVar[int]
+    split: str
+    url: str
+    def __init__(self, split: _Optional[str] = ..., url: _Optional[str] = ...) -> None: ...

@@ -25,13 +25,13 @@ export default function App({ Component, pageProps }: AppProps) {
                 <Notifications />
                 <CustHeader appName={process.env.APP_NAME || ""}></CustHeader>
                 <AppShell
-                    navbar={{
+                    navbar={activePage != "/video" ? {
                             width: rem(50),
                             breakpoint: 'md',
                             collapsed: { mobile: true },
-                        }}
+                        } : undefined}
                 >
-                    <AppShell.Navbar><NavbarMinimal/></AppShell.Navbar>
+                    {activePage != "/video" && <AppShell.Navbar><NavbarMinimal/></AppShell.Navbar>}
                     <AppShell.Main><Component {...pageProps} /></AppShell.Main>
                     {/* <AppShell.Footer><BottomNavbar /></AppShell.Footer> */}
                 </AppShell>

@@ -2,12 +2,10 @@ export const animationNameToPath: { [key: string]: string } = {
     "standing": "/animations/default.fbx",
     "Angry": "/animations/Angry.fbx",
     "Arm Stretching": "/animations/Arm Stretching.fbx",
-    "Breakdance Freeze Var 2": "/animations/Breakdance Freeze Var 2.fbx",
     "Breakdance Freeze Var 4": "/animations/Breakdance Freeze Var 4.fbx",
     "Clapping": "/animations/Clapping.fbx",
     "Flair": "/animations/Flair.fbx",
     "Idle": "/animations/Idle.fbx",
-    "Robot Hip Hop Dance": "/animations/Robot Hip Hop Dance.fbx",
     "Rumba Dancing": "/animations/Rumba Dancing.fbx",
     "Samba Dancing": "/animations/Samba Dancing.fbx",
     "Shoulder Rubbing": "/animations/Shoulder Rubbing.fbx",
@@ -18,11 +16,25 @@ export const animationNameToPath: { [key: string]: string } = {
     "Swing Dancing": "/animations/Swing Dancing.fbx",
     "Thoughtful Head Nod": "/animations/Thoughtful Head Nod.fbx",
     "Dwarf Idle": "/animations/Dwarf Idle.fbx",
+    "Breakdance Ending 3": "/animations/Breakdance Ending 3.fbx",
+
+    "Dancing": "/animations/Dancing.fbx",
+    "Robot Hip Hop Dance": "/animations/Robot Hip Hop Dance.fbx",
+    "Breakdance Freeze Var 2": "/animations/Breakdance Freeze Var 2.fbx",
+    "Running Jump": "/animations/Running Jump.fbx",
+    "Swimming": "/animations/Swimming.fbx",
+    "Hip Hop Dancing": "/animations/Hip Hop Dancing.fbx",
+
+    "Swing Dancing-2": "/animations/Swing Dancing-2.fbx",
+    "Hip Hop Dancing-3": "/animations/Hip Hop Dancing-3.fbx",
+    "Hip Hop Dancing-2": "/animations/Hip Hop Dancing-2.fbx",
+    "Bboy Hip Hop Move": "/animations/Bboy Hip Hop Move.fbx",
 };
 
 export const animationGroup: { [key: string]: string[] } = {
     "stay": ["Idle"],
     "config": ["Idle", "Idle"],
     "hello": ["standing", "Dwarf Idle", "Arm Stretching"],
+    "video1": ["Bboy Hip Hop Move"],
     "Hance": ["Robot Hip Hop Dance"],
 };

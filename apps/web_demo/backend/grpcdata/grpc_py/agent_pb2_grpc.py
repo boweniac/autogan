@@ -89,6 +89,11 @@ class AgentStub(object):
                 request_serializer=agent__pb2.TextTranslateRequest.SerializeToString,
                 response_deserializer=agent__pb2.TextTranslateResponse.FromString,
                 )
+        self.RpcImageBatch = channel.unary_unary(
+                '/Agent.Agent/RpcImageBatch',
+                request_serializer=agent__pb2.ImageBatchRequest.SerializeToString,
+                response_deserializer=agent__pb2.ImageBatchResponse.FromString,
+                )
 
 
 class AgentServicer(object):
@@ -184,6 +189,12 @@ class AgentServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def RpcImageBatch(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_AgentServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -261,6 +272,11 @@ def add_AgentServicer_to_server(servicer, server):
                     servicer.RpcTextTranslate,
                     request_deserializer=agent__pb2.TextTranslateRequest.FromString,
                     response_serializer=agent__pb2.TextTranslateResponse.SerializeToString,
+            ),
+            'RpcImageBatch': grpc.unary_unary_rpc_method_handler(
+                    servicer.RpcImageBatch,
+                    request_deserializer=agent__pb2.ImageBatchRequest.FromString,
+                    response_serializer=agent__pb2.ImageBatchResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -524,5 +540,22 @@ class Agent(object):
         return grpc.experimental.unary_unary(request, target, '/Agent.Agent/RpcTextTranslate',
             agent__pb2.TextTranslateRequest.SerializeToString,
             agent__pb2.TextTranslateResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def RpcImageBatch(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/Agent.Agent/RpcImageBatch',
+            agent__pb2.ImageBatchRequest.SerializeToString,
+            agent__pb2.ImageBatchResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
