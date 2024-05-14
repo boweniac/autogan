@@ -52,7 +52,7 @@ export async function streamAPI(path: string, payloadData: {[key: string]: strin
                             buffer += message.toString();
                             // 切掉响应数据前缀
                             const cleaned = buffer.match(/(?<=data:).*$/s)?.toString();
-                            if (!cleaned || cleaned === "[DONE]") {
+                            if (!cleaned || cleaned === "[DONE]" || cleaned === " [DONE]") {
                                 return;
                             }
                             // 序列化
