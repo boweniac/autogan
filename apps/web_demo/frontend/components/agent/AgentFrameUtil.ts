@@ -75,7 +75,7 @@ export const AgentConversationSend = async (conversationID: string, value: strin
         signal,
         (res) => {
             if (res) {
-                if (res.content == "[DONE]") {
+                if (res.content.includes("[DONE")) {
                     // 一个消息块的结束
                     if (res.contentType == "tool") {
                         updateAgentConversationMessageBlockState(conversationID, messageLocalID, messageBlockLocalID, {contentTag: res.contentTag})
@@ -210,7 +210,7 @@ export const AutoTitle = async (conversationID: string, signal: AbortSignal, sli
         signal,
         (res) => {
             if (res) {
-                if (res.content != "[DONE]") {
+                if (!res.content.includes("[DONE")) {
                     title += res.content
                     updateAgentConversationState(conversationID, {title: title})
                 }
