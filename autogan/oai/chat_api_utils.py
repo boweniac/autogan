@@ -1,6 +1,6 @@
 import json
 import requests
-from typing import Dict, Optional
+from typing import List, Dict, Optional
 
 from openai import OpenAI, AzureOpenAI
 
@@ -11,7 +11,7 @@ from autogan.utils.response import obj_to_dict
 class ChatCompletionsRequest:
     def __init__(
             self,
-            messages: list[Dict],
+            messages: List[Dict],
             stream_mode: bool,
             temperature: Optional[float] = None,
     ):
@@ -49,7 +49,7 @@ def process_response(message: dict, stream_mode: Optional[bool] = None):
     content = ""
     tokens = 0
     if stream_mode:
-        if (message and "choices" in message and "delta" in message["choices"][0]
+        if (message and "choices" in message and message["choices"] and "delta" in message["choices"][0]
                 and "content" in message["choices"][0]["delta"]
                 and message["choices"][0]["delta"]["content"]):
             content = message["choices"][0]["delta"]["content"]
