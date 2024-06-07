@@ -26,6 +26,7 @@ export async function streamAPI(path: string, payloadData: {[key: string]: strin
 
         const req = http.request(
             {
+                protocol: gateWayProtocol,
                 hostname: gateWayHost,
                 port: gateWayPort,
                 path: path,
@@ -53,6 +54,9 @@ export async function streamAPI(path: string, payloadData: {[key: string]: strin
                             // 切掉响应数据前缀
                             const cleaned = buffer.match(/(?<=data:).*$/s)?.toString();
                             if (!cleaned || cleaned.includes("[DONE") || cleaned === " [DONE]") {
+                                if (cleaned) {
+                                    callback?.(JSON.parse(cleaned));
+                                }
                                 return;
                             }
                             // 序列化
