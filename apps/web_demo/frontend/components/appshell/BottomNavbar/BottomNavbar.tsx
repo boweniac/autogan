@@ -3,10 +3,8 @@ import { useMediaQuery } from '@mantine/hooks';
 
 export function BottomNavbar() {
     return (
-        <Group justify="space-between" grow hiddenFrom="xs">
-            <Button variant="default">First</Button>
-            <Button variant="default">Second</Button>
-            <Button variant="default">Third</Button>
+        <Group justify="center" >
+            <a href="https://beian.miit.gov.cn/" target="_blank">备案号：京ICP备2023021208号-1</a>
         </Group>
     );
 }
